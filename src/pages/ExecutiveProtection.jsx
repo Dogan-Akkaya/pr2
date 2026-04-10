@@ -104,6 +104,120 @@ const VIP_PROFILES = {
       { label: "Account Recovery Abuse", severity: "LOW", desc: "No security questions or recovery data exposed.", color: "#16A34A" },
     ],
   },
+  "maria.berg@greenanimals.com": {
+    name: "Maria Berg", email: "maria.berg@greenanimals.com", riskScore: 0, riskLevel: "LOW",
+    breaches: 0, passwords: 0, dataClasses: 0, pastes: 0,
+    categories: [
+      { label: "Online Accounts & Email", desc: "No data found", severity: "LOW", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" },
+      { label: "Credentials", desc: "No data found", severity: "LOW", icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" },
+      { label: "Identity & PII", desc: "No data found", severity: "LOW", icon: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" },
+      { label: "Professional Intel", desc: "No data found", severity: "LOW", icon: "M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M9 21V9m6 12V9" },
+      { label: "Location & IP", desc: "No data found", severity: "LOW", icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" },
+      { label: "Phone & Contact", desc: "No data found", severity: "LOW", icon: "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72" },
+    ],
+    breachTimeline: [],
+    sources: [],
+    attackVectors: [
+      { label: "Credential Stuffing", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Identity Theft", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Financial Fraud", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "SIM Swap Attack", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Spear Phishing", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Account Recovery Abuse", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+    ],
+  },
+  "ahmet.kara@socradar.io": {
+    name: "Ahmet Kara", email: "ahmet.kara@socradar.io", riskScore: 15, riskLevel: "LOW",
+    breaches: 1, passwords: 0, dataClasses: 2, pastes: 0,
+    categories: [
+      { label: "Online Accounts & Email", desc: "Email addresses", severity: "LOW", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" },
+      { label: "Credentials", desc: "No data found", severity: "LOW", icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" },
+      { label: "Identity & PII", desc: "No data found", severity: "LOW", icon: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" },
+      { label: "Professional Intel", desc: "Employer: SOCRadar, Role: Security Engineer", severity: "MEDIUM", icon: "M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M9 21V9m6 12V9" },
+      { label: "Location & IP", desc: "No data found", severity: "LOW", icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" },
+      { label: "Phone & Contact", desc: "No data found", severity: "LOW", icon: "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72" },
+    ],
+    breachTimeline: [
+      { date: "Jan 2025", types: ["Email addresses"], severity: "medium" },
+    ],
+    sources: [
+      { name: "Breach Databases", severity: "MEDIUM" },
+    ],
+    attackVectors: [
+      { label: "Credential Stuffing", severity: "LOW", desc: "No passwords found in breach records.", color: "#16A34A" },
+      { label: "Identity Theft", severity: "LOW", desc: "Minimal PII exposure.", color: "#16A34A" },
+      { label: "Financial Fraud", severity: "LOW", desc: "No financial data exposed.", color: "#16A34A" },
+      { label: "SIM Swap Attack", severity: "LOW", desc: "No phone numbers found.", color: "#16A34A" },
+      { label: "Spear Phishing", severity: "MEDIUM", desc: "SOCRadar security engineer role makes this a potential supply chain target despite minimal data exposure.", color: "#CA8A04" },
+      { label: "Account Recovery Abuse", severity: "LOW", desc: "No security questions exposed.", color: "#16A34A" },
+    ],
+  },
+  "j.morrison@jtrustbank.co.id": {
+    name: "James Morrison", email: "j.morrison@jtrustbank.co.id", riskScore: 0, riskLevel: "LOW",
+    breaches: 0, passwords: 0, dataClasses: 0, pastes: 0,
+    categories: [
+      { label: "Online Accounts & Email", desc: "No exposure", severity: "LOW", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" },
+      { label: "Credentials", desc: "No exposure", severity: "LOW", icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" },
+      { label: "Identity & PII", desc: "No exposure", severity: "LOW", icon: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" },
+      { label: "Professional Intel", desc: "No exposure", severity: "LOW", icon: "M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M9 21V9m6 12V9" },
+      { label: "Location & IP", desc: "No exposure", severity: "LOW", icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" },
+      { label: "Phone & Contact", desc: "No exposure", severity: "LOW", icon: "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72" },
+    ],
+    breachTimeline: [],
+    sources: [],
+    attackVectors: [
+      { label: "Credential Stuffing", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Identity Theft", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Financial Fraud", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "SIM Swap Attack", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Spear Phishing", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+      { label: "Account Recovery Abuse", severity: "LOW", desc: "No exposure found", color: "#16A34A" },
+    ],
+  },
+  "elena.marchetti@socradar.io": {
+    name: "Elena Marchetti", email: "elena.marchetti@socradar.io", riskScore: 5, riskLevel: "LOW",
+    breaches: 0, passwords: 0, dataClasses: 0, pastes: 0,
+    categories: [
+      { label: "Online Accounts & Email", desc: "No exposure detected", severity: "LOW", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" },
+      { label: "Credentials", desc: "No exposure detected", severity: "LOW", icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" },
+      { label: "Identity & PII", desc: "No exposure detected", severity: "LOW", icon: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" },
+      { label: "Professional Intel", desc: "No exposure detected", severity: "LOW", icon: "M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M9 21V9m6 12V9" },
+      { label: "Location & IP", desc: "No exposure detected", severity: "LOW", icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" },
+      { label: "Phone & Contact", desc: "No exposure detected", severity: "LOW", icon: "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72" },
+    ],
+    breachTimeline: [],
+    sources: [],
+    attackVectors: [
+      { label: "Credential Stuffing", severity: "LOW", desc: "No credentials found in any breach databases. Account is secure.", color: "#16A34A" },
+      { label: "Identity Theft", severity: "LOW", desc: "No PII exposure detected.", color: "#16A34A" },
+      { label: "Financial Fraud", severity: "LOW", desc: "No financial data exposure.", color: "#16A34A" },
+      { label: "SIM Swap Attack", severity: "LOW", desc: "No phone data exposed.", color: "#16A34A" },
+      { label: "Spear Phishing", severity: "LOW", desc: "Minimal attack surface — no breach data available for targeting.", color: "#16A34A" },
+      { label: "Account Recovery Abuse", severity: "LOW", desc: "No security questions or recovery data exposed.", color: "#16A34A" },
+    ],
+  },
+  "james.chen@greenanimalsbank.com": {
+    name: "James Chen", email: "james.chen@greenanimalsbank.com", riskScore: 8, riskLevel: "LOW",
+    breaches: 0, passwords: 0, dataClasses: 1, pastes: 0,
+    categories: [
+      { label: "Online Accounts & Email", desc: "Email address only (public)", severity: "LOW", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" },
+      { label: "Credentials", desc: "No exposure detected", severity: "LOW", icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" },
+      { label: "Identity & PII", desc: "No exposure detected", severity: "LOW", icon: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" },
+      { label: "Professional Intel", desc: "No exposure detected", severity: "LOW", icon: "M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M9 21V9m6 12V9" },
+      { label: "Location & IP", desc: "No exposure detected", severity: "LOW", icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" },
+      { label: "Phone & Contact", desc: "No exposure detected", severity: "LOW", icon: "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72" },
+    ],
+    breachTimeline: [],
+    sources: [{ name: "Professional & Corporate", severity: "LOW" }],
+    attackVectors: [
+      { label: "Credential Stuffing", severity: "LOW", desc: "No credentials exposed. Account is secure.", color: "#16A34A" },
+      { label: "Identity Theft", severity: "LOW", desc: "No PII exposure.", color: "#16A34A" },
+      { label: "Financial Fraud", severity: "LOW", desc: "No financial data found.", color: "#16A34A" },
+      { label: "SIM Swap Attack", severity: "LOW", desc: "No phone data exposed.", color: "#16A34A" },
+      { label: "Spear Phishing", severity: "LOW", desc: "Minimal exposure — low risk target.", color: "#16A34A" },
+      { label: "Account Recovery Abuse", severity: "LOW", desc: "No recovery data exposed.", color: "#16A34A" },
+    ],
+  },
 };
 
 // ── VIP Alarm Records ──
@@ -116,6 +230,8 @@ const VIP_ALARMS = [
   { id: 6, vipName: "Simon Johnsson", keyword: "simon.johnsson@greenanimals.com", source: "https://t.me/-1001389201445/9102", status: "Open", date: "2025-08-15", alarmType: "Breach Data", leakDate: "2025-08-14", password: "S****n", passwordType: "raw" },
   { id: 7, vipName: "Simon Johnsson", keyword: "simon.johnsson@greenanimals.com", source: "https://darkforums.st/thread/combo-aug-2025", status: "Open", date: "2025-08-10", alarmType: "Breach Data", leakDate: "2025-08-09", password: "J****!", passwordType: "hashed" },
   { id: 8, vipName: "Dogan Akkaya", keyword: "dogan.akkaya@socradar.io", source: "https://t.me/leaked_databases_2025/5521", status: "Open", date: "2025-09-22", alarmType: "VIP Mentions", leakDate: "—", password: "—", passwordType: "—" },
+  { id: 9, vipName: "Elena Marchetti", keyword: "elena.marchetti@socradar.io", source: "—", status: "Closed", date: "2025-04-15", alarmType: "Monitoring", leakDate: "—", password: "—", passwordType: "—" },
+  { id: 10, vipName: "James Chen", keyword: "james.chen@greenanimalsbank.com", source: "—", status: "Closed", date: "2025-03-20", alarmType: "Monitoring", leakDate: "—", password: "—", passwordType: "—" },
 ];
 
 // ── CSV columns ──
@@ -149,6 +265,9 @@ const TOP_ACCOUNTS = [
 const SEV_COLOR = { "VERY HIGH": "#DC2626", "HIGH": "#EA580C", "MEDIUM": "#CA8A04", "LOW": "#16A34A" };
 const SEV_BG = { "VERY HIGH": "rgba(220,38,38,0.12)", "HIGH": "rgba(234,88,12,0.1)", "MEDIUM": "rgba(202,138,4,0.1)", "LOW": "rgba(22,163,74,0.1)" };
 
+// ── 3 featured VIP profiles for cards section ──
+const FEATURED_EMAILS = ["gabriel@gmail.com", "simon.johnsson@greenanimals.com", "dogan.akkaya@socradar.io"];
+
 function MiniDonut({ segments, size = 110 }) {
   const total = segments.reduce((s, seg) => s + seg.count, 0);
   let cumulative = 0;
@@ -176,6 +295,7 @@ export default function ExecutiveProtection() {
   const [loaded, setLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [detailEmail, setDetailEmail] = useState(null);
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
   const { sortField, sortDir, onSort, sortData } = useSort("date", "desc");
@@ -192,34 +312,74 @@ export default function ExecutiveProtection() {
     { label: "Assign", onClick: () => { alert("Assigning " + sel.count + " items to analyst..."); sel.clear(); } },
   ];
 
+  // Detail panel: from table row click OR from VIP card "View Full Profile"
   const selected = VIP_ALARMS.find(a => a.id === selectedId);
-  const profile = selected ? VIP_PROFILES[selected.keyword] : null;
+  const profile = selected ? VIP_PROFILES[selected.keyword] : (detailEmail ? VIP_PROFILES[detailEmail] : null);
+  const panelOpen = selected || detailEmail;
+
+  const closePanel = () => { setSelectedId(null); setDetailEmail(null); };
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
-      {/* ═══ TOP STATS ═══ */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
-        {/* Alarm Trends */}
+      {/* ═══ SECTION 1: HERO BANNER ═══ */}
+      <div className="glass" style={{ padding: "20px 24px", animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Left */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="2"><path d="M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" /><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" opacity="0.5" /></svg>
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#A855F7", textTransform: "uppercase", fontWeight: 600 }}>Executive Protection</span>
+                <span style={{ padding: "2px 8px", borderRadius: 5, fontSize: 9, fontWeight: 700, background: "rgba(232,70,58,0.1)", color: "#E8463A", fontFamily: "'JetBrains Mono',monospace" }}>440 open</span>
+              </div>
+              <div style={{ fontSize: 12, color: t.text40, marginTop: 3 }}>VIP threat monitoring and executive profile protection</div>
+            </div>
+          </div>
+          {/* Right: 3 inline stats */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <div style={{ textAlign: "center" }}>
+              <div className="hfont" style={{ fontSize: 22, fontWeight: 800 }}>440</div>
+              <div style={{ fontSize: 9, color: t.text30, marginTop: 2 }}>Total Alarms</div>
+            </div>
+            <div style={{ width: 1, height: 28, background: t.borderSection }} />
+            <div style={{ textAlign: "center" }}>
+              <div className="hfont" style={{ fontSize: 22, fontWeight: 800 }}>3</div>
+              <div style={{ fontSize: 9, color: t.text30, marginTop: 2 }}>VIP Accounts</div>
+            </div>
+            <div style={{ width: 1, height: 28, background: t.borderSection }} />
+            <div style={{ textAlign: "center" }}>
+              <span style={{ padding: "4px 12px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: SEV_BG["HIGH"], color: SEV_COLOR["HIGH"], fontFamily: "'JetBrains Mono',monospace" }}>HIGH</span>
+              <div style={{ fontSize: 9, color: t.text30, marginTop: 6 }}>Risk Level</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ SECTION 2: CHARTS ROW ═══ */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 18, animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+        {/* Left: Alarm Trends */}
         <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Alarm Trends By Type</div>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>Alarm Trends By Type</span>
             <span className="tab-btn on" style={{ padding: "3px 10px", fontSize: 10 }}>Last Year</span>
           </div>
-          <ResponsiveContainer width="100%" height={120}>
+          <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={TREND_DATA}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} interval={3} />
-              <YAxis axisLine={false} tickLine={false} width={30} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} interval={2} tick={{ fontSize: 9, fill: t.text30 }} />
+              <YAxis axisLine={false} tickLine={false} width={30} tick={{ fontSize: 9, fill: t.text30 }} />
               <Tooltip {...ttS} />
-              <Area type="monotone" dataKey="breachData" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.08} strokeWidth={2} dot={false} />
-              <Area type="monotone" dataKey="vipMentions" stroke="#E8463A" fill="#E8463A" fillOpacity={0.05} strokeWidth={1.5} dot={false} />
-              <Area type="monotone" dataKey="infoStealer" stroke="#16A34A" fill="#16A34A" fillOpacity={0.05} strokeWidth={1.5} dot={false} />
+              <Area type="monotone" dataKey="breachData" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.08} strokeWidth={2} dot={false} name="Breach Data" />
+              <Area type="monotone" dataKey="vipMentions" stroke="#E8463A" fill="#E8463A" fillOpacity={0.05} strokeWidth={1.5} dot={false} name="VIP Mentions" />
+              <Area type="monotone" dataKey="infoStealer" stroke="#16A34A" fill="#16A34A" fillOpacity={0.05} strokeWidth={1.5} dot={false} name="Info Stealer" />
             </AreaChart>
           </ResponsiveContainer>
-          <div style={{ display: "flex", gap: 14, marginTop: 8 }}>
-            {[{ l: "VIP Mentions", c: "#E8463A", v: 0 }, { l: "Info Stealer", c: "#16A34A", v: 0 }, { l: "Breach Data", c: "#3B82F6", v: 336 }].map(i => (
-              <div key={i.l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
+            {[{ l: "Breach Data", c: "#3B82F6", v: 336 }, { l: "VIP Mentions", c: "#E8463A", v: 0 }, { l: "Info Stealer", c: "#16A34A", v: 0 }].map(i => (
+              <div key={i.l} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 3, background: i.c, opacity: 0.7 }} />
                 <span className="mono" style={{ fontSize: 9, color: t.text30 }}>{i.l}</span>
                 <span className="mono" style={{ fontSize: 9, color: t.text50, fontWeight: 600 }}>{i.v}</span>
@@ -228,34 +388,35 @@ export default function ExecutiveProtection() {
           </div>
         </div>
 
-        {/* Record Statuses */}
-        <div className="glass" style={{ padding: "20px" }}>
-          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Record Statuses</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <MiniDonut segments={RECORD_STATUS} />
-            <div style={{ flex: 1 }}>
-              {RECORD_STATUS.map((s, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, background: s.color }} />
-                  <span style={{ fontSize: 12, color: t.text50, flex: 1 }}>{s.label}</span>
-                  <span className="mono" style={{ fontSize: 11, color: t.text60, fontWeight: 600 }}>{s.count}</span>
-                </div>
-              ))}
+        {/* Right: Record Statuses + Top Accounts stacked */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          {/* Record Statuses */}
+          <div className="glass" style={{ padding: "20px", flex: 1 }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 12 }}>Record Statuses</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <MiniDonut segments={RECORD_STATUS} size={90} />
+              <div style={{ flex: 1 }}>
+                {RECORD_STATUS.map((s, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: 2, background: s.color }} />
+                    <span style={{ fontSize: 11, color: t.text50, flex: 1 }}>{s.label}</span>
+                    <span className="mono" style={{ fontSize: 11, color: t.text60, fontWeight: 600 }}>{s.count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Top Accounts */}
-        <div className="glass" style={{ padding: "20px" }}>
-          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Top Alarm Generated Accounts</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <MiniDonut segments={TOP_ACCOUNTS} />
-            <div style={{ flex: 1 }}>
+          {/* Top Accounts */}
+          <div className="glass" style={{ padding: "20px", flex: 1 }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 12 }}>Top Alarm Generated Accounts</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {TOP_ACCOUNTS.map((a, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color }} />
-                  <span style={{ fontSize: 11, color: t.text50, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.label}</span>
-                  <span className="mono" style={{ fontSize: 10, color: t.text35 }}>{a.count}</span>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="mono" style={{ fontSize: 10, color: t.text30, width: 14, textAlign: "right" }}>{i + 1}.</span>
+                  <div style={{ width: 6, height: 6, borderRadius: 2, background: a.color, flexShrink: 0 }} />
+                  <span className="mono" style={{ fontSize: 10, color: t.text50, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.label}</span>
+                  <span className="mono" style={{ fontSize: 10, color: t.text35, fontWeight: 600 }}>{a.count}</span>
                 </div>
               ))}
             </div>
@@ -263,8 +424,8 @@ export default function ExecutiveProtection() {
         </div>
       </div>
 
-      {/* ═══ ALARMS TABLE ═══ */}
-      <div className="glass" style={{ overflow: "hidden", animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+      {/* ═══ SECTION 3: ALARMS TABLE ═══ */}
+      <div className="glass" style={{ overflow: "hidden", animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
         <div style={{ padding: "16px 20px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ flexShrink: 0 }}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>{filtered.length} Total Alarms</div>
@@ -289,7 +450,7 @@ export default function ExecutiveProtection() {
         </div>
 
         {pageData.map(a => (
-          <div key={a.id} onClick={() => setSelectedId(a.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 1fr 70px 100px 100px", gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer", background: sel.isSelected(a.id) ? "rgba(168,85,247,0.04)" : selectedId === a.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedId === a.id ? "3px solid #E8463A" : "3px solid transparent" }}>
+          <div key={a.id} onClick={() => { setSelectedId(a.id); setDetailEmail(null); }} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 1fr 70px 100px 100px", gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer", background: sel.isSelected(a.id) ? "rgba(168,85,247,0.04)" : selectedId === a.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedId === a.id ? "3px solid #E8463A" : "3px solid transparent" }}>
             <Checkbox checked={sel.isSelected(a.id)} onChange={() => sel.toggle(a.id)} />
             <span style={{ fontSize: 12, fontWeight: 500, color: t.text70 }}>{a.vipName}</span>
             <CopyCell value={a.keyword} style={{ fontSize: 11, color: t.text45, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} />
@@ -310,10 +471,123 @@ export default function ExecutiveProtection() {
         <BulkActionBar count={sel.count} onClear={sel.clear} actions={bulkActions} />
       </div>
 
+      {/* ═══ SECTION 4: VIP PROFILE CARDS ═══ */}
+      <div style={{ animation: loaded ? "fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+        <div className="glass" style={{ overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Executive Risk Profiles</div>
+            <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>VIP Monitoring — All Assets</span>
+          </div>
+
+          <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {FEATURED_EMAILS.map(email => {
+              const p = VIP_PROFILES[email];
+              if (!p) return null;
+              const initials = p.name.split(" ").map(n => n[0]).join("");
+              const topVectors = p.attackVectors
+                .filter(v => v.severity !== "LOW")
+                .sort((a, b) => {
+                  const sevOrder = { "VERY HIGH": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1 };
+                  return (sevOrder[b.severity] || 0) - (sevOrder[a.severity] || 0);
+                })
+                .slice(0, 3);
+
+              return (
+                <div key={email} style={{
+                  padding: "18px",
+                  borderRadius: 12,
+                  background: t.bgCard,
+                  border: `1px solid ${t.borderSection}`,
+                  display: "flex",
+                  flexDirection: "column",
+                }}>
+                  {/* Header: Name, email, risk badge, score */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 10,
+                      background: `${SEV_COLOR[p.riskLevel]}15`,
+                      border: `2px solid ${SEV_COLOR[p.riskLevel]}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: SEV_COLOR[p.riskLevel],
+                      fontWeight: 700, fontSize: 13, fontFamily: "'Plus Jakarta Sans'"
+                    }}>
+                      {initials}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: t.text70 }}>{p.name}</div>
+                      <div className="mono" style={{ fontSize: 9, color: t.text35, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.email}</div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                      <span style={{ padding: "3px 8px", borderRadius: 5, fontSize: 8, fontWeight: 700, background: SEV_BG[p.riskLevel], color: SEV_COLOR[p.riskLevel], fontFamily: "'JetBrains Mono',monospace", whiteSpace: "nowrap" }}>
+                        {p.riskLevel} RISK
+                      </span>
+                      <span className="mono" style={{ fontSize: 9, color: t.text35 }}>{p.riskScore}/100</span>
+                    </div>
+                  </div>
+
+                  {/* Quick stats row */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6, marginBottom: 14 }}>
+                    {[
+                      { label: "Breaches", val: p.breaches, color: "#E8463A" },
+                      { label: "Passwords", val: p.passwords, color: "#A855F7" },
+                      { label: "Data Classes", val: p.dataClasses, color: "#3B82F6" },
+                      { label: "Pastes", val: p.pastes, color: "#F59E0B" },
+                    ].map((s, i) => (
+                      <div key={i} style={{ padding: "8px 4px", borderRadius: 6, background: t.bgHover, textAlign: "center" }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>{s.val}</div>
+                        <div style={{ fontSize: 8, color: t.text30, marginTop: 2 }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Top 3 attack vectors */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14, flex: 1 }}>
+                    {topVectors.length > 0 ? topVectors.map((v, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: 6, background: t.bgHover }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: v.color, boxShadow: `0 0 6px ${v.color}50`, flexShrink: 0 }} />
+                          <span style={{ fontSize: 10, color: t.text60 }}>{v.label}</span>
+                        </div>
+                        <span style={{ padding: "2px 6px", borderRadius: 3, fontSize: 8, fontWeight: 700, background: SEV_BG[v.severity], color: SEV_COLOR[v.severity], fontFamily: "'JetBrains Mono',monospace" }}>{v.severity}</span>
+                      </div>
+                    )) : (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px", borderRadius: 6, background: "rgba(22,163,74,0.06)" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2">
+                          <path d="M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z" />
+                          <path d="M9 13l2 2 4-4" />
+                        </svg>
+                        <span style={{ fontSize: 10, color: "#16A34A", fontWeight: 500 }}>No significant threats detected</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* View Full Profile link */}
+                  <button
+                    onClick={() => { setDetailEmail(email); setSelectedId(null); }}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      width: "100%", padding: "10px", borderRadius: 8,
+                      border: `1px solid ${t.borderSection}`, background: "transparent",
+                      color: t.text50, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                      fontFamily: "'Satoshi',sans-serif", transition: "all 0.15s ease",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.color = t.text70; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = t.text50; }}
+                  >
+                    View Full Profile
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* ═══ DETAIL PANEL — Executive Profile ═══ */}
-      {selected && (
+      {panelOpen && (
         <>
-          <div onClick={() => setSelectedId(null)} style={{ position: "fixed", inset: 0, background: t.bgOverlay, zIndex: 50, cursor: "pointer" }} />
+          <div onClick={closePanel} style={{ position: "fixed", inset: 0, background: t.bgOverlay, zIndex: 50, cursor: "pointer" }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 520, overflow: "auto", zIndex: 51, background: t.bgPanel, backdropFilter: "blur(20px)", borderLeft: `1px solid ${t.borderLight}`, animation: "fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
             {/* Header */}
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${t.borderSection}` }}>
@@ -323,11 +597,11 @@ export default function ExecutiveProtection() {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
                   <div>
-                    <span className="hfont" style={{ fontSize: 20, fontWeight: 700 }}>{selected.vipName}</span>
-                    <div className="mono" style={{ fontSize: 10, color: t.text35, marginTop: 2 }}>{selected.keyword}</div>
+                    <span className="hfont" style={{ fontSize: 20, fontWeight: 700 }}>{selected ? selected.vipName : profile.name}</span>
+                    <div className="mono" style={{ fontSize: 10, color: t.text35, marginTop: 2 }}>{selected ? selected.keyword : profile.email}</div>
                   </div>
                 </div>
-                <button onClick={() => setSelectedId(null)} style={{ width: 28, height: 28, borderRadius: 8, border: "none", background: t.borderLight, color: t.text50, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                <button onClick={closePanel} style={{ width: 28, height: 28, borderRadius: 8, border: "none", background: t.borderLight, color: t.text50, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
               {/* Risk badge */}
               {profile && (
@@ -380,8 +654,8 @@ export default function ExecutiveProtection() {
                       </div>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: b.severity === "critical" ? "#DC2626" : b.severity === "high" ? "#EA580C" : "#CA8A04", marginTop: 4, flexShrink: 0 }} />
                       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                        {b.types.map((t, j) => (
-                          <span key={j} style={{ padding: "3px 8px", borderRadius: 5, fontSize: 9, fontWeight: 500, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace" }}>{t}</span>
+                        {b.types.map((tp, j) => (
+                          <span key={j} style={{ padding: "3px 8px", borderRadius: 5, fontSize: 9, fontWeight: 500, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace" }}>{tp}</span>
                         ))}
                       </div>
                     </div>
@@ -408,7 +682,7 @@ export default function ExecutiveProtection() {
                         <span style={{ fontSize: 12, fontWeight: 600, color: t.text70 }}>{v.label}</span>
                         <span style={{ padding: "2px 6px", borderRadius: 4, fontSize: 8, fontWeight: 700, background: SEV_BG[v.severity], color: SEV_COLOR[v.severity], fontFamily: "'JetBrains Mono',monospace" }}>{v.severity}</span>
                       </div>
-                      <p style={{ fontSize: 10, color: t.text35, lineHeight: 1.5 }}>{v.desc}</p>
+                      <p style={{ fontSize: 10, color: t.text35, lineHeight: 1.5, margin: 0 }}>{v.desc}</p>
                       <div style={{ height: 3, borderRadius: 1.5, background: t.bgHover, marginTop: 8 }}>
                         <div style={{ height: "100%", borderRadius: 1.5, background: v.color, width: v.severity === "VERY HIGH" ? "90%" : v.severity === "HIGH" ? "65%" : "20%", opacity: 0.6 }} />
                       </div>

@@ -109,7 +109,11 @@ function WorldMap({ hoveredCountry, selectedCountry, onHover, onSelect }) {
           <stop offset="0%" stopColor="#CA8A04" stopOpacity="0.35" />
           <stop offset="100%" stopColor="#CA8A04" stopOpacity="0" />
         </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
+
+      {/* Ocean/water background */}
+      <rect width="2000" height="1001" fill="rgba(59,130,246,0.015)" rx="8" />
 
       {/* Country outlines with hover/select */}
       <g>
@@ -120,10 +124,10 @@ function WorldMap({ hoveredCountry, selectedCountry, onHover, onSelect }) {
             <path
               key={c.id}
               d={c.d}
-              fill={isSelected ? "rgba(232,70,58,0.25)" : isHovered ? "rgba(232,70,58,0.12)" : "rgba(255,255,255,0.06)"}
+              fill={isSelected ? "rgba(232,70,58,0.25)" : isHovered ? "rgba(232,70,58,0.12)" : "rgba(255,255,255,0.04)"}
               stroke={isSelected ? "#E8463A" : isHovered ? "rgba(232,70,58,0.5)" : "rgba(255,255,255,0.08)"}
-              strokeWidth={isSelected ? 1.2 : isHovered ? 0.8 : 0.5}
-              style={{ cursor: "pointer", transition: "fill 0.2s, stroke 0.2s" }}
+              strokeWidth={isSelected ? 1.5 : isHovered ? 0.8 : 0.6}
+              style={{ cursor: "pointer", transition: "fill 0.2s, stroke 0.2s", filter: isSelected ? "url(#glow)" : "none" }}
               onMouseEnter={() => onHover(c.id)}
               onMouseLeave={() => onHover(null)}
               onClick={() => onSelect(c.id === selectedCountry ? null : c.id)}
@@ -149,8 +153,11 @@ function WorldMap({ hoveredCountry, selectedCountry, onHover, onSelect }) {
       ))}
 
       {/* Grid lines */}
-      {[200,400,600,800].map(y => <line key={y} x1="0" y1={y} x2="2000" y2={y} stroke="rgba(255,255,255,0.015)" style={{ pointerEvents: "none" }} />)}
-      {[400,800,1200,1600].map(x => <line key={x} x1={x} y1="0" x2={x} y2="1001" stroke="rgba(255,255,255,0.015)" style={{ pointerEvents: "none" }} />)}
+      {[200,400,600,800].map(y => <line key={y} x1="0" y1={y} x2="2000" y2={y} stroke="rgba(255,255,255,0.025)" style={{ pointerEvents: "none" }} />)}
+      {[400,800,1200,1600].map(x => <line key={x} x1={x} y1="0" x2={x} y2="1001" stroke="rgba(255,255,255,0.025)" style={{ pointerEvents: "none" }} />)}
+
+      {/* Equator line */}
+      <line x1="0" y1="500" x2="2000" y2="500" stroke="rgba(255,255,255,0.04)" strokeDasharray="8 4" style={{ pointerEvents: "none" }} />
     </svg>
   );
 }
@@ -225,6 +232,7 @@ export default function GlobalThreats() {
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIndustry, setSelectedIndustry] = useState(null);
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
   // Search → select country
@@ -249,11 +257,11 @@ export default function GlobalThreats() {
   }, []);
 
   // Clear filter
-  const clearFilter = () => { setSelectedCountry(null); setSearchQuery(""); setActiveDW(0); setActiveRansom(0); };
+  const clearFilter = () => { setSelectedCountry(null); setSearchQuery(""); setActiveDW(0); setActiveRansom(0); setSelectedIndustry(null); };
 
   // Filtered data
-  const filteredDW = filterByCountry(DW_NEWS, selectedCountry);
-  const filteredRansom = filterByCountry(RANSOM_NEWS, selectedCountry);
+  const filteredDW = filterByCountry(DW_NEWS, selectedCountry).filter(item => !selectedIndustry || item.tags.some(tag => tag.toLowerCase().includes(selectedIndustry.toLowerCase())));
+  const filteredRansom = filterByCountry(RANSOM_NEWS, selectedCountry).filter(item => !selectedIndustry || item.tags.some(tag => tag.toLowerCase().includes(selectedIndustry.toLowerCase())));
   const filteredActors = filterByCountry(THREAT_ACTORS, selectedCountry);
   const filteredVulns = filterByCountry(TOP_VULNS, selectedCountry);
   const filteredVictims = filterByCountry(RECENT_VICTIMS, selectedCountry);
@@ -265,45 +273,107 @@ export default function GlobalThreats() {
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
-      {/* ═══ 1. WORLD MAP ═══ */}
-      <div className="glass" style={{
-        padding: "20px 24px 16px", overflow: "hidden",
+      {/* ═══ 0. MAGAZINE STRIP: Geographic Targeting + World Map + Ransomware Groups ═══ */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "240px 1fr 260px", gap: 14,
         animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Global Overview</div>
-            <span className="hfont" style={{ fontSize: 16, fontWeight: 700 }}>Threat Actor Distribution by Geolocation</span>
+        {/* Geographic Targeting — slim left */}
+        <div className="glass" style={{ padding: "14px 14px", overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={t.text40} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg>
+            <span className="hfont" style={{ fontSize: 12, fontWeight: 700 }}>Geographic Targeting</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {/* Hovered country tooltip */}
-            {hoveredCountry && !selectedCountry && (
-              <span className="mono" style={{ fontSize: 11, color: t.text60, transition: "all 0.2s" }}>
-                {getCountryName(hoveredCountry)} ({hoveredCountry})
-              </span>
-            )}
-            {/* Legend */}
-            <div style={{ display: "flex", gap: 10 }}>
-              {[{ label: "0-10", color: "rgba(255,255,255,0.06)" }, { label: "10-15", color: "rgba(220,38,38,0.15)" }, { label: "15-30", color: "rgba(220,38,38,0.25)" }, { label: "30-45", color: "rgba(220,38,38,0.4)" }, { label: "45+", color: "rgba(220,38,38,0.6)" }].map(l => (
-                <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <div style={{ width: 12, height: 10, borderRadius: 2, background: l.color }} />
-                  <span className="mono" style={{ fontSize: 8, color: t.text30 }}>{l.label}</span>
+          <div style={{ fontSize: 9, color: t.text25, marginBottom: 10 }}>Top targeted countries</div>
+          {[
+            { rank: "01", code: "US", name: "United States", pct: "19.91%", delta: "+3.2%", color: "#DC2626", width: "100%" },
+            { rank: "02", code: "FR", name: "France", pct: "8.45%", delta: "+1.8%", color: "#EA580C", width: "42%" },
+            { rank: "03", code: "IN", name: "India", pct: "7.82%", delta: "+5.1%", color: "#F59E0B", width: "39%" },
+            { rank: "04", code: "DE", name: "Germany", pct: "6.33%", delta: "~-0.4%", color: "#3B82F6", width: "32%" },
+            { rank: "05", code: "UK", name: "United Kingdom", pct: "5.98%", delta: "+0.9%", color: "#3B82F6", width: "30%" },
+          ].map((c, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 0", borderBottom: i < 4 ? `1px solid ${t.borderRow}` : "none" }}>
+              <span className="mono" style={{ fontSize: 9, color: t.text20, width: 14 }}>{c.rank}</span>
+              <span className="mono" style={{ fontSize: 9, color: t.text40, width: 18, fontWeight: 600 }}>{c.code}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: t.text60, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                  <span className="hfont" style={{ fontSize: 11, fontWeight: 700 }}>{c.pct}</span>
+                  <span className="mono" style={{ fontSize: 8, color: c.delta.includes("-") ? "#16A34A" : "#DC2626" }}>{c.delta}</span>
+                  <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.borderLight, marginLeft: 2 }}>
+                    <div style={{ height: "100%", borderRadius: 2, background: c.color, width: c.width, opacity: 0.8 }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Center: World Map — maximized */}
+        <div className="glass" style={{ padding: "8px 0 0", overflow: "hidden" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, padding: "0 14px" }}>
+            <div>
+              <div className="mono" style={{ fontSize: 9, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 2 }}>Global Overview</div>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Threat Actor Distribution</span>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              {hoveredCountry && !selectedCountry && (
+                <span className="mono" style={{ fontSize: 10, color: t.text60 }}>{getCountryName(hoveredCountry)}</span>
+              )}
+              {[{ l: "0-10", c: "rgba(232,70,58,0.15)" }, { l: "10-15", c: "rgba(232,70,58,0.3)" }, { l: "15-30", c: "rgba(232,70,58,0.45)" }, { l: "30-45", c: "rgba(232,70,58,0.6)" }, { l: "45+", c: "rgba(232,70,58,0.8)" }].map(sc => (
+                <div key={sc.l} style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <div style={{ width: 8, height: 6, borderRadius: 1, background: sc.c }} />
+                  <span className="mono" style={{ fontSize: 7, color: t.text20 }}>{sc.l}</span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-        <div style={{ height: 320, position: "relative" }}>
-          <WorldMap
-            hoveredCountry={hoveredCountry}
-            selectedCountry={selectedCountry}
-            onHover={setHoveredCountry}
-            onSelect={handleMapSelect}
-          />
+          <div style={{ height: 280, margin: "0 -4px" }}>
+            <WorldMap hoveredCountry={hoveredCountry} selectedCountry={selectedCountry} onHover={setHoveredCountry} onSelect={handleMapSelect} />
+          </div>
         </div>
 
-        {/* Search bar below map */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14, padding: "0 4px" }}>
+        {/* Ransomware Groups — slim right */}
+        <div className="glass" style={{ padding: "14px 14px", overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={t.text40} strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+              <span className="hfont" style={{ fontSize: 12, fontWeight: 700 }}>Ransomware Groups</span>
+            </div>
+            <span className="mono" style={{ fontSize: 8, padding: "2px 6px", borderRadius: 4, background: "rgba(16,185,129,0.1)", color: "#10B981", fontWeight: 600 }}>7 active</span>
+          </div>
+          <div style={{ fontSize: 9, color: t.text25, marginBottom: 8 }}>Active threat actors</div>
+          {[
+            { name: "Akira", attacks: 127, lastSeen: "12m ago", share: "8.35%", trend: "up" },
+            { name: "LockBit 4.0", attacks: 112, lastSeen: "3h ago", share: "7.91%", trend: "down" },
+            { name: "BlackCat/ALPHV", attacks: 98, lastSeen: "1h ago", share: "6.44%", trend: "up" },
+            { name: "Cl0p", attacks: 89, lastSeen: "2d ago", share: "5.88%", trend: "down", status: "DORMANT" },
+            { name: "Play", attacks: 78, lastSeen: "6h ago", share: "5.12%", trend: "up" },
+          ].map((g, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 0", borderBottom: i < 4 ? `1px solid ${t.borderRow}` : "none" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: g.trend === "up" ? "#DC2626" : "#16A34A", flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: t.text60 }}>{g.name}</span>
+                  {g.status && <span className="mono" style={{ fontSize: 7, color: t.text25, letterSpacing: "0.06em", border: `1px solid ${t.borderLight}`, padding: "1px 4px", borderRadius: 3 }}>{g.status}</span>}
+                </div>
+                <span className="mono" style={{ fontSize: 8, color: t.text25 }}>{g.attacks} attacks · {g.lastSeen}</span>
+              </div>
+              <span className="hfont" style={{ fontSize: 11, fontWeight: 700, color: t.text50 }}>{g.share}</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={g.trend === "up" ? "#DC2626" : "#16A34A"} strokeWidth="2">
+                {g.trend === "up" ? <path d="M7 17l5-5 4 4 6-6M18 7h4v4" /> : <path d="M7 7l5 5 4-4 6 6M18 17h4v-4" />}
+              </svg>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ═══ SEARCH + FILTERS (below magazine strip) ═══ */}
+      <div style={{
+        display: "flex", flexDirection: "column", gap: 10,
+        animation: loaded ? "fadeUp 0.6s 0.05s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1, position: "relative" }}>
             <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
             <input
@@ -322,26 +392,21 @@ export default function GlobalThreats() {
           </div>
           {selectedCountry && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{
-                padding: "6px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600,
-                background: "rgba(232,70,58,0.1)", border: "1px solid rgba(232,70,58,0.2)",
-                color: "#E8463A", display: "flex", alignItems: "center", gap: 6,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
+              <span style={{ padding: "6px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: "rgba(232,70,58,0.1)", border: "1px solid rgba(232,70,58,0.2)", color: "#E8463A", display: "flex", alignItems: "center", gap: 6 }}>
                 {getCountryName(selectedCountry)}
               </span>
-              <button
-                onClick={clearFilter}
-                style={{
-                  padding: "6px 10px", borderRadius: 8, border: `1px solid ${t.borderMed}`,
-                  background: t.bgHover, color: t.text50,
-                  fontSize: 11, cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
-                }}
-              >
-                Clear
-              </button>
+              <button onClick={clearFilter} style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${t.borderMed}`, background: t.bgHover, color: t.text50, fontSize: 11, cursor: "pointer", fontFamily: "'Satoshi',sans-serif" }}>Clear</button>
             </div>
           )}
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+          <div className="mono" style={{ fontSize: 9, color: t.text25, textTransform: "uppercase", letterSpacing: "0.08em", marginRight: 2 }}>Country</div>
+          {["US", "GB", "DE", "CN", "RU", "IR", "IN", "NL", "CH", "BR", "KR", "JP", "AU", "TR"].map(code => (
+            <button key={code} onClick={() => handleMapSelect(selectedCountry === code ? null : code)}
+              style={{ padding: "4px 10px", borderRadius: 16, fontSize: 10, fontWeight: 500, background: selectedCountry === code ? "rgba(232,70,58,0.15)" : t.bgInput, border: `1px solid ${selectedCountry === code ? "rgba(232,70,58,0.3)" : t.borderLight}`, color: selectedCountry === code ? "#E8463A" : t.text50, cursor: "pointer", fontFamily: "'Satoshi',sans-serif", transition: "all 0.15s" }}>
+              {getCountryName(code)}
+            </button>
+          ))}
         </div>
       </div>
 

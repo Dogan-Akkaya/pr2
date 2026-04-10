@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, stickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 
 // ── Dummy stealer log domains (realistic from screenshots) ──
@@ -94,6 +95,15 @@ const CSV_COLS = [
   { label: "Stealer", field: "stealer" }, { label: "ISP", field: "isp" },
 ];
 
+// ── Dummy timeline data for Active Listings chart ──
+const TIMELINE_DATA = [
+  { day: "Sep 15", count: 1 }, { day: "Sep 18", count: 1 }, { day: "Sep 20", count: 2 },
+  { day: "Sep 22", count: 3 }, { day: "Sep 25", count: 3 }, { day: "Sep 27", count: 2 },
+  { day: "Sep 28", count: 3 }, { day: "Oct 01", count: 3 }, { day: "Oct 03", count: 5 },
+  { day: "Oct 05", count: 4 }, { day: "Oct 07", count: 5 }, { day: "Oct 10", count: 4 },
+  { day: "Oct 15", count: 5 }, { day: "Oct 24", count: 6 },
+];
+
 // ═══════════════════════════════════════
 export default function BlackMarket() {
   const { t } = useTheme();
@@ -101,6 +111,7 @@ export default function BlackMarket() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sevFilter, setSevFilter] = useState("all");
   const { sortField, sortDir, onSort, sortData } = useSort("date", "desc");
   const sel = useSelection("id");
   const { range, setRange, filterByRange } = useTimeRange("All");
@@ -109,7 +120,8 @@ export default function BlackMarket() {
   const filtered = filterByRange(LISTINGS.filter(l => {
     const matchSearch = !searchQuery || l.asset.includes(searchQuery.toLowerCase()) || l.source.toLowerCase().includes(searchQuery.toLowerCase()) || l.vendor.toLowerCase().includes(searchQuery.toLowerCase()) || String(l.id).includes(searchQuery);
     const matchStatus = statusFilter === "all" || l.status.toLowerCase() === statusFilter;
-    return matchSearch && matchStatus;
+    const matchSev = sevFilter === "all" || l.severity === sevFilter;
+    return matchSearch && matchStatus && matchSev;
   }), "date");
 
   // Custom sort for severity field
@@ -125,6 +137,24 @@ export default function BlackMarket() {
 
   const selected = LISTINGS.find(l => l.id === selectedId);
   const totalValue = LISTINGS.reduce((s, l) => s + parseFloat(l.price.replace("$", "")), 0);
+  const criticalCount = LISTINGS.filter(l => l.severity === "critical").length;
+  const activeCount = LISTINGS.filter(l => l.status === "Open").length;
+  const uniqueAssets = [...new Set(LISTINGS.map(l => l.asset))].length;
+
+  // Listing duration data (days since listing)
+  const now = new Date("2025-10-25");
+  const durationData = LISTINGS.map(l => {
+    const days = Math.max(1, Math.round((now - new Date(l.date)) / (1000 * 60 * 60 * 24)));
+    return { asset: l.asset, days, severity: l.severity, id: l.id };
+  }).sort((a, b) => b.days - a.days);
+  const maxDays = Math.max(...durationData.map(d => d.days));
+
+  // Marketplace counts
+  const marketCounts = {};
+  LISTINGS.forEach(l => { marketCounts[l.source] = (marketCounts[l.source] || 0) + 1; });
+  const marketData = Object.entries(marketCounts).sort((a, b) => b[1] - a[1]);
+  const maxMarket = Math.max(...marketData.map(m => m[1]));
+  const marketColors = { "Russian Market": "#10B981", "Genesis Market": "#DC2626", "2easy Shop": "#3B82F6" };
 
   const bulkActions = [
     { label: "Mark Resolved", icon: "M20 6L9 17l-5-5", primary: true, onClick: () => sel.clear() },
@@ -132,155 +162,289 @@ export default function BlackMarket() {
     { label: "Assign", icon: "M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2", onClick: () => { alert("Assigning " + sel.count + " items to analyst..."); sel.clear(); } },
   ];
 
+  const pillStyle = (active) => ({
+    padding: "5px 14px", borderRadius: 20, border: "none", fontSize: 11, fontWeight: 600,
+    cursor: "pointer", fontFamily: "'Satoshi',sans-serif", transition: "all 0.2s",
+    background: active ? "rgba(232,70,58,0.12)" : "rgba(255,255,255,0.04)",
+    color: active ? "#E8463A" : t.text40,
+  });
+
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
-      {/* ═══ STATS ROW ═══ */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12,
+      {/* ═══ HERO BANNER ═══ */}
+      <div className="glass" style={{
+        padding: "18px 24px", overflow: "hidden",
         animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
-        {[
-          { label: "Active Listings", value: LISTINGS.filter(l => l.status === "Open").length, icon: "M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18", color: "#E8463A" },
-          { label: "Total Value", value: `$${totalValue.toFixed(0)}`, icon: "M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6", color: "#F59E0B" },
-          { label: "Unique Sources", value: [...new Set(LISTINGS.map(l => l.source))].length, icon: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z", color: "#A855F7" },
-          { label: "Affected Assets", value: [...new Set(LISTINGS.map(l => l.asset))].length, icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z", color: "#3B82F6" },
-        ].map((s, i) => (
-          <div key={i} className="glass" style={{ padding: "16px 18px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${s.color}10`, border: `1px solid ${s.color}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2"><path d={s.icon} /></svg>
-              </div>
-              <span style={{ fontSize: 11, color: t.text40, fontWeight: 500 }}>{s.label}</span>
-            </div>
-            <span className="hfont" style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.value}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* ═══ LISTINGS TABLE ═══ */}
-      <div className="glass" style={{
-        overflow: "hidden",
-        animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none",
-      }}>
-        {/* Header */}
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flexShrink: 0 }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Black Market</div>
-            <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>{filtered.length} Listings</span>
-          </div>
-          {/* Search */}
-          <div style={{ position: "relative", flex: 1 }}>
-            <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input
-              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by asset, source, vendor, or listing ID..."
-              style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none", transition: "border-color 0.2s" }}
-              onFocus={e => e.target.style.borderColor = "rgba(232,70,58,0.3)"}
-              onBlur={e => e.target.style.borderColor = t.borderLight}
-            />
-          </div>
-          {/* Time range */}
-          <TimeRangeFilter range={range} onRangeChange={setRange} />
-          {/* Status filter */}
-          <div style={{ display: "flex", gap: 4 }}>
-            {["all", "open", "closed"].map(s => (
-              <button key={s} className={`tab-btn ${statusFilter === s ? "on" : ""}`} onClick={() => setStatusFilter(s)} style={{ textTransform: "capitalize" }}>{s}</button>
-            ))}
-          </div>
-          <ExportButton onClick={() => exportCSV(filtered, CSV_COLS, "black-market-export.csv")} />
-        </div>
-
-        {/* Table header — sticky */}
-        <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 60px 188px 1fr 120px 100px 80px 80px 70px 72px 40px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle }}>
-          <Checkbox checked={sel.allSelected(pageData)} indeterminate={sel.count > 0 && !sel.allSelected(pageData)} onChange={() => sel.toggleAll(pageData)} />
-          <SortHeader label="Sev" field="severity" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Proof</span>
-          <SortHeader label="Asset" field="asset" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <SortHeader label="Source" field="source" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <SortHeader label="Vendor" field="vendor" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <SortHeader label="Price" field="price" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <SortHeader label="Date" field="date" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <SortHeader label="Status" field="status" sortField={sortField} sortDir={sortDir} onSort={onSort} />
-          <span />
-          <span />
-        </div>
-
-        {/* Rows */}
-        {pageData.map(listing => (
-          <div
-            key={listing.id}
-            onClick={() => setSelectedId(listing.id)}
-            className="trow"
-            style={{
-              display: "grid", gridTemplateColumns: "28px 60px 188px 1fr 120px 100px 80px 80px 70px 72px 40px",
-              gap: 8, alignItems: "center", padding: "10px 20px", cursor: "pointer",
-              background: sel.isSelected(listing.id) ? "rgba(232,70,58,0.04)" : selectedId === listing.id ? "rgba(232,70,58,0.04)" : undefined,
-              borderLeft: selectedId === listing.id ? "3px solid #E8463A" : "3px solid transparent",
-            }}
-          >
-            <Checkbox checked={sel.isSelected(listing.id)} onChange={() => sel.toggle(listing.id)} />
-            {/* Severity */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: SEV_COLOR[listing.severity], boxShadow: `0 0 6px ${SEV_COLOR[listing.severity]}50` }} />
-              <span className="mono" style={{ fontSize: 9, color: SEV_COLOR[listing.severity], textTransform: "uppercase" }}>{listing.severity}</span>
-            </div>
-            {/* Proof thumbnail */}
-            <div style={{
-              width: 180, height: 44, borderRadius: 6, overflow: "hidden",
-              background: t.bgHover, border: `1px solid ${t.borderLight}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Left side */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(232,70,58,0.08)", border: "1px solid rgba(232,70,58,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="1.5">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 01-8 0" />
               </svg>
             </div>
-            {/* Asset — copyable */}
-            <CopyCell value={listing.asset} style={{ fontSize: 12, color: t.text60, fontFamily: "'JetBrains Mono',monospace", overflow: "hidden" }} />
-            {/* Source */}
-            <span style={{ fontSize: 11, color: t.text45 }}>{listing.source}</span>
-            {/* Vendor */}
-            <span className="mono" style={{ fontSize: 10, color: t.text35, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{listing.vendor}</span>
-            {/* Price */}
-            <span className="mono" style={{ fontSize: 12, color: "#F59E0B", fontWeight: 600 }}>{listing.price}</span>
-            {/* Date */}
-            <TimeCell date={listing.date} />
-            {/* Status */}
-            <span className="tag" style={{
-              background: listing.status === "Open" ? "rgba(22,163,74,0.08)" : t.bgHover,
-              color: listing.status === "Open" ? "#16A34A" : t.text30, fontSize: 9,
-              display: "inline-flex", alignItems: "center", gap: 3,
-            }}>{listing.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
-            {/* Obtain button — only for Open listings */}
-            {listing.status === "Open" ? (
-              <button
-                onClick={(e) => { e.stopPropagation(); }}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Black Market Monitor</span>
+                <span style={{ padding: "2px 8px", borderRadius: 10, background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.2)", fontSize: 10, fontWeight: 600, color: "#DC2626" }}>
+                  {criticalCount} critical listing{criticalCount !== 1 ? "s" : ""}
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: t.text35, marginTop: 3 }}>Tracking your assets across dark web marketplaces and forums</div>
+            </div>
+          </div>
+
+          {/* Right side: inline stats + export */}
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            {[
+              { label: "Active Listings", value: activeCount, icon: "M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18", color: "#E8463A" },
+              { label: "Total Value", value: `$${totalValue.toFixed(0)}`, icon: "M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6", color: "#F59E0B" },
+              { label: "Critical", value: criticalCount, icon: "M12 9v2m0 4h.01M10.29 3.86l-8.36 14.32A1 1 0 002.78 20h18.44a1 1 0 00.85-1.82L13.71 3.86a1 1 0 00-1.42 0z", color: "#DC2626" },
+              { label: "Unique Assets", value: uniqueAssets, icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z", color: "#3B82F6" },
+            ].map((s, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 26, height: 26, borderRadius: 7, background: `${s.color}10`, border: `1px solid ${s.color}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2"><path d={s.icon} /></svg>
+                </div>
+                <div>
+                  <div className="mono" style={{ fontSize: 9, color: t.text25, textTransform: "uppercase" }}>{s.label}</div>
+                  <span className="hfont" style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.value}</span>
+                </div>
+              </div>
+            ))}
+            <ExportButton onClick={() => exportCSV(filtered, CSV_COLS, "black-market-export.csv")} />
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ TWO-COLUMN LAYOUT ═══ */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "1fr 380px", gap: 18,
+        animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
+
+        {/* ── LEFT: Detected Listings ── */}
+        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          {/* Header with filters */}
+          <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div>
+                <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Detected Listings</div>
+                <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>{filtered.length} Results</span>
+              </div>
+              <TimeRangeFilter range={range} onRangeChange={setRange} />
+            </div>
+
+            {/* Filter pills row */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              {/* Severity pills */}
+              {["all", "critical", "high", "medium", "low"].map(s => (
+                <button key={s} onClick={() => setSevFilter(s)} style={{
+                  ...pillStyle(sevFilter === s),
+                  ...(s !== "all" && sevFilter === s ? { background: `${SEV_COLOR[s]}15`, color: SEV_COLOR[s] } : {}),
+                }}>
+                  {s === "all" ? "All Severity" : (
+                    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: SEV_COLOR[s] }} />
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </span>
+                  )}
+                </button>
+              ))}
+
+              <span style={{ width: 1, height: 18, background: t.borderSection, margin: "0 4px" }} />
+
+              {/* Status pills */}
+              {["all", "open", "closed"].map(s => (
+                <button key={s} onClick={() => setStatusFilter(s)} style={pillStyle(statusFilter === s)}>
+                  {s === "all" ? "All Status" : s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <div style={{ position: "relative", marginTop: 12 }}>
+              <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+              <input
+                value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search by asset, source, vendor, or listing ID..."
+                style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none", transition: "border-color 0.2s", boxSizing: "border-box" }}
+                onFocus={e => e.target.style.borderColor = "rgba(232,70,58,0.3)"}
+                onBlur={e => e.target.style.borderColor = t.borderLight}
+              />
+            </div>
+          </div>
+
+          {/* Listing cards */}
+          <div style={{ flex: 1, overflow: "auto" }}>
+            {pageData.map(listing => (
+              <div
+                key={listing.id}
+                onClick={() => setSelectedId(listing.id)}
+                className="trow"
                 style={{
-                  padding: "4px 12px", borderRadius: 6, border: "none",
-                  background: "#E8463A", color: "#fff", fontSize: 10, fontWeight: 600,
-                  cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
-                  whiteSpace: "nowrap",
+                  display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", cursor: "pointer",
+                  background: sel.isSelected(listing.id) ? "rgba(232,70,58,0.04)" : selectedId === listing.id ? "rgba(232,70,58,0.04)" : undefined,
+                  borderLeft: selectedId === listing.id ? "3px solid #E8463A" : "3px solid transparent",
+                  transition: "background 0.15s",
                 }}
               >
-                Obtain
-              </button>
-            ) : <span />}
-            {/* Arrow */}
-            <RowChevron />
+                {/* Checkbox */}
+                <Checkbox checked={sel.isSelected(listing.id)} onChange={() => sel.toggle(listing.id)} />
+
+                {/* Proof thumbnail placeholder */}
+                <div style={{
+                  width: 48, height: 48, borderRadius: 8, overflow: "hidden", flexShrink: 0,
+                  background: t.bgHover, border: `1px solid ${t.borderLight}`,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                  <span style={{ fontSize: 7, color: t.text20, fontFamily: "'Satoshi',sans-serif" }}>Preview</span>
+                </div>
+
+                {/* Center content */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: t.text70, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{listing.asset}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    {/* Severity badge */}
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 10,
+                      background: `${SEV_COLOR[listing.severity]}12`, fontSize: 9, fontWeight: 600,
+                      color: SEV_COLOR[listing.severity], textTransform: "uppercase",
+                      fontFamily: "'JetBrains Mono',monospace",
+                    }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: SEV_COLOR[listing.severity], boxShadow: `0 0 4px ${SEV_COLOR[listing.severity]}50` }} />
+                      {listing.severity}
+                    </span>
+                    {/* Status */}
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      fontSize: 9, fontWeight: 500, color: listing.status === "Open" ? "#16A34A" : t.text30,
+                      fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase",
+                    }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: listing.status === "Open" ? "#16A34A" : t.text30 }} />
+                      {listing.status}
+                    </span>
+                  </div>
+                  <div className="mono" style={{ fontSize: 10, color: t.text30 }}>
+                    {listing.source} &middot; {listing.vendor} &middot; {listing.date}
+                  </div>
+                </div>
+
+                {/* Price + chevron */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                  <span className="mono" style={{ fontSize: 15, color: "#F59E0B", fontWeight: 700 }}>{listing.price}</span>
+                  <RowChevron />
+                </div>
+              </div>
+            ))}
+
+            {pageData.length === 0 && (
+              <div style={{ padding: "40px 20px", textAlign: "center", color: t.text30, fontSize: 13 }}>
+                No listings match your filters.
+              </div>
+            )}
           </div>
-        ))}
 
-        {/* Pagination */}
-        <Pagination
-          page={pag.page} totalPages={pag.totalPages} startIdx={pag.startIdx} endIdx={pag.endIdx}
-          totalItems={sorted.length} onPrev={pag.prev} onNext={pag.next} onGoTo={pag.goTo}
-          perPage={pag.perPage} onPerPageChange={pag.setPerPage}
-        />
+          {/* Pagination */}
+          <Pagination
+            page={pag.page} totalPages={pag.totalPages} startIdx={pag.startIdx} endIdx={pag.endIdx}
+            totalItems={sorted.length} onPrev={pag.prev} onNext={pag.next} onGoTo={pag.goTo}
+            perPage={pag.perPage} onPerPageChange={pag.setPerPage}
+          />
 
-        {/* Bulk Action Bar */}
-        <BulkActionBar count={sel.count} onClear={sel.clear} actions={bulkActions} />
+          {/* Bulk Action Bar */}
+          <BulkActionBar count={sel.count} onClear={sel.clear} actions={bulkActions} />
+        </div>
+
+        {/* ── RIGHT: Charts Sidebar ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+
+          {/* a) Listing Duration */}
+          <div className="glass" style={{ overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Listing Duration</div>
+              <span style={{ fontSize: 11, color: t.text35 }}>How long each listing has been live</span>
+            </div>
+            <div style={{ padding: "14px 20px" }}>
+              {durationData.map((d, i) => (
+                <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: i < durationData.length - 1 ? 10 : 0 }}>
+                  <span className="mono" style={{ fontSize: 10, color: t.text40, width: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flexShrink: 0 }}>{d.asset}</span>
+                  <div style={{ flex: 1, height: 8, borderRadius: 4, background: t.bgHover, overflow: "hidden" }}>
+                    <div style={{
+                      width: `${Math.max(8, (d.days / maxDays) * 100)}%`, height: "100%", borderRadius: 4,
+                      background: SEV_COLOR[d.severity],
+                      opacity: 0.7,
+                    }} />
+                  </div>
+                  <span className="mono" style={{ fontSize: 9, color: t.text30, width: 30, textAlign: "right", flexShrink: 0 }}>{d.days}d</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* b) Active Listings Timeline */}
+          <div className="glass" style={{ overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Active Listings Timeline</div>
+              <span style={{ fontSize: 11, color: t.text35 }}>Listing count over last 30 days</span>
+            </div>
+            <div style={{ padding: "14px 16px 10px" }}>
+              <ResponsiveContainer width="100%" height={120}>
+                <AreaChart data={TIMELINE_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={t.borderLight} />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text25, fontFamily: "'JetBrains Mono',monospace" }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text25, fontFamily: "'JetBrains Mono',monospace" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "rgba(12,16,33,0.95)", backdropFilter: "blur(12px)",
+                      border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10,
+                      padding: "8px 12px", fontSize: 11, fontFamily: "'JetBrains Mono',monospace",
+                    }}
+                    labelStyle={{ color: t.text40, fontSize: 10, marginBottom: 4 }}
+                    itemStyle={{ color: "#E8463A" }}
+                  />
+                  <Area type="monotone" dataKey="count" stroke="#E8463A" fill="#E8463A" fillOpacity={0.06} strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* c) By Marketplace */}
+          <div className="glass" style={{ overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>By Marketplace</div>
+              <span style={{ fontSize: 11, color: t.text35 }}>Listings per platform</span>
+            </div>
+            <div style={{ padding: "16px 20px" }}>
+              {marketData.map(([name, count], i) => (
+                <div key={name} style={{ marginBottom: i < marketData.length - 1 ? 14 : 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, color: t.text50, fontWeight: 500 }}>{name}</span>
+                    <span className="mono" style={{ fontSize: 11, color: t.text40, fontWeight: 600 }}>{count}</span>
+                  </div>
+                  <div style={{ height: 10, borderRadius: 5, background: t.bgHover, overflow: "hidden" }}>
+                    <div style={{
+                      width: `${(count / maxMarket) * 100}%`, height: "100%", borderRadius: 5,
+                      background: marketColors[name] || "#A855F7",
+                      opacity: 0.8,
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ═══ DETAIL PANEL (slide from right) ═══ */}

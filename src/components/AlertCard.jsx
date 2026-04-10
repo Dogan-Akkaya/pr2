@@ -37,21 +37,20 @@ export default function AlertCard({ alert, onDismiss }) {
           </div>
         </div>
       </div>
-      {/* Hover overlay — transparent + blur, extends to ~50% of card width */}
+      {/* Hover overlay — always has blur, opacity controls visibility */}
       <div
         style={{
           position: "absolute", top: 0, right: 0, bottom: 0,
-          width: hov ? "55%" : "40%",
+          width: "55%",
           display: "flex", alignItems: "center", justifyContent: "flex-end",
           gap: 6, padding: "0 12px",
-          background: hov
-            ? "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.06) 100%)"
-            : "transparent",
-          backdropFilter: hov ? "blur(12px)" : "blur(0px)",
-          WebkitBackdropFilter: hov ? "blur(12px)" : "blur(0px)",
+          background: "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.02) 20%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.07) 100%)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           opacity: hov ? 1 : 0,
-          transform: hov ? "translateX(0)" : "translateX(12px)",
-          transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+          pointerEvents: hov ? "auto" : "none",
+          transform: hov ? "translateX(0)" : "translateX(8px)",
+          transition: "opacity 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1)",
           borderRadius: "0 12px 12px 0",
         }}
       >

@@ -8,8 +8,14 @@ const TIMELINE = Array.from({ length: 14 }, (_, i) => {
   const d = new Date(2025, 2, 26 + i * 5);
   const label = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const spike = i === 3 ? 280 : i === 4 ? 180 : 0;
-  return { date: label, count: Math.round(30 + Math.random() * 40 + spike) };
+  const count = Math.round(30 + Math.random() * 40 + spike);
+  let cumulative = 0;
+  return { date: label, count };
 });
+
+// Add cumulative field
+let _cum = 0;
+TIMELINE.forEach(t => { _cum += t.count; t.cumulative = _cum; });
 
 // ── Record Statuses ──
 const RECORD_STATUS = [
@@ -19,11 +25,11 @@ const RECORD_STATUS = [
 
 // ── Top Alarm Generated Accounts ──
 const TOP_ACCOUNTS = [
-  { label: "gabriel@gmail.com", count: 277, color: "#E8463A" },
-  { label: "kevin.koestoro@jtrust...", count: 18, color: "#A855F7" },
-  { label: "edy@jtrustbank.co.id", count: 9, color: "#3B82F6" },
-  { label: "recruit@bm.co.id", count: 8, color: "#F59E0B" },
-  { label: "s.admin@jtrustbank.co.id", count: 7, color: "#10B981" },
+  { label: "gabriel@gmail.com", count: 277, color: "#E8463A", strength: "WEAK", source: "Stealer Log", time: "2025-10-19" },
+  { label: "kevin.koestoro@jtrust...", count: 18, color: "#A855F7", strength: "WEAK", source: "Combo List", time: "2025-09-15" },
+  { label: "edy@jtrustbank.co.id", count: 9, color: "#3B82F6", strength: "MEDIUM", source: "Breach DB", time: "2025-09-09" },
+  { label: "recruit@bm.co.id", count: 8, color: "#F59E0B", strength: "MEDIUM", source: "Stealer Log", time: "2025-08-28" },
+  { label: "s.admin@jtrustbank.co.id", count: 7, color: "#10B981", strength: "STRONG", source: "Combo List", time: "2025-08-22" },
 ];
 
 // ── Leaked Credentials (PII Exposure) ──
@@ -80,6 +86,13 @@ const MENTION_CSV = [
   { label: "Status", field: "status" }, { label: "Date", field: "date" }, { label: "Alarm ID", field: "alarmId" },
 ];
 
+const STR_COL = { WEAK: "#DC2626", MEDIUM: "#CA8A04", STRONG: "#16A34A" };
+const PW_STRENGTH = [
+  { label: "Weak", count: 487, color: "#DC2626" },
+  { label: "Medium", count: 183, color: "#CA8A04" },
+  { label: "Strong", count: 42, color: "#16A34A" },
+];
+
 // ═══════════════════════════════════════
 export default function IdentityExposure() {
   const { t } = useTheme();
@@ -116,148 +129,252 @@ export default function IdentityExposure() {
     { label: "Assign", icon: "M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2", onClick: () => { alert("Assigning " + activeSel.count + " items to analyst..."); activeSel.clear(); } },
   ];
 
+  const totalRecords = RECORD_STATUS.reduce((s, r) => s + r.count, 0);
+
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
-      {/* ═══ TOP STATS ═══ */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
-        {/* Credential Timeline */}
-        <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
-          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Credential Timeline</div>
-          <ResponsiveContainer width="100%" height={120}>
-            <AreaChart data={TIMELINE}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" axisLine={false} tickLine={false} interval={3} />
-              <YAxis axisLine={false} tickLine={false} width={30} />
-              <Tooltip {...ttS} />
-              <Area type="monotone" dataKey="count" stroke="#E8463A" fill="#E8463A" fillOpacity={0.08} strokeWidth={2} dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Record Statuses */}
-        <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
-          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Record Statuses</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <MiniDonut segments={RECORD_STATUS} />
-            <div style={{ flex: 1 }}>
-              {RECORD_STATUS.map((s, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, background: s.color }} />
-                  <span style={{ fontSize: 12, color: t.text50, flex: 1 }}>{s.label}</span>
-                  <span className="mono" style={{ fontSize: 11, color: t.text60, fontWeight: 600 }}>{s.count}</span>
-                </div>
-              ))}
+      {/* ═══ SECTION 1: HERO BANNER ═══ */}
+      <div className="glass" style={{ overflow: "hidden", animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+        <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24 }}>
+          {/* Left side */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(232,70,58,0.08)", border: "1px solid rgba(232,70,58,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#E8463A", textTransform: "uppercase", fontWeight: 600 }}>Identity Exposure</span>
+                <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 9, fontWeight: 700, background: "rgba(232,70,58,0.12)", color: "#E8463A", fontFamily: "'JetBrains Mono',monospace" }}>711 open</span>
+              </div>
+              <span style={{ fontSize: 12, color: t.text40, lineHeight: 1.4 }}>Credential exposure tracking across stealer logs, combo lists, and breach databases</span>
+            </div>
+          </div>
+          {/* Right side: 4 inline stats */}
+          <div style={{ display: "flex", gap: 24, flexShrink: 0 }}>
+            {[
+              { label: "Total Records", value: "712", color: "#E8ECF1" },
+              { label: "Open", value: "711", color: "#E8463A" },
+              { label: "Closed", value: "1", color: "#3B82F6" },
+              { label: "Weak Passwords", value: "487", color: "#DC2626" },
+            ].map((s, i) => (
+              <div key={i} style={{ textAlign: "center", minWidth: 80 }}>
+                <div className="hfont" style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: 10, color: t.text35, marginTop: 2 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ SECTION 2: CHARTS ROW ═══ */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 18, animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+
+        {/* Credential Timeline */}
+        <div className="glass" style={{ overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Credential Timeline</div>
+            <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>New exposure records over time</span>
+          </div>
+          <div style={{ padding: "16px 16px 8px" }}>
+            {/* Legend */}
+            <div style={{ display: "flex", gap: 16, marginBottom: 12, paddingLeft: 4 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ width: 10, height: 3, borderRadius: 2, background: "#3B82F6" }} />
+                <span style={{ fontSize: 10, color: t.text40 }}>New Records</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ width: 10, height: 3, borderRadius: 2, background: "#E8463A" }} />
+                <span style={{ fontSize: 10, color: t.text40 }}>Cumulative</span>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={TIMELINE}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={3} tick={{ fontSize: 9, fill: t.text30, fontFamily: "'JetBrains Mono',monospace" }} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} width={34} tick={{ fontSize: 9, fill: t.text30, fontFamily: "'JetBrains Mono',monospace" }} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} width={40} tick={{ fontSize: 9, fill: t.text30, fontFamily: "'JetBrains Mono',monospace" }} />
+                <Tooltip {...ttS} />
+                <Area yAxisId="left" type="monotone" dataKey="count" name="New Records" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.06} strokeWidth={2} dot={false} />
+                <Area yAxisId="right" type="monotone" dataKey="cumulative" name="Cumulative" stroke="#E8463A" fill="#E8463A" fillOpacity={0.04} strokeWidth={2} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Top Alarm Generated Accounts */}
-        <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
-          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Top Alarm Generated Accounts</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <MiniDonut segments={TOP_ACCOUNTS} />
-            <div style={{ flex: 1 }}>
-              {TOP_ACCOUNTS.map((a, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color }} />
-                  <span style={{ fontSize: 11, color: t.text50, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.label}</span>
-                  <span className="mono" style={{ fontSize: 10, color: t.text35 }}>{a.count}</span>
-                </div>
-              ))}
+        {/* Record Statuses */}
+        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Record Statuses</div>
+            <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>{totalRecords} total credential records</span>
+          </div>
+          <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            {/* Donut + percentages */}
+            <div style={{ display: "flex", alignItems: "center", gap: 24, justifyContent: "center", marginBottom: 20 }}>
+              <MiniDonut segments={RECORD_STATUS} size={130} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {RECORD_STATUS.map((s, i) => {
+                  const pct = totalRecords > 0 ? ((s.count / totalRecords) * 100).toFixed(1) : "0";
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: 3, background: s.color }} />
+                      <div>
+                        <div style={{ fontSize: 12, color: t.text60, fontWeight: 600 }}>{s.label}</div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                          <span className="hfont" style={{ fontSize: 18, fontWeight: 800 }}>{s.count}</span>
+                          <span className="mono" style={{ fontSize: 10, color: t.text35 }}>{pct}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Password Strength Distribution */}
+            <div style={{ borderTop: `1px solid ${t.borderSection}`, paddingTop: 16 }}>
+              <div className="mono" style={{ fontSize: 9, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 10 }}>Password Strength Distribution</div>
+              <div style={{ display: "flex", gap: 16 }}>
+                {PW_STRENGTH.map((p, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: p.color, boxShadow: `0 0 6px ${p.color}50` }} />
+                    <span style={{ fontSize: 11, color: t.text50 }}>{p.label}</span>
+                    <span className="mono" style={{ fontSize: 11, color: t.text60, fontWeight: 600 }}>{p.count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ═══ FINDINGS TABLE ═══ */}
-      <div className="glass" style={{ overflow: "hidden", animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
-        {/* Header */}
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flexShrink: 0 }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>
-              {activeData.length} Total Findings
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button className={`tab-btn ${tab === "leaked" ? "on" : ""}`} onClick={() => { setTab("leaked"); setSearchQuery(""); }}>Leaked Credentials</button>
-              <button className={`tab-btn ${tab === "mentions" ? "on" : ""}`} onClick={() => { setTab("mentions"); setSearchQuery(""); }}>Channel Mentions</button>
-            </div>
+      {/* ═══ SECTION 3: BOTTOM ROW ═══ */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+
+        {/* Top Alarm Generated Accounts */}
+        <div className="glass" style={{ overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Top Alarm Generated Accounts</div>
+            <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>Most exposed identities</span>
           </div>
-          <div style={{ position: "relative", flex: 1 }}>
-            <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={tab === "leaked" ? "Search by email or source..." : "Search by asset or platform..."} style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
+          <div style={{ padding: "4px 0" }}>
+            {TOP_ACCOUNTS.map((a, i) => (
+              <div key={i} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr auto auto", gap: 10, alignItems: "center", padding: "14px 20px" }}>
+                {/* Rank */}
+                <div style={{ width: 24, height: 24, borderRadius: 7, background: i === 0 ? "rgba(232,70,58,0.1)" : "rgba(255,255,255,0.03)", border: `1px solid ${i === 0 ? "rgba(232,70,58,0.2)" : "rgba(255,255,255,0.05)"}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span className="mono" style={{ fontSize: 10, fontWeight: 700, color: i === 0 ? "#E8463A" : t.text40 }}>{i + 1}</span>
+                </div>
+                {/* Email + meta */}
+                <div style={{ overflow: "hidden" }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: t.text70, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.label}</div>
+                  <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                    <span style={{ fontSize: 10, color: t.text30 }}>{a.source}</span>
+                    <span style={{ fontSize: 10, color: t.text25 }}>{a.time}</span>
+                  </div>
+                </div>
+                {/* Strength badge */}
+                <span style={{ padding: "3px 8px", borderRadius: 5, fontSize: 9, fontWeight: 600, letterSpacing: "0.04em", background: `${STR_COL[a.strength]}10`, color: STR_COL[a.strength], fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase" }}>{a.strength}</span>
+                {/* Alarm count */}
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={t.text30} strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                  <span className="mono" style={{ fontSize: 11, fontWeight: 700, color: t.text60 }}>{a.count}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <TimeRangeFilter range={range} onRangeChange={setRange} />
-          <ExportButton onClick={() => exportCSV(activeData, tab === "leaked" ? LEAKED_CSV : MENTION_CSV, `identity-${tab}-export.csv`)} />
         </div>
 
-        {/* Leaked Credentials Table */}
-        {tab === "leaked" && (<>
-          <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 1fr 80px 70px 100px 100px 80px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle, alignItems: "center" }}>
-            <Checkbox checked={activeSel.allSelected(pageData)} indeterminate={activeSel.count > 0 && !activeSel.allSelected(pageData)} onChange={() => activeSel.toggleAll(pageData)} />
-            <SortHeader label="Email" field="email" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
-            <SortHeader label="Source" field="source" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
-            <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Password</span>
-            <SortHeader label="Status" field="status" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
-            <SortHeader label="Discovery" field="discoveryDate" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
-            <SortHeader label="Breach" field="breachDate" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
-            <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Alarm</span>
-          </div>
-          {leakedPag.paginate(filteredLeaked).map(r => (
-            <div key={r.id} onClick={() => setSelectedLeakedId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 80px 70px 100px 100px 80px", gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(232,70,58,0.04)" : selectedLeakedId === r.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedLeakedId === r.id ? "3px solid #E8463A" : "3px solid transparent" }}>
-              <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
-              <CopyCell value={r.email} style={{ fontSize: 12, color: t.text60, overflow: "hidden" }}>
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.email}</span>
-              </CopyCell>
-              <CopyCell value={r.source} style={{ overflow: "hidden" }}>
-                <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%" }}>{r.source}</span>
-              </CopyCell>
-              <span className="mono" style={{ fontSize: 11, color: t.text40 }}>{r.password}</span>
-              <span className="tag" style={{ background: r.status === "Open" ? "rgba(22,163,74,0.08)" : "rgba(255,255,255,0.04)", color: r.status === "Open" ? "#16A34A" : "rgba(232,236,241,0.3)", fontSize: 9, display: "inline-flex", alignItems: "center", gap: 3 }}>{r.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
-              <TimeCell date={r.discoveryDate} />
-              <TimeCell date={r.breachDate} />
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#E8463A", fontSize: 9, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
-            </div>
-          ))}
-        </>)}
-
-        {/* Channel Mentions Table */}
-        {tab === "mentions" && (<>
-          <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 100px 1fr 1fr 70px 100px 80px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle, alignItems: "center" }}>
-            <Checkbox checked={activeSel.allSelected(pageData)} indeterminate={activeSel.count > 0 && !activeSel.allSelected(pageData)} onChange={() => activeSel.toggleAll(pageData)} />
-            <SortHeader label="Platform" field="platform" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
-            <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Related Assets</span>
-            <SortHeader label="Source" field="source" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
-            <SortHeader label="Status" field="status" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
-            <SortHeader label="Discovery" field="date" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
-            <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Alarm</span>
-          </div>
-          {mentionPag.paginate(filteredMentions).map(r => (
-            <div key={r.id} onClick={() => setSelectedMentionId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 100px 1fr 1fr 70px 100px 80px", gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(232,70,58,0.04)" : selectedMentionId === r.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedMentionId === r.id ? "3px solid #E8463A" : "3px solid transparent" }}>
-              <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
-              <span style={{ fontSize: 12, color: t.text60 }}>{r.platform}</span>
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                {r.assets.map((a, i) => (
-                  <span key={i} style={{ padding: "3px 8px", borderRadius: 5, fontSize: 10, fontWeight: 500, background: "rgba(21,27,46,0.9)", border: `1px solid ${t.borderStrong}`, color: t.text70, fontFamily: "'JetBrains Mono',monospace" }}>{a}</span>
-                ))}
+        {/* Leaked Credentials / Channel Mentions */}
+        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          {/* Header */}
+          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>Leaked Credentials</span>
+                <span className="mono" style={{ fontSize: 10, color: t.text35 }}>{activeData.length} total</span>
               </div>
-              <CopyCell value={r.source} style={{ overflow: "hidden" }}>
-                <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%" }}>{r.source}</span>
-              </CopyCell>
-              <span className="tag" style={{ background: "rgba(22,163,74,0.08)", color: "#16A34A", fontSize: 9, display: "inline-flex", alignItems: "center", gap: 3 }}>{r.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
-              <TimeCell date={r.date} />
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#E8463A", fontSize: 9, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button className={`tab-btn ${tab === "leaked" ? "on" : ""}`} onClick={() => { setTab("leaked"); setSearchQuery(""); }}>Leaked Credentials</button>
+                <button className={`tab-btn ${tab === "mentions" ? "on" : ""}`} onClick={() => { setTab("mentions"); setSearchQuery(""); }}>Channel Mentions</button>
+              </div>
             </div>
-          ))}
-        </>)}
+            <div style={{ display: "flex", gap: 8, flex: 1, alignItems: "center", minWidth: 0 }}>
+              <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+                <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={tab === "leaked" ? "Search by email or source..." : "Search by asset or platform..."} style={{ width: "100%", padding: "8px 12px 8px 34px", fontSize: 11, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 8, color: t.text, outline: "none" }} />
+              </div>
+              <TimeRangeFilter range={range} onRangeChange={setRange} />
+              <ExportButton onClick={() => exportCSV(activeData, tab === "leaked" ? LEAKED_CSV : MENTION_CSV, `identity-${tab}-export.csv`)} />
+            </div>
+          </div>
 
-        {/* Pagination */}
-        <Pagination
-          page={activePag.page} totalPages={activePag.totalPages} startIdx={activePag.startIdx} endIdx={activePag.endIdx}
-          totalItems={activeData.length} onPrev={activePag.prev} onNext={activePag.next} onGoTo={activePag.goTo}
-          perPage={activePag.perPage} onPerPageChange={activePag.setPerPage}
-        />
-        <BulkActionBar count={activeSel.count} onClear={activeSel.clear} actions={bulkActions} />
+          {/* Leaked Credentials Table */}
+          {tab === "leaked" && (<>
+            <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 1fr 70px 60px 90px 90px 70px", gap: 6, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle, alignItems: "center" }}>
+              <Checkbox checked={activeSel.allSelected(pageData)} indeterminate={activeSel.count > 0 && !activeSel.allSelected(pageData)} onChange={() => activeSel.toggleAll(pageData)} />
+              <SortHeader label="Email" field="email" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
+              <SortHeader label="Source" field="source" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
+              <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Password</span>
+              <SortHeader label="Status" field="status" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
+              <SortHeader label="Discovery" field="discoveryDate" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
+              <SortHeader label="Breach" field="breachDate" sortField={leakedSort.sortField} sortDir={leakedSort.sortDir} onSort={leakedSort.onSort} />
+              <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Alarm</span>
+            </div>
+            {leakedPag.paginate(filteredLeaked).map(r => (
+              <div key={r.id} onClick={() => setSelectedLeakedId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 70px 60px 90px 90px 70px", gap: 6, alignItems: "center", padding: "10px 20px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(232,70,58,0.04)" : selectedLeakedId === r.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedLeakedId === r.id ? "3px solid #E8463A" : "3px solid transparent" }}>
+                <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
+                <CopyCell value={r.email} style={{ fontSize: 11, color: t.text60, overflow: "hidden" }}>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.email}</span>
+                </CopyCell>
+                <CopyCell value={r.source} style={{ overflow: "hidden" }}>
+                  <span style={{ padding: "3px 8px", borderRadius: 5, fontSize: 9, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%" }}>{r.source}</span>
+                </CopyCell>
+                <span className="mono" style={{ fontSize: 10, color: t.text40 }}>{r.password}</span>
+                <span className="tag" style={{ background: r.status === "Open" ? "rgba(22,163,74,0.08)" : "rgba(255,255,255,0.04)", color: r.status === "Open" ? "#16A34A" : "rgba(232,236,241,0.3)", fontSize: 9, display: "inline-flex", alignItems: "center", gap: 3 }}>{r.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
+                <TimeCell date={r.discoveryDate} />
+                <TimeCell date={r.breachDate} />
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#E8463A", fontSize: 9, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
+              </div>
+            ))}
+          </>)}
+
+          {/* Channel Mentions Table */}
+          {tab === "mentions" && (<>
+            <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 80px 1fr 1fr 60px 90px 70px", gap: 6, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle, alignItems: "center" }}>
+              <Checkbox checked={activeSel.allSelected(pageData)} indeterminate={activeSel.count > 0 && !activeSel.allSelected(pageData)} onChange={() => activeSel.toggleAll(pageData)} />
+              <SortHeader label="Platform" field="platform" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
+              <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Related Assets</span>
+              <SortHeader label="Source" field="source" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
+              <SortHeader label="Status" field="status" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
+              <SortHeader label="Discovery" field="date" sortField={mentionSort.sortField} sortDir={mentionSort.sortDir} onSort={mentionSort.onSort} />
+              <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Alarm</span>
+            </div>
+            {mentionPag.paginate(filteredMentions).map(r => (
+              <div key={r.id} onClick={() => setSelectedMentionId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 80px 1fr 1fr 60px 90px 70px", gap: 6, alignItems: "center", padding: "10px 20px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(232,70,58,0.04)" : selectedMentionId === r.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedMentionId === r.id ? "3px solid #E8463A" : "3px solid transparent" }}>
+                <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
+                <span style={{ fontSize: 11, color: t.text60 }}>{r.platform}</span>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {r.assets.map((a, ai) => (
+                    <span key={ai} style={{ padding: "3px 8px", borderRadius: 5, fontSize: 9, fontWeight: 500, background: "rgba(21,27,46,0.9)", border: `1px solid ${t.borderStrong}`, color: t.text70, fontFamily: "'JetBrains Mono',monospace" }}>{a}</span>
+                  ))}
+                </div>
+                <CopyCell value={r.source} style={{ overflow: "hidden" }}>
+                  <span style={{ padding: "3px 8px", borderRadius: 5, fontSize: 9, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%" }}>{r.source}</span>
+                </CopyCell>
+                <span className="tag" style={{ background: "rgba(22,163,74,0.08)", color: "#16A34A", fontSize: 9, display: "inline-flex", alignItems: "center", gap: 3 }}>{r.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
+                <TimeCell date={r.date} />
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#E8463A", fontSize: 9, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
+              </div>
+            ))}
+          </>)}
+
+          {/* Pagination */}
+          <Pagination
+            page={activePag.page} totalPages={activePag.totalPages} startIdx={activePag.startIdx} endIdx={activePag.endIdx}
+            totalItems={activeData.length} onPrev={activePag.prev} onNext={activePag.next} onGoTo={activePag.goTo}
+            perPage={activePag.perPage} onPerPageChange={activePag.setPerPage}
+          />
+          <BulkActionBar count={activeSel.count} onClear={activeSel.clear} actions={bulkActions} />
+        </div>
       </div>
 
       {/* ═══ LEAKED CREDENTIAL DETAIL PANEL ═══ */}
