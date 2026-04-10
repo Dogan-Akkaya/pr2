@@ -1,0 +1,27 @@
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import TopBar from "../components/TopBar";
+import AdminPanel from "../components/AdminPanel";
+import { useData } from "../context/DataContext";
+import { useTheme } from "../context/ThemeContext";
+
+export default function AppLayout() {
+  const { state } = useData();
+  const { t } = useTheme();
+
+  return (
+    <div style={{
+      display: "flex", minHeight: "100vh",
+      background: t.bgBase, color: t.text,
+      fontFamily: "'Satoshi','DM Sans',sans-serif",
+      transition: "background 0.3s, color 0.3s",
+    }}>
+      <Sidebar />
+      <main style={{ flex: 1, overflow: "auto", position: "relative" }}>
+        <TopBar />
+        <Outlet />
+      </main>
+      {state.adminOpen && <AdminPanel />}
+    </div>
+  );
+}
