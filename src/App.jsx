@@ -23,7 +23,6 @@ import ThirdParty from "./pages/ThirdParty";
 import Telegram from "./pages/Telegram";
 import FraudIntelligence from "./pages/FraudIntelligence";
 import InsiderThreat from "./pages/InsiderThreat";
-import LatestDataAdded from "./pages/LatestDataAdded";
 import RFI from "./pages/RFI";
 import Coverage from "./pages/Coverage";
 import BreachIndex from "./pages/BreachIndex";
@@ -57,7 +56,6 @@ export default function App() {
             <Route path="telegram" element={<Telegram />} />
             <Route path="fraud-intelligence" element={<FraudIntelligence />} />
             <Route path="insider-threat" element={<InsiderThreat />} />
-            <Route path="latest-data-added" element={<LatestDataAdded />} />
             <Route path="rfi" element={<RFI />} />
             <Route path="coverage" element={<Coverage />} />
             <Route path="breach-index" element={<BreachIndex />} />

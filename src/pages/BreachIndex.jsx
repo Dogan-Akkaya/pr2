@@ -419,7 +419,7 @@ export default function BreachIndex() {
           background: t.bgInput,
           fontFamily: "'JetBrains Mono', monospace",
         }}>
-          <span>COMPANY</span>
+          <span>NAME</span>
           <span>DATA TYPES & DESCRIPTION</span>
           <span style={{ textAlign: "center" }}>RECORDS</span>
           <span style={{ textAlign: "center" }}>BREACH</span>
