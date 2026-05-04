@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Fragment } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { WORLD_PATHS } from "../data/worldMapPaths";
@@ -356,7 +356,7 @@ function filterByCountry(items, code, key = "country") {
 
 // ═══════════════════════════════════════
 export default function GlobalThreats() {
-  const { t } = useTheme();
+  const { t, mode } = useTheme();
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   const [newsTab, setNewsTab] = useState("darkweb");
@@ -374,8 +374,23 @@ export default function GlobalThreats() {
   ]);
   // Layer 2 — Advanced search chips (single source of truth for filters)
   const [chips, setChips] = useState([]);
-  // Search dropdown
+  // Search dropdown — ref + document listener for reliable click-outside
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchWrapRef = useRef(null);
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onDocPointerDown(e) {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocPointerDown);
+    document.addEventListener("touchstart", onDocPointerDown);
+    return () => {
+      document.removeEventListener("mousedown", onDocPointerDown);
+      document.removeEventListener("touchstart", onDocPointerDown);
+    };
+  }, [searchOpen]);
 
   // Derive filter values from chips so chips are the single source of truth
   const selectedCountry = chips.find(c => c.type === "country")?.value || null;
@@ -473,8 +488,9 @@ export default function GlobalThreats() {
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
       {/* ═══ LAYER 2: ADVANCED SEARCH (chips + freetext + autocomplete dropdown) ═══ */}
-      <div style={{
+      <div ref={searchWrapRef} style={{
         position: "relative",
+        zIndex: searchOpen ? 60 : "auto",
         animation: loaded ? "fadeUp 0.6s 0.05s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
         <div className="glass" style={{
@@ -503,9 +519,8 @@ export default function GlobalThreats() {
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
             onFocus={() => setSearchOpen(true)}
-            onBlur={() => setTimeout(() => setSearchOpen(false), 160)}
             onKeyDown={e => {
-              if (e.key === "Escape") { setSearchOpen(false); setSearchQuery(""); }
+              if (e.key === "Escape") { setSearchOpen(false); setSearchQuery(""); e.currentTarget.blur(); }
               if (e.key === "Backspace" && !searchQuery && chips.length > 0) {
                 setChips(s => s.slice(0, -1));
               }
@@ -530,14 +545,14 @@ export default function GlobalThreats() {
         {/* Autocomplete dropdown */}
         {searchOpen && suggestionResults.length > 0 && (
           <div
-            onMouseDown={e => e.preventDefault()}
             style={{
               position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
-              background: t.bgPanel, backdropFilter: "blur(20px)",
-              border: `1px solid ${t.borderLight}`, borderRadius: 10,
+              // Solid opaque background — was bleeding through to heatmap below
+              background: mode === "dark" ? "#0F1729" : "#FFFFFF",
+              border: `1px solid ${t.borderMed}`, borderRadius: 10,
               maxHeight: 360, overflow: "auto",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
-              zIndex: 30,
+              boxShadow: "0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4)",
+              zIndex: 80,
             }}
           >
             {suggestionResults.map(({ group, items }) => {
