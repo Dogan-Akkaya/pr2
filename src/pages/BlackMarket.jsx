@@ -164,9 +164,9 @@ export default function BlackMarket() {
 
   const pillStyle = (active) => ({
     padding: "5px 14px", borderRadius: 20, border: "none", fontSize: 11, fontWeight: 600,
-    cursor: "pointer", fontFamily: "'Satoshi',sans-serif", transition: "all 0.2s",
-    background: active ? "rgba(232,70,58,0.12)" : "rgba(255,255,255,0.04)",
-    color: active ? "#E8463A" : t.text40,
+    cursor: "pointer", fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
+    background: active ? "rgba(255,69,98,0.12)" : t.bgHover,
+    color: active ? "#FF4562" : t.text40,
   });
 
   return (
@@ -180,8 +180,8 @@ export default function BlackMarket() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Left side */}
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(232,70,58,0.08)", border: "1px solid rgba(232,70,58,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="1.5">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,69,98,0.08)", border: "1px solid rgba(255,69,98,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="1.5">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <path d="M16 10a4 4 0 01-8 0" />
@@ -201,7 +201,7 @@ export default function BlackMarket() {
           {/* Right side: inline stats + export */}
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             {[
-              { label: "Active Listings", value: activeCount, icon: "M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18", color: "#E8463A" },
+              { label: "Active Listings", value: activeCount, icon: "M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18", color: "#FF4562" },
               { label: "Total Value", value: `$${totalValue.toFixed(0)}`, icon: "M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6", color: "#F59E0B" },
               { label: "Critical", value: criticalCount, icon: "M12 9v2m0 4h.01M10.29 3.86l-8.36 14.32A1 1 0 002.78 20h18.44a1 1 0 00.85-1.82L13.71 3.86a1 1 0 00-1.42 0z", color: "#DC2626" },
               { label: "Unique Assets", value: uniqueAssets, icon: "M12 2L4 7v6c0 5.25 3.4 10.15 8 11.35 4.6-1.2 8-6.1 8-11.35V7l-8-5z", color: "#3B82F6" },
@@ -212,7 +212,7 @@ export default function BlackMarket() {
                 </div>
                 <div>
                   <div className="mono" style={{ fontSize: 9, color: t.text25, textTransform: "uppercase" }}>{s.label}</div>
-                  <span className="hfont" style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.value}</span>
+                  <span className="hfont" style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em" }}>{s.value}</span>
                 </div>
               </div>
             ))}
@@ -272,8 +272,8 @@ export default function BlackMarket() {
               <input
                 value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search by asset, source, vendor, or listing ID..."
-                style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none", transition: "border-color 0.2s", boxSizing: "border-box" }}
-                onFocus={e => e.target.style.borderColor = "rgba(232,70,58,0.3)"}
+                style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Inter', sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none", transition: "border-color 0.2s", boxSizing: "border-box" }}
+                onFocus={e => e.target.style.borderColor = "rgba(255,69,98,0.3)"}
                 onBlur={e => e.target.style.borderColor = t.borderLight}
               />
             </div>
@@ -288,8 +288,8 @@ export default function BlackMarket() {
                 className="trow"
                 style={{
                   display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", cursor: "pointer",
-                  background: sel.isSelected(listing.id) ? "rgba(232,70,58,0.04)" : selectedId === listing.id ? "rgba(232,70,58,0.04)" : undefined,
-                  borderLeft: selectedId === listing.id ? "3px solid #E8463A" : "3px solid transparent",
+                  background: sel.isSelected(listing.id) ? "rgba(255,69,98,0.04)" : selectedId === listing.id ? "rgba(255,69,98,0.04)" : undefined,
+                  borderLeft: selectedId === listing.id ? "3px solid #FF4562" : "3px solid transparent",
                   transition: "background 0.15s",
                 }}
               >
@@ -302,12 +302,12 @@ export default function BlackMarket() {
                   background: t.bgHover, border: `1px solid ${t.borderLight}`,
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
                 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.text15} strokeWidth="1.5">
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <path d="M21 15l-5-5L5 21" />
                   </svg>
-                  <span style={{ fontSize: 7, color: t.text20, fontFamily: "'Satoshi',sans-serif" }}>Preview</span>
+                  <span style={{ fontSize: 7, color: t.text20, fontFamily: "'Inter', sans-serif" }}>Preview</span>
                 </div>
 
                 {/* Center content */}
@@ -407,14 +407,14 @@ export default function BlackMarket() {
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text25, fontFamily: "'JetBrains Mono',monospace" }} />
                   <Tooltip
                     contentStyle={{
-                      background: "rgba(12,16,33,0.95)", backdropFilter: "blur(12px)",
-                      border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10,
+                      background: t.bgTooltip, backdropFilter: "blur(12px)",
+                      border: `1px solid ${t.borderMed}`, borderRadius: 10,
                       padding: "8px 12px", fontSize: 11, fontFamily: "'JetBrains Mono',monospace",
                     }}
                     labelStyle={{ color: t.text40, fontSize: 10, marginBottom: 4 }}
-                    itemStyle={{ color: "#E8463A" }}
+                    itemStyle={{ color: "#FF4562" }}
                   />
-                  <Area type="monotone" dataKey="count" stroke="#E8463A" fill="#E8463A" fillOpacity={0.06} strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="count" stroke="#FF4562" fill="#FF4562" fillOpacity={0.06} strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -480,7 +480,7 @@ export default function BlackMarket() {
                 background: t.bgInput, border: `1px solid ${t.borderLight}`,
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
               }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={t.text15} strokeWidth="1.5">
                   <rect x="3" y="3" width="18" height="18" rx="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <path d="M21 15l-5-5L5 21" />
@@ -528,8 +528,8 @@ export default function BlackMarket() {
 
               {/* File info */}
               <div style={{ marginTop: 20, padding: "14px 16px", borderRadius: 12, background: t.bgCard, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(232,70,58,0.08)", border: "1px solid rgba(232,70,58,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" /></svg>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(255,69,98,0.08)", border: "1px solid rgba(255,69,98,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" /></svg>
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: t.text70 }}>{selected.fileName}</div>

@@ -23,6 +23,10 @@ const initialState = {
   expData: DEFAULT_EXP_DATA,
   stats: DEFAULT_STATS,
   adminOpen: false,
+  // Last successful crawler ingest. Seeded at module-load time so the
+  // TopBar freshness reads "n minutes ago" relative to when the user opened
+  // the app, instead of a literal "12 min ago" baked into JSX.
+  lastScanAt: Date.now() - 12 * 60 * 1000,
 };
 
 function dataReducer(state, action) {

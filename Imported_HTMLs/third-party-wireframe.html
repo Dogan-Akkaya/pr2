@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Third-Party Dark Web Threats — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ BANNER ═══ */
+.banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px}
+.banner-icon{width:40px;height:40px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:8px}
+.banner-title .badge{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:20px;flex-shrink:0}
+.bs{text-align:center;min-width:60px}
+.bs-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.bs-val{font-size:18px;font-weight:800;margin-top:1px}
+
+/* ═══ RANSOMWARE ALERT STRIP ═══ */
+.ransom-alert{
+  background:rgba(255,69,98,0.06);border:1px solid rgba(255,69,98,0.18);
+  border-radius:8px;padding:10px 16px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.ransom-alert-icon{font-size:16px;flex-shrink:0}
+.ransom-alert-text{flex:1;font-size:10px}
+.ransom-alert-text strong{color:var(--red)}
+.ransom-alert-time{font-size:8px;color:var(--dim);flex-shrink:0}
+.ransom-alert-action{font-size:9px;color:var(--indigo);font-weight:600;flex-shrink:0;cursor:pointer}
+
+/* ═══ CONTENT LAYOUT ═══ */
+.content{display:flex;gap:12px}
+.main{flex:1;min-width:0}
+.sidebar{width:300px;flex-shrink:0}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;gap:4px;margin-bottom:10px}
+.tab{font-size:9px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(51,65,85,0.3);color:var(--dim);display:flex;align-items:center;gap:4px}
+.tab:hover{color:var(--text)}
+.tab.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+.tab .tab-count{font-size:7px;background:rgba(51,65,85,0.3);padding:1px 5px;border-radius:3px}
+.tab.active .tab-count{background:rgba(99,102,241,0.2);color:var(--indigo)}
+
+/* ═══ FILTER BAR ═══ */
+.filter-bar{display:flex;gap:4px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+.fpill{font-size:8px;font-weight:600;padding:4px 10px;border-radius:5px;border:1px solid rgba(51,65,85,0.3);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:4px}
+.fpill.active{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.25);color:var(--indigo)}
+.fpill .fdot{width:5px;height:5px;border-radius:50%}
+.filter-search{
+  flex:1;min-width:180px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  border-radius:6px;padding:6px 10px;font-size:9px;color:var(--text);font-family:inherit;outline:none;
+}
+.filter-search::placeholder{color:var(--dim)}
+
+/* ═══ WATCHLIST TABLE ═══ */
+.watchlist{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.wl-header{display:flex;padding:8px 14px;font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;border-bottom:1px solid rgba(51,65,85,0.3);background:rgba(15,23,42,0.3)}
+.wl-col-company{width:220px;flex-shrink:0}
+.wl-col-risk{width:80px;flex-shrink:0;text-align:center}
+.wl-col-findings{width:70px;flex-shrink:0;text-align:center}
+.wl-col-signal{flex:1;min-width:0}
+.wl-col-date{width:80px;flex-shrink:0;text-align:right}
+.wl-col-trend{width:60px;flex-shrink:0;text-align:center}
+
+.wl-row{
+  display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(51,65,85,0.08);
+  cursor:pointer;transition:background 0.15s;position:relative;
+}
+.wl-row:hover{background:rgba(99,102,241,0.03)}
+.wl-row:last-child{border-bottom:none}
+.wl-row.selected{background:rgba(99,102,241,0.06)}
+.wl-row.selected::after{content:'';position:absolute;right:0;top:6px;bottom:6px;width:3px;background:var(--indigo);border-radius:3px 0 0 3px}
+
+/* Critical row highlight */
+.wl-row.critical{border-left:3px solid var(--red)}
+.wl-row.high{border-left:3px solid var(--amber)}
+.wl-row.clean{opacity:0.5}
+
+/* Company cell */
+.company-cell{display:flex;align-items:center;gap:8px}
+.company-logo{width:28px;height:28px;border-radius:6px;background:rgba(51,65,85,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:var(--muted)}
+.company-name{font-size:10px;font-weight:700}
+.company-domain{font-size:7px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-top:1px}
+
+/* Risk badge */
+.risk-badge{font-size:7px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block}
+.risk-critical{background:rgba(255,69,98,0.15);color:var(--red)}
+.risk-high{background:rgba(245,158,11,0.15);color:var(--amber)}
+.risk-medium{background:rgba(251,146,60,0.12);color:#FB923C}
+.risk-low{background:rgba(34,197,94,0.1);color:var(--green)}
+.risk-clean{background:rgba(51,65,85,0.15);color:var(--dim)}
+
+/* Findings count */
+.findings-count{font-size:13px;font-weight:800;text-align:center}
+
+/* Signal cell */
+.signal-cell{display:flex;align-items:center;gap:6px;font-size:9px}
+.signal-type{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600;flex-shrink:0}
+.signal-summary{color:#94A3B8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Date cell */
+.signal-date{font-size:8px;color:var(--dim);text-align:right}
+
+/* Trend sparkline */
+.sparkline{display:flex;align-items:flex-end;gap:1px;height:16px;justify-content:center}
+.sparkline span{width:3px;border-radius:1px}
+
+/* Spike indicator */
+.spike{display:inline-flex;align-items:center;gap:2px;font-size:7px;color:var(--red);font-weight:700;background:rgba(255,69,98,0.08);padding:1px 5px;border-radius:3px}
+
+/* Pagination */
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:8px;color:var(--dim);border-top:1px solid rgba(51,65,85,0.15)}
+.page-dots{display:flex;gap:3px}
+.page-dot{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;border:1px solid rgba(51,65,85,0.3);cursor:pointer}
+.page-dot.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ SIDEBAR WIDGETS ═══ */
+.widget{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.widget-label{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.widget-title{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.widget-val{font-size:9px;color:var(--muted);margin-left:auto}
+
+/* Signal type breakdown */
+.stype-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:8px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.stype-row:last-child{border-bottom:none}
+.stype-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.stype-name{flex:1;font-size:9px}
+.stype-bar{width:70px;height:5px;background:rgba(51,65,85,0.2);border-radius:3px;overflow:hidden}
+.stype-bar-fill{height:100%;border-radius:3px}
+.stype-count{width:24px;text-align:right;font-weight:700;font-size:9px}
+
+/* Most at risk */
+.risk-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1);cursor:pointer}
+.risk-row:hover{background:rgba(99,102,241,0.03);margin:0 -14px;padding:5px 14px}
+.risk-row:last-child{border-bottom:none}
+.risk-rank{width:16px;font-size:8px;color:var(--dim);font-weight:700}
+.risk-name{flex:1;font-weight:600}
+.risk-findings{font-weight:700;width:30px;text-align:right}
+
+/* News widget */
+.news-item{padding:6px 0;border-bottom:1px solid rgba(51,65,85,0.1);font-size:9px}
+.news-item:last-child{border-bottom:none}
+.news-vendor{font-size:7px;padding:1px 5px;border-radius:3px;background:rgba(99,102,241,0.1);color:var(--indigo);font-weight:600;display:inline-block;margin-bottom:2px}
+.news-headline{font-weight:500;line-height:1.3}
+.news-meta{font-size:7px;color:var(--dim);margin-top:2px;display:flex;gap:6px;align-items:center}
+.news-type{font-size:6px;padding:1px 5px;border-radius:3px;font-weight:700}
+
+/* Chart placeholder */
+.chart-ph{height:70px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:8px;border:1px dashed rgba(51,65,85,0.3);border-radius:6px;text-align:center}
+
+/* ═══ DETAIL PANEL (SLIDE-IN PREVIEW) ═══ */
+.detail-panel{
+  background:#0d1321;border:1px solid var(--border);border-radius:10px;
+  padding:18px;margin-top:14px;position:relative;
+}
+.detail-close{position:absolute;top:12px;right:14px;color:var(--dim);font-size:14px;cursor:pointer}
+.detail-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(51,65,85,0.2)}
+.detail-logo{width:44px;height:44px;border-radius:8px;background:rgba(51,65,85,0.3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--muted);flex-shrink:0}
+.detail-info{flex:1}
+.detail-name{font-size:16px;font-weight:800}
+.detail-domain{font-size:9px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+.detail-industry{font-size:8px;color:var(--muted);margin-top:1px}
+.detail-trust{text-align:center;flex-shrink:0}
+.trust-circle{
+  width:48px;height:48px;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-size:18px;font-weight:800;
+}
+.trust-score{font-size:8px;color:var(--dim);margin-top:2px}
+
+.detail-kpis{display:flex;gap:6px;margin-bottom:14px}
+.detail-kpi{flex:1;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:6px;padding:8px;text-align:center}
+.detail-kpi-val{font-size:16px;font-weight:800}
+.detail-kpi-label{font-size:6px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-top:1px}
+
+.detail-section-title{font-size:10px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* Signal cards in detail */
+.signal-card{
+  background:rgba(15,23,42,0.4);border:1px solid rgba(51,65,85,0.2);
+  border-radius:6px;padding:10px 12px;margin-bottom:4px;display:flex;align-items:flex-start;gap:8px;
+}
+.signal-sev-bar{width:3px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.signal-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.signal-body{flex:1}
+.signal-title{font-size:9px;font-weight:700;display:flex;align-items:center;gap:6px}
+.signal-title .sev-tag{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px}
+.signal-summary-text{font-size:8px;color:#94A3B8;margin-top:2px}
+.signal-footer{font-size:7px;color:var(--dim);margin-top:3px;display:flex;gap:8px}
+.signal-action{color:var(--indigo);font-size:8px;margin-left:auto;flex-shrink:0;cursor:pointer}
+
+/* News in detail */
+.detail-news{padding:6px 0;border-bottom:1px solid rgba(51,65,85,0.1);font-size:9px}
+.detail-news:last-child{border-bottom:none}
+.detail-news-headline{font-weight:500;line-height:1.3}
+.detail-news-meta{font-size:7px;color:var(--dim);margin-top:2px}
+
+/* ═══ COMPANY SEARCH / REPORT GENERATOR ═══ */
+.company-search{
+  background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(168,85,247,0.04));
+  border:1px solid rgba(99,102,241,0.15);border-radius:12px;
+  padding:18px 22px;margin-bottom:16px;position:relative;overflow:hidden;
+}
+.company-search::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--indigo),var(--purple),transparent)}
+.cs-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.cs-title{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.cs-title .db-badge{font-size:8px;color:var(--purple);background:rgba(168,85,247,0.1);padding:3px 10px;border-radius:5px;font-weight:700;letter-spacing:0.5px}
+.cs-desc{font-size:10px;color:var(--muted);margin-top:3px;max-width:600px}
+.cs-stats{display:flex;gap:12px;flex-shrink:0}
+.cs-stat{text-align:center;padding:6px 12px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:6px}
+.cs-stat-val{font-size:14px;font-weight:800;color:var(--indigo)}
+.cs-stat-label{font-size:6px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-top:1px}
+.cs-bar{display:flex;gap:8px;align-items:center}
+.cs-input{
+  flex:1;padding:12px 16px;border-radius:8px;
+  background:rgba(15,23,42,0.6);border:1px solid rgba(99,102,241,0.2);
+  font-size:12px;color:var(--text);font-family:inherit;outline:none;
+  transition:border-color 0.15s;
+}
+.cs-input:focus{border-color:rgba(99,102,241,0.5)}
+.cs-input::placeholder{color:var(--dim)}
+.cs-btn{
+  padding:12px 22px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--indigo),var(--purple));
+  color:white;font-size:11px;font-weight:700;font-family:inherit;
+  letter-spacing:0.5px;white-space:nowrap;
+}
+.cs-hint{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.cs-hint-label{font-size:7px;color:var(--dim);font-weight:700;letter-spacing:1px}
+.cs-chip{
+  font-size:8px;padding:3px 10px;border-radius:5px;cursor:pointer;
+  background:rgba(15,23,42,0.4);border:1px solid rgba(51,65,85,0.3);
+  color:var(--muted);transition:all 0.15s;
+}
+.cs-chip:hover{border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+THIRD-PARTY DARK WEB THREATS — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+This page is a DARK WEB LENS on the customer's third-party ecosystem.
+It is NOT a copy of Supply Chain Intelligence. It answers:
+"Which of my vendors have dark web exposure right now, and how bad is it?"
+
+DATA SOURCE: ~90% from existing Supply Chain Intelligence APIs.
+Only net-new work: risk level computation, signal type mapping, aggregation.
+
+DEFAULT STATE: "At Risk" tab selected, sorted by dark web risk descending.
+
+LAYOUT: Zone A (banner) + Zone B (watchlist table, ~65%) + Zone D (sidebar, ~35%)
+Zone C (detail panel) slides in when a vendor row is clicked.
+
+COMPONENT HIERARCHY:
+ThirdPartyDarkWebPage
+├── TopBanner (KPIs)
+├── RansomwareAlertStrip (conditional — only if any vendor on leak site)
+├── CompanySearch (50M+ DB, type-ahead, report generation)
+│   ├── SearchInput (debounced, type-ahead with company suggestions)
+│   ├── GenerateReportButton
+│   ├── TrendingChips (companies with recent dark web activity globally)
+│   └── RecentSearchChips (user's last searches, from localStorage)
+├── ContentLayout
+│   ├── MainPanel (~65%)
+│   │   ├── TabBar (All | At Risk | Critical | Recently Affected)
+│   │   ├── FilterBar (risk level, signal type, industry, search)
+│   │   ├── WatchlistTable
+│   │   │   └── VendorRow (logo, name, risk badge, findings, signal, date, trend)
+│   │   └── Pagination
+│   └── SidebarPanel (~35%)
+│       ├── SignalTypeBreakdown
+│       ├── MostAtRiskVendors (top 5)
+│       ├── RecentThirdPartyNews
+│       └── ActivityTimeline (sparkline chart)
+└── VendorDetailPanel (slide-in, Zone C)
+    ├── Header (logo, name, trust score)
+    ├── KPIs (findings, cybercriminal score, under-attack score)
+    ├── ActiveSignals (chronological feed)
+    ├── DarkWebNews (collapsed by default)
+    └── ScoreTrend (collapsed by default, 2 mini charts)
+
+COMPANY SEARCH NOTES:
+- Search queries SOCRadar's 50M+ company database via type-ahead API
+- Suggestions show: company name, domain, logo, industry, country
+- If company is already in the user's watchlist → opens detail panel directly
+- If company is NOT in watchlist → generates an on-demand report with:
+  * Dark web findings scan
+  * Cybercriminal ecosystem assessment
+  * Credential exposure check
+  * Ransomware association check
+  * IAB listing search
+  * Forum mention scan
+  * Overall risk grade (A-F)
+- Report generation may take 5-15 seconds (show loading state)
+- After report loads, offer "Add to Watchlist" action
+- Recent searches persist in localStorage (last 5)
+- Trending chips show companies with high recent dark web activity globally
+  (not user-specific — think "what's hot in the threat landscape")
+
+DATA MODELS:
+
+VendorRow: {
+  id, name, domain, logo_url, industry,
+  cybercriminal_ecosystem_score: number,  // /100
+  organization_under_attack_score: number,  // /100
+  dark_web_risk_level: 'critical'|'high'|'medium'|'low'|'clean',
+  dark_web_findings_count: number,
+  latest_signal: { type, summary, date, severity },
+  trend_30d: number[],  // weekly counts for sparkline
+  trust_score: number, trust_grade: string
+}
+
+Risk level derivation:
+  if either score < 50 → critical
+  if either score < 70 → high
+  if either score < 85 → medium
+  if both >= 85 → low
+  if no findings → clean
+
+VendorSignal: {
+  id, vendor_id,
+  type: 'ransomware_leak'|'credentials_found'|'iab_listing'|
+        'data_breach'|'forum_mention'|'confidential_exposure',
+  severity, date, source, summary, details_url
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">THIRD-PARTY DARK WEB THREATS &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ ZONE A: BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#128279;</div>
+  <div class="banner-info">
+    <div class="banner-title">THIRD-PARTY DARK WEB THREATS <span class="badge" style="background:rgba(255,69,98,0.15);color:var(--red)">14 vendors at risk</span></div>
+    <div class="banner-desc">Dark web exposure across your monitored supply chain</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bs"><div class="bs-label">MONITORED VENDORS</div><div class="bs-val">188</div></div>
+    <div class="bs"><div class="bs-label">VENDORS AT RISK</div><div class="bs-val" style="color:var(--red)">14</div></div>
+    <div class="bs"><div class="bs-label">CRITICAL SIGNALS</div><div class="bs-val" style="color:var(--red)">7</div></div>
+    <div class="bs"><div class="bs-label">NEW THIS WEEK</div><div class="bs-val" style="color:var(--amber)">23</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ RANSOMWARE ALERT STRIP ═══════════ -->
+<!-- CLAUDE CODE: Only render this if any vendor appeared on a ransomware leak site.
+     This is the highest-severity event — it should NOT be buried in the table. -->
+<div class="ransom-alert">
+  <span class="ransom-alert-icon">&#128680;</span>
+  <div class="ransom-alert-text">
+    <strong>Hitachi Ltd</strong> appeared on LockBit's ransomware leak site 2 hours ago. Data publication deadline: 72 hours. <strong>SalesForce Inc</strong> was listed on ALPHV leak site yesterday.
+  </div>
+  <span class="ransom-alert-time">Updated 2h ago</span>
+  <span class="ransom-alert-action">View Details &rarr;</span>
+</div>
+
+<!-- ═══════════ COMPANY SEARCH / REPORT GENERATOR ═══════════ -->
+<!-- CLAUDE CODE: This is a MAJOR feature — not just a filter.
+     Users can search SOCRadar's 50M+ company database to generate
+     a holistic third-party dark web security report for ANY company.
+     The search has type-ahead with company suggestions (name, domain, logo).
+     Selecting a company either:
+     a) Opens the detail panel if the company is already in their watchlist
+     b) Generates an on-demand report if it's a new company (with option to add to watchlist)
+     
+     The report shows: dark web findings, cybercriminal ecosystem score,
+     credential exposure, ransomware associations, IAB listings, forum mentions,
+     and overall risk grade — a holistic security view.
+     
+     Recent searches should persist (localStorage or user preferences).
+     Popular/trending companies can be shown as suggestion chips. -->
+<div class="company-search">
+  <div class="cs-top">
+    <div>
+      <div class="cs-title">&#128269; Search Any Company <span class="db-badge">50M+ companies</span></div>
+      <div class="cs-desc">Look up any organization worldwide and get an instant dark web security report — credential exposure, ransomware associations, IAB listings, forum mentions, and overall risk assessment.</div>
+    </div>
+    <div class="cs-stats">
+      <div class="cs-stat"><div class="cs-stat-val">50M+</div><div class="cs-stat-label">COMPANIES</div></div>
+      <div class="cs-stat"><div class="cs-stat-val">195</div><div class="cs-stat-label">COUNTRIES</div></div>
+      <div class="cs-stat"><div class="cs-stat-val">24/7</div><div class="cs-stat-label">MONITORING</div></div>
+    </div>
+  </div>
+  <div class="cs-bar">
+    <input class="cs-input" type="text" placeholder="Search by company name, domain, or industry... (e.g., Hitachi, salesforce.com, healthcare providers)">
+    <button class="cs-btn">Generate Report</button>
+  </div>
+  <div class="cs-hint">
+    <span class="cs-hint-label">TRENDING:</span>
+    <span class="cs-chip">Snowflake Inc</span>
+    <span class="cs-chip">Change Healthcare</span>
+    <span class="cs-chip">MOVEit (Progress)</span>
+    <span class="cs-hint-label" style="margin-left:8px">RECENT:</span>
+    <span class="cs-chip" style="border-color:rgba(168,85,247,0.2);color:var(--purple)">Hitachi Ltd</span>
+    <span class="cs-chip" style="border-color:rgba(168,85,247,0.2);color:var(--purple)">SalesForce Inc</span>
+  </div>
+</div>
+
+<!-- ═══════════ CONTENT: MAIN + SIDEBAR ═══════════ -->
+<div class="content">
+
+  <!-- ═══ ZONE B: WATCHLIST TABLE ═══ -->
+  <div class="main">
+    <div class="tabs">
+      <span class="tab">All Vendors <span class="tab-count">188</span></span>
+      <span class="tab active">At Risk <span class="tab-count">14</span></span>
+      <span class="tab">Critical <span class="tab-count">3</span></span>
+      <span class="tab">Recently Affected <span class="tab-count">23</span></span>
+    </div>
+
+    <div class="filter-bar">
+      <span class="fpill active"><span class="fdot" style="background:var(--text)"></span>All Risk</span>
+      <span class="fpill"><span class="fdot" style="background:var(--red)"></span>Critical</span>
+      <span class="fpill"><span class="fdot" style="background:var(--amber)"></span>High</span>
+      <span class="fpill"><span class="fdot" style="background:#FB923C"></span>Medium</span>
+      <span class="fpill"><span class="fdot" style="background:var(--green)"></span>Low</span>
+      <input class="filter-search" type="text" placeholder="Search vendor name or domain...">
+    </div>
+
+    <div class="watchlist">
+      <div class="wl-header">
+        <span class="wl-col-company">COMPANY</span>
+        <span class="wl-col-risk">DW RISK</span>
+        <span class="wl-col-findings">FINDINGS</span>
+        <span class="wl-col-signal">LATEST SIGNAL</span>
+        <span class="wl-col-date">DATE</span>
+        <span class="wl-col-trend">TREND</span>
+      </div>
+
+      <!-- Row 1: CRITICAL — Hitachi (ransomware) -->
+      <div class="wl-row critical selected">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo">H</div><div><div class="company-name">Hitachi Ltd</div><div class="company-domain">hitachi.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-critical">CRITICAL</span></div>
+        <div class="wl-col-findings"><span class="findings-count" style="color:var(--red)">164</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(255,69,98,0.12);color:var(--red)">RANSOM</span><span class="signal-summary">Listed on LockBit leak site — 72h deadline</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">2h ago</span></div>
+        <div class="wl-col-trend"><span class="spike">&#9650; +340%</span></div>
+      </div>
+
+      <!-- Row 2: CRITICAL — SalesForce -->
+      <div class="wl-row critical">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(0,136,204,0.15);color:var(--cyan)">SF</div><div><div class="company-name">SalesForce Inc</div><div class="company-domain">salesforce.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-critical">CRITICAL</span></div>
+        <div class="wl-col-findings"><span class="findings-count" style="color:var(--red)">89</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(255,69,98,0.12);color:var(--red)">RANSOM</span><span class="signal-summary">Listed on ALPHV leak site</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">1d ago</span></div>
+        <div class="wl-col-trend"><span class="spike">&#9650; +180%</span></div>
+      </div>
+
+      <!-- Row 3: CRITICAL — Accenture -->
+      <div class="wl-row critical">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(168,85,247,0.15);color:var(--purple)">AC</div><div><div class="company-name">Accenture PLC</div><div class="company-domain">accenture.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-critical">CRITICAL</span></div>
+        <div class="wl-col-findings"><span class="findings-count" style="color:var(--red)">112</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(255,69,98,0.12);color:var(--red)">IAB</span><span class="signal-summary">VPN access for sale on BreachForums — $2,500</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">3d ago</span></div>
+        <div class="wl-col-trend"><div class="sparkline"><span style="height:6px;background:rgba(255,69,98,0.3)"></span><span style="height:8px;background:rgba(255,69,98,0.4)"></span><span style="height:5px;background:rgba(255,69,98,0.3)"></span><span style="height:10px;background:rgba(255,69,98,0.5)"></span><span style="height:14px;background:var(--red)"></span></div></div>
+      </div>
+
+      <!-- Row 4: HIGH — AWS -->
+      <div class="wl-row high">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(245,158,11,0.15);color:var(--amber)">AW</div><div><div class="company-name">Amazon Web Services</div><div class="company-domain">aws.amazon.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-high">HIGH</span></div>
+        <div class="wl-col-findings"><span class="findings-count" style="color:var(--amber)">67</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">CREDS</span><span class="signal-summary">AWS credentials detected — 3 companies affected</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">Yesterday</span></div>
+        <div class="wl-col-trend"><div class="sparkline"><span style="height:8px;background:rgba(245,158,11,0.3)"></span><span style="height:7px;background:rgba(245,158,11,0.3)"></span><span style="height:9px;background:rgba(245,158,11,0.4)"></span><span style="height:8px;background:rgba(245,158,11,0.3)"></span><span style="height:10px;background:var(--amber)"></span></div></div>
+      </div>
+
+      <!-- Row 5: HIGH — Microsoft -->
+      <div class="wl-row high">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(99,102,241,0.15);color:var(--indigo)">MS</div><div><div class="company-name">Microsoft Corp</div><div class="company-domain">microsoft.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-high">HIGH</span></div>
+        <div class="wl-col-findings"><span class="findings-count" style="color:var(--amber)">43</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">CREDS</span><span class="signal-summary">Employee credentials in stealer logs</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">2d ago</span></div>
+        <div class="wl-col-trend"><div class="sparkline"><span style="height:6px;background:rgba(99,102,241,0.3)"></span><span style="height:7px;background:rgba(99,102,241,0.3)"></span><span style="height:6px;background:rgba(99,102,241,0.3)"></span><span style="height:7px;background:rgba(99,102,241,0.3)"></span><span style="height:8px;background:var(--indigo)"></span></div></div>
+      </div>
+
+      <!-- Row 6: MEDIUM — ServiceNow -->
+      <div class="wl-row">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo">SN</div><div><div class="company-name">ServiceNow</div><div class="company-domain">servicenow.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-medium">MEDIUM</span></div>
+        <div class="wl-col-findings"><span class="findings-count">28</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">FORUM</span><span class="signal-summary">Domain mentioned in XSS forum discussion</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">5d ago</span></div>
+        <div class="wl-col-trend"><div class="sparkline"><span style="height:5px;background:rgba(51,65,85,0.3)"></span><span style="height:4px;background:rgba(51,65,85,0.3)"></span><span style="height:6px;background:rgba(51,65,85,0.3)"></span><span style="height:5px;background:rgba(51,65,85,0.3)"></span><span style="height:5px;background:rgba(51,65,85,0.3)"></span></div></div>
+      </div>
+
+      <!-- Row 7: MEDIUM — Cloudflare -->
+      <div class="wl-row">
+        <div class="wl-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(245,158,11,0.1);color:var(--amber)">CF</div><div><div class="company-name">Cloudflare Inc</div><div class="company-domain">cloudflare.com</div></div></div></div>
+        <div class="wl-col-risk"><span class="risk-badge risk-medium">MEDIUM</span></div>
+        <div class="wl-col-findings"><span class="findings-count">19</span></div>
+        <div class="wl-col-signal"><div class="signal-cell"><span class="signal-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">BREACH</span><span class="signal-summary">Confidential docs surfaced on paste site</span></div></div>
+        <div class="wl-col-date"><span class="signal-date">1w ago</span></div>
+        <div class="wl-col-trend"><div class="sparkline"><span style="height:4px;background:rgba(51,65,85,0.3)"></span><span style="height:3px;background:rgba(51,65,85,0.3)"></span><span style="height:5px;background:rgba(51,65,85,0.3)"></span><span style="height:4px;background:rgba(51,65,85,0.3)"></span><span style="height:4px;background:rgba(51,65,85,0.3)"></span></div></div>
+      </div>
+
+      <div class="pagination">
+        <span>Showing 1&ndash;7 of 14 at-risk vendors</span>
+        <div class="page-dots"><span class="page-dot">&lsaquo;</span><span class="page-dot active">1</span><span class="page-dot">2</span><span class="page-dot">&rsaquo;</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ZONE D: SIDEBAR ═══ -->
+  <div class="sidebar">
+    <!-- Signal Type Breakdown -->
+    <div class="widget">
+      <div class="widget-label">SIGNAL TYPE BREAKDOWN</div>
+      <div class="widget-title">Finding distribution</div>
+      <div class="stype-row"><span class="stype-dot" style="background:var(--red)"></span><span class="stype-name">Credentials found</span><div class="stype-bar"><div class="stype-bar-fill" style="width:75%;background:var(--red)"></div></div><span class="stype-count" style="color:var(--red)">312</span></div>
+      <div class="stype-row"><span class="stype-dot" style="background:var(--red)"></span><span class="stype-name">Ransomware leak site</span><div class="stype-bar"><div class="stype-bar-fill" style="width:15%;background:var(--red)"></div></div><span class="stype-count" style="color:var(--red)">4</span></div>
+      <div class="stype-row"><span class="stype-dot" style="background:var(--amber)"></span><span class="stype-name">Forum mentions</span><div class="stype-bar"><div class="stype-bar-fill" style="width:45%;background:var(--amber)"></div></div><span class="stype-count" style="color:var(--amber)">89</span></div>
+      <div class="stype-row"><span class="stype-dot" style="background:var(--amber)"></span><span class="stype-name">Data breach</span><div class="stype-bar"><div class="stype-bar-fill" style="width:30%;background:var(--amber)"></div></div><span class="stype-count">34</span></div>
+      <div class="stype-row"><span class="stype-dot" style="background:var(--indigo)"></span><span class="stype-name">IAB listings</span><div class="stype-bar"><div class="stype-bar-fill" style="width:12%;background:var(--indigo)"></div></div><span class="stype-count">8</span></div>
+      <div class="stype-row"><span class="stype-dot" style="background:var(--purple)"></span><span class="stype-name">Confidential exposure</span><div class="stype-bar"><div class="stype-bar-fill" style="width:20%;background:var(--purple)"></div></div><span class="stype-count">21</span></div>
+    </div>
+
+    <!-- Most at Risk -->
+    <div class="widget">
+      <div class="widget-label">MOST AT-RISK VENDORS</div>
+      <div class="widget-title">Top 5 by dark web exposure</div>
+      <div class="risk-row"><span class="risk-rank">1</span><span class="risk-name">Hitachi Ltd</span><span class="risk-badge risk-critical" style="font-size:6px;padding:1px 5px">CRIT</span><span class="risk-findings" style="color:var(--red)">164</span></div>
+      <div class="risk-row"><span class="risk-rank">2</span><span class="risk-name">Accenture PLC</span><span class="risk-badge risk-critical" style="font-size:6px;padding:1px 5px">CRIT</span><span class="risk-findings" style="color:var(--red)">112</span></div>
+      <div class="risk-row"><span class="risk-rank">3</span><span class="risk-name">SalesForce Inc</span><span class="risk-badge risk-critical" style="font-size:6px;padding:1px 5px">CRIT</span><span class="risk-findings" style="color:var(--red)">89</span></div>
+      <div class="risk-row"><span class="risk-rank">4</span><span class="risk-name">Amazon Web Services</span><span class="risk-badge risk-high" style="font-size:6px;padding:1px 5px">HIGH</span><span class="risk-findings" style="color:var(--amber)">67</span></div>
+      <div class="risk-row"><span class="risk-rank">5</span><span class="risk-name">Microsoft Corp</span><span class="risk-badge risk-high" style="font-size:6px;padding:1px 5px">HIGH</span><span class="risk-findings" style="color:var(--amber)">43</span></div>
+    </div>
+
+    <!-- Recent Third-Party News -->
+    <div class="widget">
+      <div class="widget-label">RECENT THIRD-PARTY NEWS</div>
+      <div class="widget-title">Dark web &amp; ransomware <span class="widget-val">5 articles</span></div>
+      <div class="news-item">
+        <span class="news-vendor">Hitachi</span>
+        <div class="news-headline">LockBit claims breach of Hitachi subsidiary, threatens data release</div>
+        <div class="news-meta"><span class="news-type" style="background:rgba(255,69,98,0.12);color:var(--red)">RANSOMWARE</span><span>2h ago</span></div>
+      </div>
+      <div class="news-item">
+        <span class="news-vendor">SalesForce</span>
+        <div class="news-headline">ALPHV/BlackCat lists SalesForce on leak site with sample data</div>
+        <div class="news-meta"><span class="news-type" style="background:rgba(255,69,98,0.12);color:var(--red)">RANSOMWARE</span><span>1d ago</span></div>
+      </div>
+      <div class="news-item">
+        <span class="news-vendor">Accenture</span>
+        <div class="news-headline">Access broker offers VPN credentials to Accenture network</div>
+        <div class="news-meta"><span class="news-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">DARK WEB</span><span>3d ago</span></div>
+      </div>
+      <div style="text-align:center;margin-top:6px"><span class="link">View All News &rarr;</span></div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="widget">
+      <div class="widget-label">SUPPLY CHAIN ACTIVITY</div>
+      <div class="widget-title">Findings volume (30d)</div>
+      <div class="chart-ph">[Area Chart]<br>Dark web findings across all vendors<br>Last 30 days &middot; Daily granularity</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ZONE C: VENDOR DETAIL PANEL (PREVIEW) ═══════════ -->
+<!-- CLAUDE CODE: This slides in from the right when a row is clicked.
+     In production, this overlays the sidebar. Show here as inline preview. -->
+<div class="detail-panel">
+  <span class="detail-close">&times;</span>
+  <div style="font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:8px">VENDOR DETAIL &middot; SLIDE-IN PANEL PREVIEW</div>
+
+  <div class="detail-header">
+    <div class="detail-logo">H</div>
+    <div class="detail-info">
+      <div class="detail-name">Hitachi Ltd</div>
+      <div class="detail-domain">hitachi.com</div>
+      <div class="detail-industry">Computer Systems Design Services &middot; Japan</div>
+    </div>
+    <div class="detail-trust">
+      <div class="trust-circle" style="background:rgba(255,69,98,0.12);color:var(--red);border:2px solid rgba(255,69,98,0.3)">D</div>
+      <div class="trust-score">62 / 100</div>
+    </div>
+  </div>
+
+  <div class="detail-kpis">
+    <div class="detail-kpi"><div class="detail-kpi-val" style="color:var(--red)">164</div><div class="detail-kpi-label">DW FINDINGS</div></div>
+    <div class="detail-kpi"><div class="detail-kpi-val" style="color:var(--red)">38</div><div class="detail-kpi-label">CYBERCRIMINAL SCORE</div></div>
+    <div class="detail-kpi"><div class="detail-kpi-val" style="color:var(--red)">25</div><div class="detail-kpi-label">UNDER ATTACK SCORE</div></div>
+    <div class="detail-kpi"><div class="detail-kpi-val" style="color:var(--amber)">45</div><div class="detail-kpi-label">CONFIDENTIAL EXP.</div></div>
+  </div>
+
+  <div class="detail-section-title">&#128276; Active Dark Web Signals <span style="font-size:8px;color:var(--dim);font-weight:400">12 active</span></div>
+
+  <div class="signal-card">
+    <div class="signal-sev-bar" style="background:var(--red)"></div>
+    <span class="signal-icon">&#128680;</span>
+    <div class="signal-body">
+      <div class="signal-title">Ransomware Leak Site <span class="sev-tag tag-crit">CRITICAL</span></div>
+      <div class="signal-summary-text">Listed on LockBit 4.0 leak site. Data publication deadline: 72 hours. Proof-of-data published including internal directories.</div>
+      <div class="signal-footer"><span>LockBit Leak Site</span><span>2 hours ago</span></div>
+    </div>
+    <span class="signal-action">View &rarr;</span>
+  </div>
+
+  <div class="signal-card">
+    <div class="signal-sev-bar" style="background:var(--red)"></div>
+    <span class="signal-icon">&#128274;</span>
+    <div class="signal-body">
+      <div class="signal-title">Credentials Found <span class="sev-tag tag-crit">CRITICAL</span></div>
+      <div class="signal-summary-text">47 employee credentials detected across Russian Market and Genesis Market stealer logs in the last 30 days.</div>
+      <div class="signal-footer"><span>Russian Market, Genesis</span><span>3 days ago</span></div>
+    </div>
+    <span class="signal-action">View &rarr;</span>
+  </div>
+
+  <div class="signal-card">
+    <div class="signal-sev-bar" style="background:var(--amber)"></div>
+    <span class="signal-icon">&#128187;</span>
+    <div class="signal-body">
+      <div class="signal-title">IAB Listing <span class="sev-tag tag-high">HIGH</span></div>
+      <div class="signal-summary-text">RDP access to Hitachi subsidiary being sold on BreachForums for $1,800. Seller has 4.3★ rating.</div>
+      <div class="signal-footer"><span>BreachForums</span><span>1 week ago</span></div>
+    </div>
+    <span class="signal-action">View &rarr;</span>
+  </div>
+
+  <div class="signal-card">
+    <div class="signal-sev-bar" style="background:var(--indigo)"></div>
+    <span class="signal-icon">&#128172;</span>
+    <div class="signal-body">
+      <div class="signal-title">Forum Mention <span class="sev-tag tag-med">MEDIUM</span></div>
+      <div class="signal-summary-text">Company name mentioned in XSS Forum thread discussing potential targets in Japanese manufacturing sector.</div>
+      <div class="signal-footer"><span>XSS Forum</span><span>2 weeks ago</span></div>
+    </div>
+    <span class="signal-action">View &rarr;</span>
+  </div>
+
+  <!-- Dark Web News (collapsed by default) -->
+  <div style="margin-top:12px">
+    <div class="detail-section-title" style="cursor:pointer">&#128240; Dark Web News <span style="font-size:8px;color:var(--dim);font-weight:400">3 articles</span> <span style="margin-left:auto;color:var(--dim);font-size:10px">&#9660;</span></div>
+    <div class="detail-news">
+      <div class="detail-news-headline">LockBit claims breach of Hitachi subsidiary, threatens data release within 72 hours</div>
+      <div class="detail-news-meta"><span class="news-type" style="background:rgba(255,69,98,0.12);color:var(--red)">RANSOMWARE</span> &middot; 2h ago &middot; <span class="link">Read &rarr;</span></div>
+    </div>
+    <div class="detail-news">
+      <div class="detail-news-headline">Hitachi employee data appears in massive stealer log dump on Russian Market</div>
+      <div class="detail-news-meta"><span class="news-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">DARK WEB</span> &middot; 3d ago &middot; <span class="link">Read &rarr;</span></div>
+    </div>
+  </div>
+
+  <!-- Score Trend (collapsed by default) -->
+  <div style="margin-top:12px">
+    <div class="detail-section-title" style="cursor:pointer">&#128200; Score Trend (6 months) <span style="margin-left:auto;color:var(--dim);font-size:10px">&#9654;</span></div>
+    <div style="font-size:8px;color:var(--dim)">Cybercriminal Ecosystem &amp; Organization Under Attack trend lines &middot; Click to expand</div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.25)"></span>Zone A: Banner</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.08);border:1px solid rgba(255,69,98,0.15)"></span>Ransomware Alert (conditional)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15)"></span>Company Search (50M+ DB)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Zone B: Watchlist (~65%)</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.15)"></span>Zone D: Sidebar (~35%)</span>
+    <span><span class="lsw" style="background:rgba(13,19,33,1);border:1px solid rgba(51,65,85,0.4)"></span>Zone C: Detail Panel (slide-in)</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -8,7 +8,7 @@ This is NOT a marketing website. It is a web-hosted platform (SaaS app) used dai
 ## Design System
 
 ### Colors
-- **Primary accent:** `#E8463A` (SOCRadar red) — used for CTAs, active states, severity indicators, accent text
+- **Primary accent:** `#FF4562` (SOCRadar red) — used for CTAs, active states, severity indicators, accent text
 - **Alternate accent:** `#FF4562` — used in Brief Room / Labs products
 - **Background (content area):** `#0C1021` (deep navy-black)
 - **Sidebar background:** `#151B2E` (dark navy) — DO NOT CHANGE, keep existing SOCRadar nav shell
@@ -91,7 +91,7 @@ The signature visual element. A canvas-based particle system that:
 #### Sidebar
 - Width: 220px, fixed, kept AS-IS from existing SOCRadar platform
 - Dark navy (#151B2E), icon + text nav items
-- Active state: red tint background, #E8463A text
+- Active state: red tint background, #FF4562 text
 - zIndex: 30 (above smoke)
 
 #### Top Bar

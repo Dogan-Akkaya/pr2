@@ -277,8 +277,8 @@ function MiniDonut({ groups, size = 140, t }) {
           onMouseLeave={e => e.currentTarget.style.opacity = "0.85"}
         />
       ))}
-      <circle cx={cx} cy={cy} r={innerR} fill="#0C1021" />
-      <text x={cx} y={cy - 4} textAnchor="middle" fill={t.text} fontSize="14" fontWeight="800" fontFamily="'Plus Jakarta Sans',sans-serif">{(total / 1000).toFixed(1)}K</text>
+      <circle cx={cx} cy={cy} r={innerR} fill={t.bgBase} />
+      <text x={cx} y={cy - 4} textAnchor="middle" fill={t.text} fontSize="14" fontWeight="800" fontFamily="'Red Hat Display', sans-serif">{(total / 1000).toFixed(1)}K</text>
       <text x={cx} y={cy + 12} textAnchor="middle" fill={t.text35} fontSize="8" fontFamily="'JetBrains Mono',monospace" textTransform="uppercase">TOTAL</text>
     </svg>
   );
@@ -310,7 +310,7 @@ function NewsCard({ item, isActive, onClick, t }) {
           </svg>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "inline-flex", padding: "2px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600, background: "rgba(168,85,247,0.12)", color: "#A855F7", marginBottom: 5, fontFamily: "'Satoshi',sans-serif" }}>Ransomware News</div>
+          <div style={{ display: "inline-flex", padding: "2px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600, background: "rgba(168,85,247,0.12)", color: "#A855F7", marginBottom: 5, fontFamily: "'Inter', sans-serif" }}>Ransomware News</div>
           <div style={{ fontSize: 12, fontWeight: 500, lineHeight: 1.4, color: t.text70, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.title}</div>
           <div className="mono" style={{ fontSize: 9, color: t.text25 }}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4, verticalAlign: "middle" }}><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
@@ -337,9 +337,13 @@ export default function RansomwareNews() {
   const [selectedId, setSelectedId] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAll, setShowAll] = useState(true);
-  const [selIndustries, setSelIndustries] = useState(new Set());
+  // Default the industry filter to the customer's profile sector ("Finance")
+  // so the page opens framed as "ransomware in your sector". They can clear it.
+  const YOUR_SECTORS = ["Finance"];
+  const [selIndustries, setSelIndustries] = useState(new Set(YOUR_SECTORS));
   const [selCountries, setSelCountries] = useState(new Set());
   const [selGroups, setSelGroups] = useState(new Set());
+  const [yoursLensActive, setYoursLensActive] = useState(true);
   const [insightsExpanded, setInsightsExpanded] = useState(true);
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
@@ -416,7 +420,7 @@ export default function RansomwareNews() {
           </div>
           <div style={{ padding: "10px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{ fontSize: 12, color: t.text50 }}>Attacks This Month:</span>
-            <span className="hfont" style={{ fontSize: 20, fontWeight: 800, color: "#A855F7" }}>312</span>
+            <span className="hfont" style={{ fontSize: 20, fontWeight: 700, color: "#A855F7" }}>312</span>
           </div>
         </div>
 
@@ -463,7 +467,7 @@ export default function RansomwareNews() {
               <span style={{ fontSize: 11, color: t.text40 }}>{s.label}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span className="hfont" style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.value}</span>
+              <span className="hfont" style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" }}>{s.value}</span>
               <span className="mono" style={{ fontSize: 10, color: "#10B981" }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ verticalAlign: "middle", marginRight: 2 }}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /></svg>
                 {s.trend}
@@ -509,8 +513,30 @@ export default function RansomwareNews() {
             <span style={{ fontSize: 11, color: showAll ? t.text70 : t.text40 }}>Show All</span>
           </div>
 
+          {/* Yours-sector lens — primary lens bridge */}
+          <button
+            onClick={() => {
+              const next = !yoursLensActive;
+              setYoursLensActive(next);
+              setSelIndustries(next ? new Set(YOUR_SECTORS) : new Set());
+            }}
+            title={yoursLensActive ? "Click to clear · show all sectors" : "Click to filter to your sector (Finance)"}
+            style={{
+              padding: "6px 11px", borderRadius: 8,
+              border: `1px solid ${yoursLensActive ? "rgba(255,69,98,0.32)" : t.borderLight}`,
+              background: yoursLensActive ? "rgba(255,69,98,0.10)" : "transparent",
+              color: yoursLensActive ? "#FF4562" : t.text40,
+              fontSize: 10, fontWeight: 700, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              fontFamily: "'Inter', sans-serif", letterSpacing: "0.04em",
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF4562" }} />
+            Your sector ({YOUR_SECTORS.join(" + ")})
+          </button>
+
           {/* Filter dropdowns */}
-          <FilterDropdown label="Industries" options={ALL_INDUSTRIES} selected={selIndustries} onSelectionChange={setSelIndustries} accentColor="#A855F7" />
+          <FilterDropdown label="Industries" options={ALL_INDUSTRIES} selected={selIndustries} onSelectionChange={(next) => { setSelIndustries(next); setYoursLensActive(false); }} accentColor="#A855F7" />
           <FilterDropdown label="Countries" options={ALL_COUNTRIES} selected={selCountries} onSelectionChange={setSelCountries} accentColor="#A855F7" />
           <FilterDropdown label="Ransomware Groups" options={ALL_GROUPS} selected={selGroups} onSelectionChange={setSelGroups} accentColor="#A855F7" total={126} />
 
@@ -535,7 +561,7 @@ export default function RansomwareNews() {
               onChange={e => setSearchQuery(e.target.value)}
               style={{
                 width: "100%", padding: "7px 12px 7px 30px", fontSize: 11,
-                fontFamily: "'Satoshi',sans-serif", background: t.bgInput,
+                fontFamily: "'Inter', sans-serif", background: t.bgInput,
                 border: `1px solid ${t.borderLight}`, borderRadius: 8,
                 color: t.text, outline: "none", transition: "border-color 0.2s",
               }}
@@ -635,7 +661,7 @@ export default function RansomwareNews() {
                   background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.2)",
                   display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <svg width="16" height="16" viewBox="0 0 28 28"><circle cx="14" cy="14" r="6" fill="#A855F7" opacity="0.85" /><circle cx="14" cy="14" r="2.5" fill="#0C1021" /></svg>
+                  <svg width="16" height="16" viewBox="0 0 28 28"><circle cx="14" cy="14" r="6" fill="#A855F7" opacity="0.85" /><circle cx="14" cy="14" r="2.5" fill={t.bgBase} /></svg>
                 </div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "#A855F7" }}>SOCRadar</div>
@@ -649,7 +675,7 @@ export default function RansomwareNews() {
                       padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(168,85,247,0.15)",
                       background: "rgba(168,85,247,0.06)", cursor: "pointer",
                       fontSize: 10, fontWeight: 500, color: "#A855F7",
-                      fontFamily: "'Satoshi',sans-serif", display: "flex", alignItems: "center", gap: 4,
+                      fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 4,
                       transition: "all 0.15s",
                     }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(168,85,247,0.12)"}

@@ -11,8 +11,8 @@ A **frontend-only prototype** of SOCRadar's Advanced Dark Web Monitoring product
 - **Canvas API** for smoke particle effects
 - **All custom styling** — no component libraries (no MUI, no shadcn, no Chakra, no Tailwind)
 - **Inline styles** for component-specific styling + **global.css** for shared classes
-- **Google Fonts**: Plus Jakarta Sans, JetBrains Mono, DM Sans
-- **Fontshare**: Satoshi
+- **Google Fonts**: Red Hat Display (headlines), Inter (body), JetBrains Mono (data)
+- **Brand source**: https://socradar.io/brand-guideline/
 
 ## Page Architecture
 
@@ -42,28 +42,35 @@ A **frontend-only prototype** of SOCRadar's Advanced Dark Web Monitoring product
 
 Full reference in `CLAUDE-socradar-rules.md`. Below are the **enforced patterns** extracted from the built pages.
 
-## Colors (STRICT — do not deviate)
+## Colors — Official Brand (https://socradar.io/brand-guideline/)
 
-### Backgrounds
-- Page background: `#0C1021`
-- Sidebar: `#151B2E` (NEVER change)
-- Top bar: `rgba(12,16,33,0.92)` + `blur(16px)`
-- Glass card: `rgba(255,255,255,0.02)`
-- Glass card small: `rgba(255,255,255,0.025)`
-- Input fields: `rgba(255,255,255,0.03)` or `rgba(255,255,255,0.04)`
+### Brand Palette
+- **Energetic Coral**: `#FF4562` (primary accent — buttons, links, active states)
+- **Deep Night Blue**: `#1B1B3C` (page background)
+- **Pure White**: `#FFFFFF` (light surfaces, search bars)
+- Coral tones: `#FFD1DB` (lightest) → `#99293C` (darkest)
+- Night Blue tones: `#8D8DA2` → `#0D0D1C` (sidebar background)
+- Apply via `t.brandCoral`, `t.brandNight`, `t.brandNightDeep` from ThemeContext
 
-### Brand & Severity
-- SOCRadar red (primary accent): `#E8463A`
-- Alternate accent: `#FF4562` (Brief Room/Labs)
+### Backgrounds (consume via theme tokens)
+- Page background (dark): `t.bgBase` = `#1B1B3C`
+- Sidebar (dark): `t.bgSidebar` = `#0D0D1C`
+- Top bar: `t.bgTopbar` (frosted glass)
+- Glass card: `t.bgCard`
+- Input fields: `t.bgInput`
+
+### Severity (semantic, not brand — DO NOT change)
 - Critical: `#DC2626`
 - High: `#EA580C`
 - Medium/Warning: `#CA8A04`
 - Low/Safe: `#16A34A`
+
+### Other accents (chart data, status)
 - Info/Config: `#3B82F6`
 - Financial/Warning: `#F59E0B`
-- Purple (accent): `#A855F7`
-- Teal (accent): `#06B6D4`
-- Green (accent): `#10B981`
+- Purple: `#A855F7`
+- Teal: `#06B6D4`
+- Green: `#10B981`
 
 ### Text Opacity Tiers (based on `#E8ECF1`)
 | Tier | Value | Usage |
@@ -81,21 +88,30 @@ Full reference in `CLAUDE-socradar-rules.md`. Below are the **enforced patterns*
 - Row separator: `rgba(255,255,255,0.02)` (between data rows)
 - Section divider: `rgba(255,255,255,0.03)` or `rgba(255,255,255,0.04)`
 
-## Typography (STRICTLY enforced)
+## Typography — Official Brand
+
+Per https://socradar.io/brand-guideline/ — **Red Hat Display** for headlines, **Inter** for body.
+JetBrains Mono is retained for monospace data tables (functional choice; brand guide doesn't specify a mono face).
 
 | Role | Font | Weight | Size | Extra |
 |------|------|--------|------|-------|
-| Page title | Plus Jakarta Sans (`.hfont`) | 700 | 16px | — |
-| Section heading | Plus Jakarta Sans | 700-800 | 14-22px | letterSpacing: -0.02em |
-| Hero heading | Plus Jakarta Sans | 800 | 26px | letterSpacing: -0.03em |
-| Stat value | Plus Jakarta Sans | 800 | 24px | letterSpacing: -0.02em |
-| Body text | Satoshi (default) | 400-500 | 12-13px | — |
+| H1 / Page title | Red Hat Display (`.hfont`) | 500 | 32px | — |
+| H2 / Section heading | Inter | 600 | 20px | letterSpacing: -0.02em |
+| H3 / Sub-heading | Inter | 700 | 16px | — |
+| H4 / Card heading | Inter | 700 | 14px | — |
+| Hero heading | Red Hat Display (`.hfont`) | 700 | 26px | letterSpacing: -0.03em |
+| Stat value | Red Hat Display (`.hfont`) | 700 | 24px | letterSpacing: -0.02em |
+| Body text | Inter (default via AppLayout) | 400 | 13-14px | — |
+| Body de-emphasized | Inter | 300 | 14px | — |
+| Label | Inter | 400 | 12px | — |
 | Section label | JetBrains Mono (`.mono`) | 400 | 10px | uppercase, letterSpacing: 0.08em |
 | Data values | JetBrains Mono | 400-500 | 10-12px | — |
 | Table header | JetBrains Mono | 400 | 9px | uppercase, ghost color |
-| Button text | Satoshi or Plus Jakarta Sans | 600-700 | 11-14px | — |
+| Button text | Inter | 600-700 | 11-14px | — |
 
-**NEVER use**: Inter, Roboto, Arial, system fonts, Space Grotesk, Syne
+**Red Hat Display weight cap: 700.** Brand guide allows Medium 500, Semibold 600, Bold 700 only.
+
+**NEVER use**: Plus Jakarta Sans, Satoshi, DM Sans, Roboto, Arial, system-ui, Space Grotesk, Syne, Inter Tight
 
 ## Layout Architecture
 
@@ -255,7 +271,7 @@ Used for detail views and forms (AdminPanel, Add Asset, Black Market Detail):
 ## Buttons
 | Type | Background | Color | Shadow |
 |------|-----------|-------|--------|
-| Primary (CTA) | `#E8463A` | `#fff` | `0 4px 16px rgba(232,70,58,0.3)` |
+| Primary (CTA) | `#FF4562` | `#fff` | `0 4px 16px rgba(255,69,98,0.3)` |
 | Secondary | `rgba(255,255,255,0.04)` | `rgba(232,236,241,0.65)` | none |
 | Danger | `rgba(220,38,38,0.06)` | `#DC2626` | none |
 | Icon (32x32) | `rgba(255,255,255,0.04)` | varies | none |

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Insider Threat Monitor — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ STATUS BANNER ═══ */
+.status-clean{
+  background:linear-gradient(135deg,rgba(34,197,94,0.06),rgba(34,197,94,0.02));
+  border:1px solid rgba(34,197,94,0.18);border-radius:14px;padding:20px 24px;
+  margin-bottom:18px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;
+}
+.status-clean::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--green);border-radius:14px 0 0 14px}
+.status-icon{width:56px;height:56px;border-radius:50%;background:rgba(34,197,94,0.1);border:2px solid rgba(34,197,94,0.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.status-info{flex:1}
+.status-title{font-size:16px;font-weight:800;color:var(--green)}
+.status-sub{font-size:10px;color:var(--muted);margin-top:3px;max-width:600px;line-height:1.5}
+.status-meta{display:flex;gap:16px;margin-top:8px;font-size:8px;color:var(--dim)}
+.status-meta span{display:flex;align-items:center;gap:3px}
+.status-meta strong{color:var(--text)}
+.status-export{flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.export-btn{font-size:8px;font-weight:600;padding:6px 14px;border-radius:6px;border:1px solid rgba(99,102,241,0.3);background:rgba(99,102,241,0.06);color:var(--indigo);cursor:pointer}
+
+/* Alert state */
+.status-alert{
+  background:linear-gradient(135deg,rgba(255,69,98,0.1),rgba(255,69,98,0.03));
+  border:1px solid rgba(255,69,98,0.25);border-radius:14px;padding:20px 24px;
+  margin-bottom:12px;position:relative;overflow:hidden;
+}
+.status-alert::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red);border-radius:14px 0 0 14px}
+.status-alert .status-icon{background:rgba(255,69,98,0.1);border-color:rgba(255,69,98,0.3)}
+.status-alert .status-title{color:var(--red)}
+
+/* Alert cards */
+.alert-card{
+  background:rgba(255,69,98,0.04);border:1px solid rgba(255,69,98,0.15);
+  border-radius:10px;padding:14px 16px;margin-bottom:8px;position:relative;
+}
+.alert-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red);border-radius:10px 0 0 10px}
+.alert-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.alert-source{display:flex;align-items:center;gap:6px;font-size:9px}
+.alert-source-badge{font-size:7px;padding:2px 8px;border-radius:4px;font-weight:700}
+.alert-source-forum{background:rgba(168,85,247,0.12);color:var(--purple)}
+.alert-source-tg{background:rgba(0,136,204,0.12);color:var(--cyan)}
+.alert-actor{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--amber)}
+.alert-date{font-size:8px;color:var(--dim)}
+.alert-sev{font-size:7px;font-weight:700;padding:3px 10px;border-radius:4px;background:rgba(255,69,98,0.15);color:var(--red)}
+.alert-text{
+  font-size:10px;line-height:1.6;padding:10px 12px;margin-bottom:8px;
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:6px;
+  font-family:'JetBrains Mono',monospace;color:#d4d4d8;
+}
+.alert-text em{color:var(--red);font-style:normal;font-weight:700;background:rgba(255,69,98,0.08);padding:0 2px;border-radius:2px}
+.alert-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.alert-pill{font-size:7px;padding:3px 8px;border-radius:4px;font-weight:600}
+.alert-actions{display:flex;gap:6px}
+.alert-action{font-size:8px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid rgba(51,65,85,0.3);color:var(--muted)}
+.alert-action.primary{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ LANDSCAPE STATS ═══ */
+.stats-row{display:flex;gap:8px;margin-bottom:18px}
+.stat-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center}
+.stat-val{font-size:22px;font-weight:800}
+.stat-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-top:2px}
+.stat-highlight{border-color:rgba(255,69,98,0.2);background:rgba(255,69,98,0.03)}
+
+/* ═══ CONTENT LAYOUT ═══ */
+.content{display:flex;gap:12px;margin-bottom:18px}
+.feed-col{flex:1;min-width:0}
+.side-col{width:300px;flex-shrink:0}
+
+/* ═══ FILTER BAR ═══ */
+.filter-bar{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.fpill{font-size:7px;font-weight:600;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:3px}
+.fpill.active{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.25);color:var(--indigo)}
+.filter-sep{width:1px;height:18px;background:rgba(51,65,85,0.3);margin:0 2px}
+.filter-search{
+  flex:1;min-width:180px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  border-radius:6px;padding:6px 10px;font-size:9px;color:var(--text);font-family:inherit;outline:none;
+}
+.filter-search::placeholder{color:var(--dim)}
+
+/* ═══ LANDSCAPE POST CARDS ═══ */
+.post-card{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:14px;margin-bottom:6px;
+}
+.post-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.post-source{display:flex;align-items:center;gap:6px}
+.post-source-badge{font-size:7px;padding:2px 8px;border-radius:4px;font-weight:700}
+.post-actor{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--amber);display:flex;align-items:center;gap:4px}
+.post-actor-rep{font-size:7px;color:var(--dim);background:rgba(51,65,85,0.3);padding:1px 5px;border-radius:3px}
+.post-date{font-size:8px;color:var(--dim)}
+.post-text{
+  font-size:9px;line-height:1.6;padding:10px 12px;margin-bottom:8px;
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.2);border-radius:6px;
+  font-family:'JetBrains Mono',monospace;color:#94A3B8;
+}
+.post-text .redacted{color:var(--red);font-weight:600}
+.post-screenshot{
+  width:100%;height:80px;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.2);
+  border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;
+  font-size:8px;color:var(--dim);cursor:pointer;
+}
+.post-screenshot:hover{border-color:rgba(99,102,241,0.3)}
+.post-tags{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px}
+.post-tag{font-size:6px;padding:2px 6px;border-radius:3px;font-weight:600}
+.post-footer{display:flex;justify-content:space-between;align-items:center;font-size:8px;color:var(--dim)}
+.post-replies{display:flex;align-items:center;gap:3px}
+.post-replies strong{color:var(--amber)}
+
+/* ═══ SIDEBAR WIDGETS ═══ */
+.widget{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.widget-label{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.widget-title{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* Industry breakdown */
+.ind-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:8px;border-bottom:1px solid rgba(51,65,85,0.08);cursor:pointer}
+.ind-row:hover{background:rgba(99,102,241,0.03);margin:0 -14px;padding:4px 14px}
+.ind-row:last-child{border-bottom:none}
+.ind-row.your-industry{background:rgba(255,69,98,0.03);margin:0 -14px;padding:4px 14px;border-left:2px solid var(--red)}
+.ind-name{flex:1;font-size:9px;font-weight:500}
+.ind-bar{width:80px;height:5px;background:rgba(51,65,85,0.2);border-radius:3px;overflow:hidden}
+.ind-bar-fill{height:100%;border-radius:3px}
+.ind-count{width:30px;text-align:right;font-weight:700;font-size:9px}
+.ind-your{font-size:6px;color:var(--red);font-weight:700;letter-spacing:0.5px}
+
+/* Threat actor profiles */
+.actor-card{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);
+  border-radius:6px;padding:10px;margin-bottom:4px;
+}
+.actor-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.actor-handle{font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--amber)}
+.actor-risk{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700}
+.actor-meta{font-size:7px;color:var(--dim);margin-bottom:4px}
+.actor-spec{font-size:8px;color:#94A3B8;margin-bottom:4px}
+.actor-tags{display:flex;gap:3px}
+.actor-tag{font-size:6px;padding:2px 5px;border-radius:3px;background:rgba(51,65,85,0.2);color:var(--muted)}
+
+/* Monitoring scope */
+.scope-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:18px}
+.scope-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.scope-item{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:6px;padding:10px;text-align:center}
+.scope-val{font-size:16px;font-weight:800;color:var(--indigo)}
+.scope-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-top:2px}
+.scope-forums{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.scope-forum{font-size:7px;padding:3px 8px;border-radius:4px;background:rgba(168,85,247,0.08);color:var(--purple);font-weight:600}
+.scope-desc{font-size:8px;color:var(--dim);line-height:1.5}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INSIDER THREAT MONITOR — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+CORE DESIGN CHALLENGE:
+This page must feel valuable EVEN when the customer has zero alerts (most common).
+The "show of force" — landscape intelligence with real anonymized posts — IS the value.
+
+TWO STATES:
+  State 1 (Clean): Green banner + landscape intelligence
+  State 2 (Alert): Red banner + alert cards + landscape intelligence
+
+DEFAULT VIEW: Status banner → stats → post feed filtered to customer's industry
+
+PAGE STRUCTURE:
+  Zone A: Status banner (clean/alert)
+  Zone B: Landscape intelligence (stats + posts + industry breakdown)
+  Zone C: Search and explore (integrated into filter bar)
+  Zone D: Monitoring scope (footer)
+
+COMPONENT HIERARCHY:
+InsiderThreatPage
+├── StatusBanner (clean | alert)
+│   └── AlertCards (if alert state, expanded below banner)
+├── LandscapeStats (horizontal stat row)
+├── ContentLayout
+│   ├── PostFeed (~65%)
+│   │   ├── FilterBar (industry, geo, access type, time, source)
+│   │   └── LandscapePostCards (anonymized real posts)
+│   └── Sidebar (~35%)
+│       ├── IndustryBreakdown (bar chart, customer's industry highlighted)
+│       ├── ThreatActorProfiles (top recruiters)
+│       └── PaymentRanges (access type × typical payment)
+└── MonitoringScope (footer, transparency section)
+
+DATA MODELS:
+
+StatusBanner: {
+  status: 'clean' | 'alert',
+  company_name, last_scan, monitoring_scope{forums, channels, posts_analyzed},
+  alerts: AlertCard[]  // empty for clean state
+}
+
+LandscapePost: {
+  id, source, source_type, post_date,
+  redacted_text, original_language,
+  industry_targeted, geography,
+  access_type, payment_offered, payment_model,
+  threat_actor: { handle, forum_reputation, account_age, total_posts },
+  replies_count, has_screenshot, screenshot_url,
+  tags: string[]
+}
+
+ThreatActorProfile: {
+  handle, forums_active, specialization,
+  target_industries, estimated_posts, last_active, risk_level
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">INSIDER THREAT MONITOR &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ ZONE A: STATUS BANNER — CLEAN STATE ═══════════ -->
+<!-- CLAUDE CODE: This is the DEFAULT state. Most customers will see this.
+     The banner must feel reassuring but authoritative — "We are watching. You're safe."
+     Switch to alert state when alerts[] is non-empty. -->
+<div class="status-clean">
+  <div class="status-icon">&#128737;</div>
+  <div class="status-info">
+    <div class="status-title">No insider recruitment targeting GreenAnimals Bank detected</div>
+    <div class="status-sub">SOCRadar is actively monitoring 340 dark web forums, 2,100 Telegram channels, and 45 underground marketplaces for recruitment posts mentioning your organization, industry, and geography.</div>
+    <div class="status-meta">
+      <span>&#128338; Last scanned: <strong>2 hours ago</strong></span>
+      <span>&#128269; Posts analyzed this month: <strong>12,400</strong></span>
+      <span>&#128202; Your industry (Finance): <strong>127 posts tracked</strong></span>
+    </div>
+  </div>
+  <div class="status-export">
+    <button class="export-btn">&#128196; Export Board Report</button>
+    <button class="export-btn">&#8615; Download Assessment</button>
+  </div>
+</div>
+
+<!-- ═══════════ ZONE A (ALERT STATE PREVIEW) ═══════════ -->
+<!-- CLAUDE CODE: Only render this block when alerts[] is non-empty.
+     Shown here for wireframe reference. In production, this REPLACES the clean banner. -->
+<div style="margin-bottom:18px">
+  <div class="section-label" style="color:var(--red)">&#9888; ALERT STATE PREVIEW (shown when insider recruitment detected)</div>
+  <div class="status-alert" style="display:flex;align-items:center;gap:18px">
+    <div class="status-icon" style="font-size:24px">&#128680;</div>
+    <div class="status-info">
+      <div class="status-title">ALERT: Insider recruitment activity detected targeting GreenAnimals Bank</div>
+      <div class="status-sub" style="color:var(--muted)">1 recruitment post mentioning your organization was detected on Exploit Forum 2 days ago.</div>
+    </div>
+    <div class="alert-sev">CRITICAL</div>
+  </div>
+  <div class="alert-card">
+    <div class="alert-header">
+      <div class="alert-source">
+        <span class="alert-source-badge alert-source-forum">EXPLOIT FORUM</span>
+        <span class="alert-actor">darkrecruiter_99</span>
+        <span class="alert-date">Apr 28, 2026</span>
+      </div>
+      <span class="alert-sev">CRITICAL</span>
+    </div>
+    <div class="alert-text">"Looking for employee at <em>GreenAnimals Bank</em> with access to customer database. Paying $5,000 per dump. Must verify employment (screenshot of internal portal). Long-term arrangement possible — $2,000/week retainer. Contact via TOX: [redacted]"</div>
+    <div class="alert-meta">
+      <span class="alert-pill" style="background:rgba(255,69,98,0.1);color:var(--red)">company name match</span>
+      <span class="alert-pill" style="background:rgba(245,158,11,0.1);color:var(--amber)">database access</span>
+      <span class="alert-pill" style="background:rgba(99,102,241,0.1);color:var(--indigo)">$5,000/dump</span>
+      <span class="alert-pill" style="background:rgba(168,85,247,0.1);color:var(--purple)">TOX contact</span>
+      <span class="alert-pill" style="background:rgba(51,65,85,0.2);color:var(--muted)">12 replies</span>
+    </div>
+    <div class="alert-actions">
+      <span class="alert-action primary">Mark as Reviewed</span>
+      <span class="alert-action">Export for Incident Report</span>
+      <span class="alert-action">View Full Post</span>
+      <span class="alert-action">Track Threat Actor</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ZONE B1: LANDSCAPE STATS ═══════════ -->
+<div class="section-label">INSIDER THREAT LANDSCAPE</div>
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-val">1,847</div><div class="stat-label">RECRUITMENT POSTS (12 MO)</div></div>
+  <div class="stat-card"><div class="stat-val">23</div><div class="stat-label">INDUSTRIES TARGETED</div></div>
+  <div class="stat-card"><div class="stat-val">65+</div><div class="stat-label">COUNTRIES MENTIONED</div></div>
+  <div class="stat-card"><div class="stat-val" style="color:var(--amber)">$4,200</div><div class="stat-label">AVG. PAYMENT OFFERED</div></div>
+  <div class="stat-card stat-highlight"><div class="stat-val" style="color:var(--red)">127</div><div class="stat-label">POSTS TARGETING FINANCE</div><div style="font-size:7px;color:var(--red);margin-top:2px">YOUR INDUSTRY</div></div>
+</div>
+
+<!-- ═══════════ ZONE B2 + B3: CONTENT LAYOUT ═══════════ -->
+<div class="content">
+
+  <!-- FEED COLUMN (~65%) -->
+  <div class="feed-col">
+    <div class="section-label">RECENT RECRUITMENT POSTS FROM THE WILD</div>
+    <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Real posts from dark web forums and Telegram, anonymized. Company names redacted. Threat actor handles shown.</div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <span class="fpill active">All Industries</span>
+      <span class="fpill" style="border-color:rgba(255,69,98,0.2);color:var(--red)">&#9733; Finance</span>
+      <span class="fpill">Telecom</span>
+      <span class="fpill">Crypto</span>
+      <span class="fpill">Cloud</span>
+      <span class="fpill">Government</span>
+      <span class="filter-sep"></span>
+      <span class="fpill active">All Geo</span>
+      <span class="fpill">US</span>
+      <span class="fpill">EU</span>
+      <span class="fpill">ME</span>
+      <span class="filter-sep"></span>
+      <span class="fpill active">All Access</span>
+      <span class="fpill">SIM Swap</span>
+      <span class="fpill">Database</span>
+      <span class="fpill">VPN/RDP</span>
+      <span class="fpill">Malware</span>
+      <input class="filter-search" type="text" placeholder="Search posts, actors, keywords...">
+    </div>
+
+    <!-- Post 1: Telecom SIM swap (HIGH VOLUME) -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-source">
+          <span class="post-source-badge alert-source-forum">EXPLOIT FORUM</span>
+          <span class="post-actor">sim_kingz <span class="post-actor-rep">Rep: 47 &middot; 2yr</span></span>
+        </div>
+        <span class="post-date">Apr 27, 2026</span>
+      </div>
+      <div class="post-text">"Need insider at <span class="redacted">[Redacted — US Telecom]</span> who can perform SIM swaps. Paying <span class="redacted">$1,500 per swap</span>. Must provide proof of employment first (badge photo or system screenshot). Weekly volume: 5-10 swaps. Serious inquiries only. Contact via Telegram @[redacted]"</div>
+      <div class="post-screenshot">&#128247; Forum post screenshot (click to enlarge) — company name and PII blurred</div>
+      <div class="post-tags">
+        <span class="post-tag" style="background:rgba(255,69,98,0.08);color:var(--red)">Telecom</span>
+        <span class="post-tag" style="background:rgba(99,102,241,0.08);color:var(--indigo)">SIM Swap</span>
+        <span class="post-tag" style="background:rgba(0,136,204,0.08);color:var(--cyan)">United States</span>
+        <span class="post-tag" style="background:rgba(245,158,11,0.08);color:var(--amber)">$1K–$5K</span>
+      </div>
+      <div class="post-footer">
+        <div class="post-replies">&#128172; <strong>23</strong> replies &middot; High demand signal</div>
+        <span class="link">View Details &rarr;</span>
+      </div>
+    </div>
+
+    <!-- Post 2: Banking malware (FINANCE — customer's industry) -->
+    <div class="post-card" style="border-color:rgba(255,69,98,0.15);background:rgba(255,69,98,0.02)">
+      <div style="font-size:7px;color:var(--red);font-weight:700;letter-spacing:1px;margin-bottom:6px">&#9733; YOUR INDUSTRY — FINANCE</div>
+      <div class="post-header">
+        <div class="post-source">
+          <span class="post-source-badge alert-source-tg">TELEGRAM</span>
+          <span class="post-actor">bank_insider_recruiter <span class="post-actor-rep">New account</span></span>
+        </div>
+        <span class="post-date">Apr 25, 2026</span>
+      </div>
+      <div class="post-text">"Looking for employees at <span class="redacted">[Redacted — European Bank]</span> willing to install software on internal workstation. One-time job, <span class="redacted">$8,000 payment via Monero</span>. No traces — our tool is FUD (fully undetectable). You just plug in a USB drive during lunch. Contact @[redacted]"</div>
+      <div class="post-tags">
+        <span class="post-tag" style="background:rgba(255,69,98,0.08);color:var(--red)">Banking</span>
+        <span class="post-tag" style="background:rgba(168,85,247,0.08);color:var(--purple)">Malware Deploy</span>
+        <span class="post-tag" style="background:rgba(0,136,204,0.08);color:var(--cyan)">Europe</span>
+        <span class="post-tag" style="background:rgba(245,158,11,0.08);color:var(--amber)">$5K–$10K</span>
+      </div>
+      <div class="post-footer">
+        <div class="post-replies">&#128172; <strong>8</strong> replies</div>
+        <span class="link">View Details &rarr;</span>
+      </div>
+    </div>
+
+    <!-- Post 3: Crypto exchange -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-source">
+          <span class="post-source-badge" style="background:rgba(245,158,11,0.12);color:var(--amber)">RAMP FORUM</span>
+          <span class="post-actor">crypto_whale_99 <span class="post-actor-rep">Rep: 82 &middot; 3yr</span></span>
+        </div>
+        <span class="post-date">Apr 22, 2026</span>
+      </div>
+      <div class="post-text">"Hiring insider at <span class="redacted">[Redacted — Crypto Exchange]</span>. Need someone with customer support or compliance access. Will pay <span class="redacted">$10,000 + 5% of proceeds</span>. Target: customer data export for specific high-value accounts. Long-term partnership preferred."</div>
+      <div class="post-screenshot">&#128247; Forum post screenshot (click to enlarge)</div>
+      <div class="post-tags">
+        <span class="post-tag" style="background:rgba(245,158,11,0.08);color:var(--amber)">Crypto</span>
+        <span class="post-tag" style="background:rgba(99,102,241,0.08);color:var(--indigo)">Data Theft</span>
+        <span class="post-tag" style="background:rgba(51,65,85,0.15);color:var(--muted)">Global</span>
+        <span class="post-tag" style="background:rgba(255,69,98,0.08);color:var(--red)">$10K+</span>
+      </div>
+      <div class="post-footer">
+        <div class="post-replies">&#128172; <strong>31</strong> replies &middot; Very high demand</div>
+        <span class="link">View Details &rarr;</span>
+      </div>
+    </div>
+
+    <!-- Post 4: Employee self-advertising -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-source">
+          <span class="post-source-badge" style="background:rgba(255,69,98,0.12);color:var(--red)">XSS FORUM</span>
+          <span class="post-actor">anon_gov_worker <span class="post-actor-rep">Rep: 3 &middot; 1mo</span></span>
+        </div>
+        <span class="post-date">Apr 20, 2026</span>
+      </div>
+      <div style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,0.08);color:var(--amber);display:inline-block;font-weight:700;margin-bottom:6px">INSIDER OFFERING ACCESS</div>
+      <div class="post-text">"Government contractor, <span class="redacted">[Redacted — US Defense]</span> subcontractor. Have access to classified project management system and internal SharePoint. Willing to provide documents on request. Payment via Monero or BTC. Serious buyers only."</div>
+      <div class="post-tags">
+        <span class="post-tag" style="background:rgba(255,69,98,0.08);color:var(--red)">Government</span>
+        <span class="post-tag" style="background:rgba(168,85,247,0.08);color:var(--purple)">Classified Docs</span>
+        <span class="post-tag" style="background:rgba(0,136,204,0.08);color:var(--cyan)">United States</span>
+        <span class="post-tag" style="background:rgba(51,65,85,0.15);color:var(--muted)">Price TBD</span>
+      </div>
+      <div class="post-footer">
+        <div class="post-replies">&#128172; <strong>5</strong> replies</div>
+        <span class="link">View Details &rarr;</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:8px;color:var(--dim);font-size:8px;cursor:pointer">Load more posts &darr;</div>
+  </div>
+
+  <!-- SIDEBAR (~35%) -->
+  <div class="side-col">
+
+    <!-- Industry Breakdown -->
+    <div class="widget">
+      <div class="widget-label">MOST TARGETED INDUSTRIES</div>
+      <div class="widget-title">Recruitment volume (12 months)</div>
+      <div class="ind-row"><span class="ind-name">Telecommunications</span><div class="ind-bar"><div class="ind-bar-fill" style="width:90%;background:var(--red)"></div></div><span class="ind-count" style="color:var(--red)">412</span></div>
+      <div class="ind-row your-industry"><span class="ind-name">Banking &amp; Finance <span class="ind-your">YOUR INDUSTRY</span></span><div class="ind-bar"><div class="ind-bar-fill" style="width:65%;background:var(--red)"></div></div><span class="ind-count" style="color:var(--red)">289</span></div>
+      <div class="ind-row"><span class="ind-name">Crypto Exchanges</span><div class="ind-bar"><div class="ind-bar-fill" style="width:50%;background:var(--amber)"></div></div><span class="ind-count" style="color:var(--amber)">223</span></div>
+      <div class="ind-row"><span class="ind-name">Cloud / SaaS</span><div class="ind-bar"><div class="ind-bar-fill" style="width:35%;background:var(--amber)"></div></div><span class="ind-count">156</span></div>
+      <div class="ind-row"><span class="ind-name">Government / Defense</span><div class="ind-bar"><div class="ind-bar-fill" style="width:30%;background:var(--indigo)"></div></div><span class="ind-count">134</span></div>
+      <div class="ind-row"><span class="ind-name">Retail / E-commerce</span><div class="ind-bar"><div class="ind-bar-fill" style="width:22%;background:var(--indigo)"></div></div><span class="ind-count">98</span></div>
+      <div class="ind-row"><span class="ind-name">Manufacturing</span><div class="ind-bar"><div class="ind-bar-fill" style="width:18%;background:var(--faint)"></div></div><span class="ind-count">81</span></div>
+      <div class="ind-row"><span class="ind-name">Pharmaceuticals</span><div class="ind-bar"><div class="ind-bar-fill" style="width:12%;background:var(--faint)"></div></div><span class="ind-count">54</span></div>
+    </div>
+
+    <!-- Payment Ranges by Access Type -->
+    <div class="widget">
+      <div class="widget-label">TYPICAL PAYMENT RANGES</div>
+      <div class="widget-title">By access type</div>
+      <div style="font-size:8px">
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(51,65,85,0.08)"><span style="color:#94A3B8">SIM Swap</span><span style="font-weight:700;color:var(--amber)">$1,200 – $2,000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(51,65,85,0.08)"><span style="color:#94A3B8">Database Access</span><span style="font-weight:700;color:var(--amber)">$3,000 – $15,000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(51,65,85,0.08)"><span style="color:#94A3B8">Malware Deployment</span><span style="font-weight:700;color:var(--red)">$5,000 – $10,000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(51,65,85,0.08)"><span style="color:#94A3B8">VPN / RDP Creds</span><span style="font-weight:700;color:var(--amber)">$500 – $5,000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(51,65,85,0.08)"><span style="color:#94A3B8">Physical Badge</span><span style="font-weight:700">$2,000 – $8,000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(51,65,85,0.08)"><span style="color:#94A3B8">Cloud Platform Insider</span><span style="font-weight:700;color:var(--red)">$10,000+</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:#94A3B8">Classified Documents</span><span style="font-weight:700;color:var(--red)">$25,000+</span></div>
+      </div>
+    </div>
+
+    <!-- Top Threat Actors -->
+    <div class="widget">
+      <div class="widget-label">TOP INSIDER RECRUITERS</div>
+      <div class="widget-title">Most active threat actors</div>
+      <div class="actor-card">
+        <div class="actor-header">
+          <span class="actor-handle">sim_kingz</span>
+          <span class="actor-risk" style="background:rgba(255,69,98,0.12);color:var(--red)">HIGH RISK</span>
+        </div>
+        <div class="actor-meta">Exploit, XSS &middot; 230 posts &middot; Active 1d ago &middot; Rep: 47</div>
+        <div class="actor-spec">Specializes in telecom SIM swap recruitment. Active across 3 forums.</div>
+        <div class="actor-tags"><span class="actor-tag">Telecom</span><span class="actor-tag">SIM Swap</span><span class="actor-tag">US</span></div>
+      </div>
+      <div class="actor-card">
+        <div class="actor-header">
+          <span class="actor-handle">crypto_whale_99</span>
+          <span class="actor-risk" style="background:rgba(255,69,98,0.12);color:var(--red)">HIGH RISK</span>
+        </div>
+        <div class="actor-meta">RAMP, BreachForums &middot; 89 posts &middot; Active 4d ago &middot; Rep: 82</div>
+        <div class="actor-spec">Targets crypto exchange employees. Offers profit-sharing arrangements.</div>
+        <div class="actor-tags"><span class="actor-tag">Crypto</span><span class="actor-tag">Data Theft</span><span class="actor-tag">Global</span></div>
+      </div>
+      <div class="actor-card">
+        <div class="actor-header">
+          <span class="actor-handle">bank_insider_recruiter</span>
+          <span class="actor-risk" style="background:rgba(245,158,11,0.12);color:var(--amber)">MEDIUM</span>
+        </div>
+        <div class="actor-meta">Telegram &middot; 45 posts &middot; Active 2d ago &middot; New account</div>
+        <div class="actor-spec">Focuses on European banking sector. Recruits for malware deployment.</div>
+        <div class="actor-tags"><span class="actor-tag">Banking</span><span class="actor-tag">Europe</span><span class="actor-tag">Malware</span></div>
+      </div>
+      <div style="text-align:center;margin-top:6px"><span class="link">View All 47 Actors &rarr;</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ZONE D: MONITORING SCOPE ═══════════ -->
+<div class="scope-section">
+  <div class="section-label">MONITORING SCOPE — WHAT SOCRADAR TRACKS</div>
+  <div class="scope-grid">
+    <div class="scope-item"><div class="scope-val">340</div><div class="scope-label">FORUMS MONITORED</div></div>
+    <div class="scope-item"><div class="scope-val">2,100</div><div class="scope-label">TELEGRAM CHANNELS</div></div>
+    <div class="scope-item"><div class="scope-val">45</div><div class="scope-label">MARKETPLACES</div></div>
+    <div class="scope-item"><div class="scope-val">Every 2h</div><div class="scope-label">SCAN FREQUENCY</div></div>
+  </div>
+  <div style="font-size:8px;color:var(--dim);margin-bottom:6px;font-weight:700;letter-spacing:1px">FORUMS SCANNED</div>
+  <div class="scope-forums">
+    <span class="scope-forum">Exploit</span>
+    <span class="scope-forum">XSS</span>
+    <span class="scope-forum">BreachForums</span>
+    <span class="scope-forum">RAMP</span>
+    <span class="scope-forum">Verified</span>
+    <span class="scope-forum">Dread</span>
+    <span class="scope-forum">CrdClub</span>
+    <span class="scope-forum">BlackHatWorld</span>
+    <span class="scope-forum">+ 332 more</span>
+  </div>
+  <div class="scope-desc">
+    <strong>Detection methodology:</strong> SOCRadar monitors for posts containing your organization's name, domain, executive names, and industry-specific keywords in known recruitment contexts. Posts are analyzed for recruitment intent using NLP classification and manual analyst review. Keywords tracked for GreenAnimals Bank: "greenanimalsbank", "greenanimals.com", "GreenAnimals Bank", executive names (3), banking + Turkey combinations.
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.25)"></span>Zone A: Status (clean/alert)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Zone B: Landscape Stats + Posts (~65%)</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.15)"></span>Sidebar: Industry + Actors (~35%)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.15)"></span>Zone D: Monitoring Scope</span>
+  </div>
+</div>
+
+</body>
+</html>

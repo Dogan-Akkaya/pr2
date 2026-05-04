@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Telegram Monitor — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+  --tg-bg:#0e1621;--tg-bubble:rgba(23,33,48,0.9);--tg-sender:#6ab3f3;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ BANNER ═══ */
+.banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px}
+.banner-icon{width:40px;height:40px;border-radius:10px;background:rgba(0,136,204,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:8px}
+.banner-title .badge{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:20px;flex-shrink:0}
+.bs{text-align:center;min-width:60px}
+.bs-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.bs-val{font-size:18px;font-weight:800;margin-top:1px}
+
+/* ═══ TWO-PANEL LAYOUT ═══ */
+.panels{display:flex;gap:16px;min-height:700px}
+.left-panel{flex:6;min-width:0;display:flex;flex-direction:column}
+.right-panel{flex:4;min-width:0;display:flex;flex-direction:column}
+
+/* ═══ LEFT: YOUR MENTIONS ═══ */
+.mentions-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.mentions-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.mentions-count{font-size:9px;background:rgba(255,69,98,0.12);color:var(--red);padding:2px 8px;border-radius:4px;font-weight:700}
+
+.mention-card{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;margin-bottom:5px;cursor:pointer;transition:all 0.15s;
+  position:relative;
+}
+.mention-card:hover{border-color:rgba(0,136,204,0.3);background:rgba(0,136,204,0.02)}
+.mention-card.active{border-color:rgba(0,136,204,0.4);background:rgba(0,136,204,0.04)}
+.mention-card.active::after{content:'';position:absolute;right:0;top:6px;bottom:6px;width:3px;background:var(--cyan);border-radius:3px 0 0 3px}
+.mention-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.mention-avatar{width:24px;height:24px;border-radius:50%;background:rgba(0,136,204,0.15);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--cyan);flex-shrink:0}
+.mention-channel{font-size:10px;font-weight:700;flex:1}
+.mention-members{font-size:7px;color:var(--dim)}
+.mention-sev{font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px}
+.mention-time{font-size:7px;color:var(--dim);margin-left:auto}
+.mention-text{font-size:9px;color:#94A3B8;line-height:1.4;margin-bottom:5px}
+.mention-text em{color:var(--red);font-style:normal;font-weight:700;background:rgba(255,69,98,0.08);padding:0 2px;border-radius:2px}
+.mention-footer{display:flex;gap:4px;align-items:center}
+.mention-match{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.match-domain{background:rgba(0,136,204,0.1);color:var(--cyan)}
+.match-brand{background:rgba(168,85,247,0.1);color:var(--purple)}
+.match-exec{background:rgba(255,69,98,0.1);color:var(--red)}
+.match-bin{background:rgba(245,158,11,0.1);color:var(--amber)}
+.match-cred{background:rgba(255,69,98,0.12);color:var(--red)}
+.mention-channel-type{font-size:6px;padding:1px 5px;border-radius:3px;margin-left:auto}
+.type-stealer{background:rgba(245,158,11,0.08);color:var(--amber)}
+.type-hacktivist{background:rgba(255,69,98,0.08);color:var(--red)}
+.type-carding{background:rgba(251,146,60,0.08);color:#FB923C}
+.type-ransom{background:rgba(220,38,38,0.1);color:#DC2626}
+.type-breach{background:rgba(168,85,247,0.08);color:var(--purple)}
+
+/* ═══ LEFT: CATEGORY FILTERS + TRENDING ═══ */
+.cat-row{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.cat-pill{font-size:8px;font-weight:600;padding:4px 10px;border-radius:5px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.cat-pill.active{background:rgba(0,136,204,0.12);border-color:rgba(0,136,204,0.3);color:var(--cyan)}
+
+.topic-scroll{display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.topic-scroll::-webkit-scrollbar{height:3px}
+.topic-scroll::-webkit-scrollbar-thumb{background:rgba(51,65,85,0.3);border-radius:2px}
+.topic-pill{
+  font-size:7px;font-weight:700;padding:4px 10px;border-radius:5px;white-space:nowrap;
+  cursor:pointer;transition:all 0.15s;flex-shrink:0;letter-spacing:0.5px;
+}
+.topic-preset{background:rgba(51,65,85,0.2);color:#94A3B8;border:1px solid rgba(51,65,85,0.3)}
+.topic-preset:hover{border-color:rgba(0,136,204,0.3);color:var(--cyan)}
+.topic-preset.hot{background:rgba(255,69,98,0.08);border-color:rgba(255,69,98,0.2);color:var(--red)}
+.topic-dynamic{background:transparent;color:var(--amber);border:1px dashed rgba(245,158,11,0.3)}
+.topic-active{background:rgba(0,136,204,0.12)!important;border-color:rgba(0,136,204,0.4)!important;color:var(--cyan)!important}
+
+.trend-list{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.trend-row{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.08);cursor:pointer;transition:background 0.15s}
+.trend-row:hover{background:rgba(0,136,204,0.03)}
+.trend-row:last-child{border-bottom:none}
+.trend-keyword{font-weight:700;flex:1;display:flex;align-items:center;gap:4px}
+.trend-category{font-size:6px;padding:1px 5px;border-radius:3px;font-weight:600}
+.trend-vol{font-weight:700;width:50px;text-align:right}
+.trend-arrow{width:24px;text-align:center;font-size:8px;font-weight:700}
+.trend-channel{font-size:7px;color:var(--dim);width:120px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trend-spark{display:flex;align-items:flex-end;gap:1px;height:14px;width:40px;flex-shrink:0}
+.trend-spark span{width:3px;border-radius:1px}
+
+/* ═══ RIGHT: SEARCH + PHONE VIEWER ═══ */
+.search-section{margin-bottom:10px}
+.tg-search{
+  width:100%;padding:10px 14px;border-radius:8px;
+  background:rgba(15,23,42,0.6);border:1px solid rgba(0,136,204,0.15);
+  font-size:11px;color:var(--text);font-family:inherit;outline:none;
+  transition:border-color 0.15s;margin-bottom:6px;
+}
+.tg-search:focus{border-color:rgba(0,136,204,0.4)}
+.tg-search::placeholder{color:var(--dim)}
+.search-operators{display:flex;gap:4px;flex-wrap:wrap}
+.search-op{font-size:7px;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.search-op.active{background:rgba(0,136,204,0.1);border-color:rgba(0,136,204,0.2);color:var(--cyan)}
+.search-sep{width:1px;height:18px;background:rgba(51,65,85,0.3);margin:0 2px;align-self:center}
+
+/* ═══ PHONE FRAME ═══ */
+.phone-frame{
+  background:var(--tg-bg);
+  border:2px solid rgba(51,65,85,0.4);
+  border-radius:32px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  flex:1;min-height:500px;
+  box-shadow:0 0 40px rgba(0,0,0,0.3),inset 0 0 0 1px rgba(51,65,85,0.15);
+  position:relative;
+}
+/* Notch */
+.phone-notch{
+  width:100px;height:4px;background:rgba(51,65,85,0.4);
+  border-radius:0 0 8px 8px;margin:0 auto;flex-shrink:0;
+}
+/* Channel header */
+.phone-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 16px;background:rgba(15,23,42,0.8);
+  border-bottom:1px solid rgba(51,65,85,0.2);flex-shrink:0;
+}
+.phone-back{color:var(--cyan);font-size:12px;cursor:pointer;flex-shrink:0}
+.phone-avatar{width:28px;height:28px;border-radius:50%;background:rgba(0,136,204,0.15);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--cyan);flex-shrink:0}
+.phone-channel{flex:1}
+.phone-channel-name{font-size:10px;font-weight:700}
+.phone-channel-meta{font-size:7px;color:var(--dim)}
+.phone-actions{display:flex;gap:6px;color:var(--dim);font-size:12px}
+
+/* Message area */
+.phone-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+
+/* Telegram message bubbles */
+.tg-msg{
+  background:var(--tg-bubble);
+  border-radius:12px 12px 12px 4px;
+  padding:8px 10px;max-width:88%;align-self:flex-start;
+  position:relative;
+}
+.tg-msg.highlighted{background:rgba(0,136,204,0.08);border:1px solid rgba(0,136,204,0.2)}
+.tg-msg-sender{font-size:8px;font-weight:700;margin-bottom:3px}
+.tg-msg-text{font-size:9px;color:#d4d4d8;line-height:1.5}
+.tg-msg-text em{color:var(--red);font-style:normal;font-weight:600}
+.tg-msg-text a{color:var(--cyan);text-decoration:underline}
+.tg-msg-time{font-size:7px;color:rgba(148,163,184,0.5);text-align:right;margin-top:3px}
+.tg-msg-tags{display:flex;gap:3px;margin-top:4px}
+.tg-msg-tag{font-size:6px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:rgba(148,163,184,0.6)}
+.tg-msg-claim{font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(255,69,98,0.15);color:var(--red);font-weight:700;display:inline-block;margin-bottom:3px}
+.tg-msg-forwarded{font-size:7px;color:var(--cyan);margin-bottom:3px;padding-left:6px;border-left:2px solid rgba(0,136,204,0.3)}
+.tg-msg-media{
+  width:100%;height:60px;background:rgba(15,23,42,0.6);border-radius:6px;
+  margin-top:4px;display:flex;align-items:center;justify-content:center;
+  font-size:7px;color:var(--dim);border:1px solid rgba(51,65,85,0.2);
+}
+.tg-msg-file{
+  display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.2);
+  margin-top:4px;font-size:8px;
+}
+.tg-msg-file-icon{font-size:14px;color:var(--cyan)}
+.tg-msg-file-info{flex:1}
+.tg-msg-file-name{font-weight:600;color:#d4d4d8;font-size:8px}
+.tg-msg-file-size{font-size:7px;color:var(--dim)}
+
+/* Digest channel separator */
+.digest-sep{
+  display:flex;align-items:center;gap:8px;padding:8px 0;margin:4px 0;
+}
+.digest-sep-line{flex:1;height:1px;background:rgba(51,65,85,0.2)}
+.digest-sep-label{font-size:8px;color:var(--cyan);font-weight:600;display:flex;align-items:center;gap:4px}
+.digest-enter{font-size:7px;color:var(--cyan);cursor:pointer;padding:3px 8px;border:1px solid rgba(0,136,204,0.2);border-radius:4px;margin-top:4px;text-align:center}
+.digest-enter:hover{background:rgba(0,136,204,0.08)}
+
+/* Phone bottom (no input — read only) */
+.phone-bottom{
+  padding:8px 14px;background:rgba(15,23,42,0.6);border-top:1px solid rgba(51,65,85,0.2);
+  font-size:8px;color:var(--dim);text-align:center;flex-shrink:0;
+}
+
+/* Date separator */
+.date-sep{text-align:center;font-size:7px;color:rgba(148,163,184,0.4);padding:6px 0}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+TELEGRAM DARK WEB MONITOR — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+TWO MODES on one page (no tabs):
+  Left panel (60%): "What affects me?" (Your Mentions) + "What's happening?" (Trending)
+  Right panel (40%): Phone-shaped message viewer (search + explore + read)
+
+PHONE VIEWER THREE STATES:
+  State 1: Empty/Welcome — on page load, before any interaction
+  State 2: Digest — after clicking topic or searching; multi-channel message clusters
+  State 3: Channel — after clicking "Enter channel" or a mention card; single channel history
+
+EXISTING PATTERNS TO REUSE (from Iran-Israel War Dashboard):
+  - Topic pill styling and horizontal scroll
+  - Message card format (sender, text, CLAIM badge, timestamp, hashtag pills)
+  - Category filter row (ALL / LEAKS / CLAIMS / DDOS etc.)
+  - Stats (big numbers + ranked lists)
+
+NEW TO BUILD:
+  - Phone-shaped message viewer (custom component, virtualized scroll)
+  - Your Mentions personalized alert section
+  - Digest → channel drill-down flow
+  - General-purpose trending topics
+
+DATA MODELS:
+  See design brief sections 3A, 3B, 4B for complete shapes:
+  - YourMention: channel{}, message{}, match{type,keyword}, severity
+  - TrendingTopic: keyword, category, volume_24h, volume_change_pct, top_channels[], sample_messages[]
+  - SearchQuery: query, time_range, channel_type, language, sort
+  - ChannelView: channel{}, messages[], has_more
+  - TelegramMessage: id, sender_name, text, timestamp, has_media, media_type, forwarded_from, is_highlighted
+
+COMPONENT HIERARCHY:
+TelegramMonitorPage
+├── TopBanner
+├── TwoPanelLayout
+│   ├── LeftPanel (60%)
+│   │   ├── YourMentions (personalized alert feed)
+│   │   │   └── MentionCard (channel + preview + match reason + severity)
+│   │   ├── CategoryFilters (ALL / LEAKS / CLAIMS / DDOS / etc.)
+│   │   ├── TopicPillRow (horizontal scroll, preset + dynamic)
+│   │   └── TrendingList (table: keyword, volume, trend, top channel)
+│   └── RightPanel (40%)
+│       ├── SearchBar + SearchOperators
+│       └── PhoneViewer
+│           ├── PhoneFrame (border-radius:32px, subtle device frame)
+│           ├── PhoneHeader (channel info, pinned)
+│           ├── PhoneMessages (virtualized scroll, Telegram-style bubbles)
+│           └── PhoneBottom (read-only notice)
+
+CHANNEL TYPE COLOR CODING:
+  Stealer Logs → amber
+  Hacktivist → red
+  Carding/Fraud → coral (#FB923C)
+  Ransomware → dark red (#DC2626)
+  Breach Announcements → purple
+  General Cybercrime → gray
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">TELEGRAM MONITOR &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#9992;</div>
+  <div class="banner-info">
+    <div class="banner-title">TELEGRAM MONITOR <span class="badge" style="background:rgba(255,69,98,0.15);color:var(--red)">8 new mentions</span></div>
+    <div class="banner-desc">Real-time intelligence from underground Telegram channels</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bs"><div class="bs-label">MONITORED CHANNELS</div><div class="bs-val" style="color:var(--cyan)">2,340</div></div>
+    <div class="bs"><div class="bs-label">YOUR MENTIONS</div><div class="bs-val" style="color:var(--red)">8</div></div>
+    <div class="bs"><div class="bs-label">MESSAGES TODAY</div><div class="bs-val">14,203</div></div>
+    <div class="bs"><div class="bs-label">TRENDING TOPICS</div><div class="bs-val" style="color:var(--amber)">12</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ TWO-PANEL LAYOUT ═══════════ -->
+<div class="panels">
+
+  <!-- ═══ LEFT PANEL (60%) ═══ -->
+  <div class="left-panel">
+
+    <!-- YOUR MENTIONS -->
+    <div class="mentions-header">
+      <div class="mentions-title">&#128276; Your Mentions <span class="mentions-count">8 new</span></div>
+      <span class="link">View All &rarr;</span>
+    </div>
+
+    <!-- Mention 1: ACTIVE (loaded in phone) -->
+    <div class="mention-card active">
+      <div class="mention-top">
+        <div class="mention-avatar">M</div>
+        <span class="mention-channel">Moon Cloud</span>
+        <span class="mention-members">45.2K members</span>
+        <span class="mention-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">HIGH</span>
+        <span class="mention-time">2h ago</span>
+      </div>
+      <div class="mention-text">"Fresh logs today: <em>greenanimalsbank.com</em> — 23 entries, includes VPN access, SSO tokens, browser saved passwords. All verified within 12h..."</div>
+      <div class="mention-footer">
+        <span class="mention-match match-domain">domain match</span>
+        <span class="mention-match match-cred">credential leak</span>
+        <span class="mention-channel-type type-stealer">Stealer Logs</span>
+      </div>
+    </div>
+
+    <!-- Mention 2 -->
+    <div class="mention-card">
+      <div class="mention-top">
+        <div class="mention-avatar" style="background:rgba(255,69,98,0.15);color:var(--red)">D</div>
+        <span class="mention-channel">DarkForums_chat</span>
+        <span class="mention-members">12.8K members</span>
+        <span class="mention-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">MEDIUM</span>
+        <span class="mention-time">5h ago</span>
+      </div>
+      <div class="mention-text">"Looking for buyers: banking sector combo list, includes <em>greenanimalsbank</em> domain entries, 4,200 records..."</div>
+      <div class="mention-footer">
+        <span class="mention-match match-brand">brand mention</span>
+        <span class="mention-channel-type type-carding">Carding</span>
+      </div>
+    </div>
+
+    <!-- Mention 3 -->
+    <div class="mention-card">
+      <div class="mention-top">
+        <div class="mention-avatar" style="background:rgba(168,85,247,0.15);color:var(--purple)">B</div>
+        <span class="mention-channel">BreachForums Alerts</span>
+        <span class="mention-members">89.4K members</span>
+        <span class="mention-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">CRITICAL</span>
+        <span class="mention-time">Yesterday</span>
+      </div>
+      <div class="mention-text">"New DB dump: Turkish banking sector — includes <em>Simon Johnsson</em> (CFO) credentials with plaintext password..."</div>
+      <div class="mention-footer">
+        <span class="mention-match match-exec">executive name</span>
+        <span class="mention-match match-cred">credential leak</span>
+        <span class="mention-channel-type type-breach">Breach</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:6px 0;margin-bottom:14px"><span class="link">Show 5 more mentions &darr;</span></div>
+
+    <!-- CATEGORY FILTERS -->
+    <div class="section-label">TRENDING INTELLIGENCE</div>
+    <div class="cat-row">
+      <span class="cat-pill active">ALL</span>
+      <span class="cat-pill">LEAKS</span>
+      <span class="cat-pill">CLAIMS</span>
+      <span class="cat-pill">DDOS</span>
+      <span class="cat-pill">ICS/OT</span>
+      <span class="cat-pill">RECON</span>
+      <span class="cat-pill">RANSOMWARE</span>
+      <span class="cat-pill">CARDING</span>
+      <span class="cat-pill">CREDENTIALS</span>
+    </div>
+
+    <!-- TOPIC PILLS (horizontal scroll) -->
+    <div class="topic-scroll">
+      <span class="topic-pill topic-preset hot">#OpIsrael</span>
+      <span class="topic-pill topic-preset hot">Iran-Israel War</span>
+      <span class="topic-pill topic-preset">Russia-Ukraine</span>
+      <span class="topic-pill topic-preset">NoName057(16)</span>
+      <span class="topic-pill topic-preset">LockBit</span>
+      <span class="topic-pill topic-preset">Stealer Logs</span>
+      <span class="topic-pill topic-preset">Dark Storm Team</span>
+      <span class="topic-pill topic-preset">Handala Hack</span>
+      <span class="topic-pill topic-preset">RipperSec</span>
+      <span class="topic-pill topic-preset">BidenCash</span>
+      <span class="topic-pill topic-preset">DDoSia</span>
+      <span class="topic-pill topic-preset">313 Team</span>
+      <span class="topic-pill topic-preset">Credential Dumps</span>
+      <span class="topic-pill topic-preset">SCADA / ICS</span>
+      <span class="topic-pill topic-preset">Moon Cloud</span>
+      <span class="topic-pill topic-preset">BreachForums</span>
+      <span class="topic-pill topic-dynamic">&#9733; Fortinet CVE</span>
+      <span class="topic-pill topic-dynamic">&#9733; Snowflake Breach</span>
+    </div>
+
+    <!-- TRENDING LIST -->
+    <div class="trend-list">
+      <div class="trend-row">
+        <div class="trend-keyword"><span class="trend-category" style="background:rgba(255,69,98,0.1);color:var(--red)">HACK</span>#OpIsrael</div>
+        <div class="trend-spark"><span style="height:4px;background:rgba(255,69,98,0.3)"></span><span style="height:6px;background:rgba(255,69,98,0.3)"></span><span style="height:8px;background:rgba(255,69,98,0.4)"></span><span style="height:7px;background:rgba(255,69,98,0.5)"></span><span style="height:14px;background:var(--red)"></span></div>
+        <div class="trend-vol" style="color:var(--red)">1,247</div>
+        <div class="trend-arrow" style="color:var(--red)">&#9650;340%</div>
+        <div class="trend-channel">OpIsrael Official</div>
+      </div>
+      <div class="trend-row">
+        <div class="trend-keyword"><span class="trend-category" style="background:rgba(255,69,98,0.1);color:var(--red)">GEO</span>Iran-Israel War</div>
+        <div class="trend-spark"><span style="height:8px;background:rgba(245,158,11,0.3)"></span><span style="height:10px;background:rgba(245,158,11,0.3)"></span><span style="height:9px;background:rgba(245,158,11,0.4)"></span><span style="height:11px;background:rgba(245,158,11,0.4)"></span><span style="height:13px;background:var(--amber)"></span></div>
+        <div class="trend-vol" style="color:var(--amber)">3,891</div>
+        <div class="trend-arrow" style="color:var(--amber)">&#9650;67%</div>
+        <div class="trend-channel">Cyber Islamic Resistance</div>
+      </div>
+      <div class="trend-row">
+        <div class="trend-keyword"><span class="trend-category" style="background:rgba(220,38,38,0.1);color:#DC2626">RANSOM</span>LockBit</div>
+        <div class="trend-spark"><span style="height:10px;background:rgba(99,102,241,0.3)"></span><span style="height:9px;background:rgba(99,102,241,0.3)"></span><span style="height:11px;background:rgba(99,102,241,0.3)"></span><span style="height:10px;background:rgba(99,102,241,0.3)"></span><span style="height:12px;background:var(--indigo)"></span></div>
+        <div class="trend-vol">892</div>
+        <div class="trend-arrow" style="color:var(--green)">&#9650;12%</div>
+        <div class="trend-channel">LockBit Official</div>
+      </div>
+      <div class="trend-row">
+        <div class="trend-keyword"><span class="trend-category" style="background:rgba(245,158,11,0.1);color:var(--amber)">MALW</span>Stealer Logs</div>
+        <div class="trend-spark"><span style="height:9px;background:rgba(245,158,11,0.3)"></span><span style="height:10px;background:rgba(245,158,11,0.3)"></span><span style="height:9px;background:rgba(245,158,11,0.3)"></span><span style="height:11px;background:rgba(245,158,11,0.3)"></span><span style="height:11px;background:var(--amber)"></span></div>
+        <div class="trend-vol">2,103</div>
+        <div class="trend-arrow" style="color:var(--dim)">&rarr; 0%</div>
+        <div class="trend-channel">Moon Cloud</div>
+      </div>
+      <div class="trend-row">
+        <div class="trend-keyword"><span class="trend-category" style="background:rgba(168,85,247,0.1);color:var(--purple)">VULN</span><span style="color:var(--amber)">&#9733;</span> Fortinet CVE</div>
+        <div class="trend-spark"><span style="height:2px;background:rgba(245,158,11,0.3)"></span><span style="height:3px;background:rgba(245,158,11,0.3)"></span><span style="height:4px;background:rgba(245,158,11,0.3)"></span><span style="height:8px;background:rgba(245,158,11,0.4)"></span><span style="height:14px;background:var(--amber)"></span></div>
+        <div class="trend-vol" style="color:var(--amber)">456</div>
+        <div class="trend-arrow" style="color:var(--red)">&#9650;890%</div>
+        <div class="trend-channel">CyberUnderground</div>
+      </div>
+      <div class="trend-row">
+        <div class="trend-keyword"><span class="trend-category" style="background:rgba(255,69,98,0.1);color:var(--red)">HACK</span>NoName057(16)</div>
+        <div class="trend-spark"><span style="height:8px;background:rgba(255,69,98,0.3)"></span><span style="height:7px;background:rgba(255,69,98,0.3)"></span><span style="height:9px;background:rgba(255,69,98,0.3)"></span><span style="height:8px;background:rgba(255,69,98,0.3)"></span><span style="height:10px;background:var(--red)"></span></div>
+        <div class="trend-vol">734</div>
+        <div class="trend-arrow" style="color:var(--green)">&#9650;5%</div>
+        <div class="trend-channel">DDoSia Project</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL (40%) ═══ -->
+  <div class="right-panel">
+
+    <!-- SEARCH -->
+    <div class="search-section">
+      <input class="tg-search" type="text" placeholder="Search Telegram channels and messages... (supports AND, OR, NOT, &quot;exact match&quot;, @channel)">
+      <div class="search-operators">
+        <span class="search-op active">Last 24h</span>
+        <span class="search-op">7d</span>
+        <span class="search-op">30d</span>
+        <span class="search-op">90d</span>
+        <span class="search-sep"></span>
+        <span class="search-op active">All Types</span>
+        <span class="search-op">Stealer</span>
+        <span class="search-op">Hacktivist</span>
+        <span class="search-op">Carding</span>
+        <span class="search-op">Ransom</span>
+        <span class="search-sep"></span>
+        <span class="search-op active">All Lang</span>
+        <span class="search-op">EN</span>
+        <span class="search-op">RU</span>
+        <span class="search-op">AR</span>
+      </div>
+    </div>
+
+    <!-- PHONE VIEWER (showing State 3: Channel View — Moon Cloud) -->
+    <!-- CLAUDE CODE: The phone frame is a custom component with virtualized scroll.
+         Three states: Empty/Welcome, Digest (multi-channel), Channel (single channel).
+         This wireframe shows State 3. The highlighted message is the one
+         that matched from the "Your Mentions" card the user clicked. -->
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-header">
+        <span class="phone-back">&larr;</span>
+        <div class="phone-avatar">M</div>
+        <div class="phone-channel">
+          <div class="phone-channel-name">Moon Cloud</div>
+          <div class="phone-channel-meta">45,200 members &middot; Stealer Log Aggregator &middot; Last active: 12m ago</div>
+        </div>
+        <div class="phone-actions">
+          <span style="cursor:pointer">&#128269;</span>
+          <span style="cursor:pointer">&#8615;</span>
+        </div>
+      </div>
+
+      <div class="phone-messages">
+        <div class="date-sep">&mdash; April 30, 2026 &mdash;</div>
+
+        <div class="tg-msg">
+          <div class="tg-msg-sender" style="color:#e8a855">MoonCloud Bot</div>
+          <div class="tg-msg-text">&#128194; Daily stealer statistics update:<br>Total logs processed: 142,801<br>New unique domains: 8,204<br>Top stealer: Raccoon v2 (34% share)</div>
+          <div class="tg-msg-time">08:01</div>
+        </div>
+
+        <div class="tg-msg">
+          <div class="tg-msg-sender" style="color:#6ab3f3">log_seller_23</div>
+          <div class="tg-msg-text">Selling fresh batch — US banking sector. 450 entries, all tested &lt;6h. Includes autofill, cookies, saved passwords. $15/batch.</div>
+          <div class="tg-msg-tags">
+            <span class="tg-msg-tag">#banking</span>
+            <span class="tg-msg-tag">#us</span>
+            <span class="tg-msg-tag">#fresh</span>
+          </div>
+          <div class="tg-msg-time">08:42</div>
+        </div>
+
+        <div class="tg-msg">
+          <div class="tg-msg-forwarded">Forwarded from <span style="color:var(--cyan)">RaccoonLogs</span></div>
+          <div class="tg-msg-sender" style="color:#a78bfa">raccoon_admin</div>
+          <div class="tg-msg-text">&#9888; Infrastructure update: new C2 servers deployed. Panel v3.2 with improved cookie capture. Update your builders.</div>
+          <div class="tg-msg-time">09:03</div>
+        </div>
+
+        <!-- HIGHLIGHTED MESSAGE (matched from Your Mentions) -->
+        <div class="tg-msg highlighted">
+          <div class="tg-msg-sender" style="color:#f87171">fresh_logs_daily</div>
+          <div class="tg-msg-text">Fresh logs today: <em>greenanimalsbank.com</em> — 23 entries, includes VPN access, SSO tokens, browser saved passwords. All verified within 12h. DM for pricing. Bulk discount for 50+ logs.</div>
+          <div class="tg-msg-tags">
+            <span class="tg-msg-tag">#banking</span>
+            <span class="tg-msg-tag">#turkey</span>
+            <span class="tg-msg-tag">#vpn</span>
+            <span class="tg-msg-tag">#sso</span>
+          </div>
+          <div class="tg-msg-time">09:15 &#128205; matched: greenanimalsbank.com</div>
+        </div>
+
+        <div class="tg-msg">
+          <div class="tg-msg-sender" style="color:#34d399">buyer_42</div>
+          <div class="tg-msg-text">@fresh_logs_daily interested in the banking set. DM sent.</div>
+          <div class="tg-msg-time">09:18</div>
+        </div>
+
+        <div class="tg-msg">
+          <div class="tg-msg-sender" style="color:#e8a855">MoonCloud Bot</div>
+          <div class="tg-msg-claim">&#9888; CLAIM</div>
+          <div class="tg-msg-text">&#128196; New batch uploaded: EU financial sector, 1,200 entries. Includes MFA tokens for 340 accounts. Stealer: LummaC2.</div>
+          <div class="tg-msg-file">
+            <span class="tg-msg-file-icon">&#128196;</span>
+            <div class="tg-msg-file-info">
+              <div class="tg-msg-file-name">eu_financial_batch_apr30.zip</div>
+              <div class="tg-msg-file-size">2.4 MB &middot; encrypted</div>
+            </div>
+          </div>
+          <div class="tg-msg-time">09:34</div>
+        </div>
+
+        <div class="tg-msg">
+          <div class="tg-msg-sender" style="color:#6ab3f3">log_seller_23</div>
+          <div class="tg-msg-text">&#128640; Flash sale: healthcare sector logs, verified active sessions with browser fingerprints. 200 entries @ $0.08/each. Gone in 1h.</div>
+          <div class="tg-msg-tags">
+            <span class="tg-msg-tag">#healthcare</span>
+            <span class="tg-msg-tag">#sessions</span>
+            <span class="tg-msg-tag">#flash</span>
+          </div>
+          <div class="tg-msg-time">09:51</div>
+        </div>
+      </div>
+
+      <div class="phone-bottom">
+        &#128274; Read-only intelligence viewer &middot; <span style="color:var(--cyan)">Export</span> &middot; <span style="color:var(--cyan)">Create Incident</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(0,136,204,0.15);border:1px solid rgba(0,136,204,0.25)"></span>Banner</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.08)"></span>Your Mentions (left, top)</span>
+    <span><span class="lsw" style="background:rgba(0,136,204,0.06)"></span>Trending Topics (left, bottom)</span>
+    <span><span class="lsw" style="background:rgba(14,22,33,1);border:2px solid rgba(51,65,85,0.4);border-radius:6px"></span>Phone Viewer (right)</span>
+  </div>
+</div>
+
+</body>
+</html>

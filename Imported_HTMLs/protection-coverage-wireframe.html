@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Protection Coverage — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+
+/* ═══ TOP BANNER ═══ */
+.top-banner{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 20px;margin-bottom:16px;
+}
+.banner-left{display:flex;align-items:center;gap:14px}
+.score-ring{
+  width:52px;height:52px;border-radius:50%;
+  background:conic-gradient(var(--amber) 0% 33%,rgba(51,65,85,0.3) 33% 100%);
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.score-ring-inner{
+  width:42px;height:42px;border-radius:50%;background:var(--card);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:var(--amber);
+}
+.banner-text h2{font-size:14px;font-weight:700;margin-bottom:2px}
+.banner-text .sub{font-size:10px;color:var(--muted)}
+.banner-text .sub strong{color:var(--red)}
+.banner-stats{display:flex;gap:20px}
+.banner-stat{text-align:center}
+.banner-stat-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.banner-stat-val{font-size:16px;font-weight:800;margin-top:1px}
+
+/* ═══ TWO-COLUMN LAYOUT ═══ */
+.cols{display:flex;gap:16px}
+.col-left{width:420px;flex-shrink:0}
+.col-right{flex:1;min-width:0}
+
+/* ═══ LEFT COLUMN: ASSET MANAGEMENT ═══ */
+.left-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.left-header h3{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700}
+.left-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.add-btn{
+  font-size:9px;font-weight:600;padding:6px 14px;border-radius:7px;
+  background:var(--red);color:white;border:none;cursor:pointer;
+}
+.search-box{
+  width:100%;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.4);
+  border-radius:7px;padding:8px 12px;font-size:9px;color:var(--text);
+  font-family:inherit;outline:none;margin-bottom:12px;
+}
+.search-box::placeholder{color:var(--dim)}
+
+/* Asset Category */
+.asset-cat{margin-bottom:14px}
+.asset-cat-header{
+  display:flex;align-items:center;gap:8px;padding:8px 0;
+  border-bottom:1px solid rgba(51,65,85,0.2);margin-bottom:6px;cursor:pointer;
+}
+.cat-icon{
+  width:24px;height:24px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:11px;flex-shrink:0;
+}
+.cat-name{font-size:11px;font-weight:700;flex:1}
+.cat-count{font-size:10px;color:var(--muted);font-weight:600}
+.cat-bar{width:50px;height:4px;background:rgba(51,65,85,0.3);border-radius:2px;overflow:hidden;margin-left:6px}
+.cat-bar-fill{height:100%;border-radius:2px}
+.cat-warning{font-size:8px;color:var(--amber);display:flex;align-items:center;gap:3px;margin-bottom:6px}
+.cat-desc{font-size:8px;color:var(--dim);margin-bottom:6px}
+
+.asset-row{
+  display:flex;align-items:center;padding:6px 8px;font-size:9px;
+  border-bottom:1px solid rgba(51,65,85,0.1);gap:6px;
+}
+.asset-row:last-child{border-bottom:none}
+.asset-name{flex:1;font-weight:500;font-family:'JetBrains Mono',monospace,system-ui}
+.asset-status{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px}
+.status-active{background:rgba(34,197,94,0.12);color:var(--green)}
+.asset-time{font-size:8px;color:var(--dim)}
+.asset-findings{font-size:9px;font-weight:700;width:30px;text-align:right}
+.add-asset-link{font-size:9px;color:var(--indigo);font-weight:500;padding:4px 0;cursor:pointer}
+
+.cat-collapse{font-size:16px;color:var(--faint);cursor:pointer}
+
+/* Bottom Sources */
+.sources-section{margin-top:16px}
+.sources-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:8px}
+.sources-row{display:flex;gap:6px}
+.source-card{
+  flex:1;background:var(--card);border:1px solid var(--border);border-radius:7px;
+  padding:8px;text-align:center;
+}
+.source-rank{
+  width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;
+  justify-content:center;font-size:8px;font-weight:700;margin-bottom:4px;
+}
+.source-name{font-size:8px;font-weight:600}
+.source-count{font-size:7px;color:var(--dim)}
+
+/* ═══ RIGHT COLUMN ═══ */
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.pn-label{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.pn-title{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.pn-title .val{margin-left:auto;font-size:11px}
+
+/* Slot Utilization */
+.slot-grid{display:flex;flex-direction:column;gap:6px}
+.slot-row{display:flex;align-items:center;gap:8px;font-size:9px}
+.slot-icon{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.slot-name{width:110px;font-weight:600;flex-shrink:0}
+.slot-bar-wrap{flex:1;height:8px;background:rgba(51,65,85,0.3);border-radius:4px;overflow:hidden;position:relative}
+.slot-bar-fill{height:100%;border-radius:4px;transition:width 0.3s}
+.slot-fraction{width:32px;text-align:right;font-weight:700;font-size:9px;flex-shrink:0}
+.slot-status{width:50px;text-align:right;flex-shrink:0}
+.slot-full{color:var(--green);font-size:7px;font-weight:700}
+.slot-partial{color:var(--amber);font-size:7px;font-weight:700}
+.slot-empty{color:var(--red);font-size:7px;font-weight:700}
+
+/* Radar Chart Placeholder */
+.radar-wrap{display:flex;gap:12px;align-items:center}
+.radar-chart{
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,102,241,0.05) 0%,transparent 70%);
+  border:1px dashed rgba(51,65,85,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--faint);text-align:center;flex-shrink:0;
+}
+.radar-legend{flex:1;font-size:8px}
+.radar-legend-row{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(51,65,85,0.1)}
+.radar-legend-row:last-child{border-bottom:none}
+.radar-legend-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.radar-legend-name{flex:1;color:#94A3B8}
+.radar-legend-pct{font-weight:700}
+
+/* Top Alarm Assets */
+.alarm-asset-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.alarm-asset-row:last-child{border-bottom:none}
+.alarm-rank{font-size:8px;color:var(--dim);width:16px;font-weight:700}
+.alarm-name{flex:1;font-weight:600;font-family:'JetBrains Mono',monospace,system-ui;font-size:9px}
+.alarm-type{font-size:7px;padding:2px 6px;border-radius:3px;flex-shrink:0}
+.alarm-count{font-weight:700;width:36px;text-align:right;font-size:10px}
+.alarm-bar{width:60px;height:5px;background:rgba(51,65,85,0.2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.alarm-bar-fill{height:100%;border-radius:3px}
+
+/* Findings by Asset Type */
+.findings-type-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.findings-type-row:last-child{border-bottom:none}
+.ft-color{width:4px;height:28px;border-radius:2px;flex-shrink:0}
+.ft-info{flex:1}
+.ft-name{font-weight:600;font-size:9px}
+.ft-desc{font-size:7px;color:var(--dim);margin-top:1px}
+.ft-count{font-weight:800;font-size:14px}
+.ft-trend{font-size:8px;font-weight:600;margin-left:4px}
+
+/* Asset Scan Timeline */
+.scan-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.scan-row:last-child{border-bottom:none}
+.scan-asset{flex:1;font-weight:500;font-family:'JetBrains Mono',monospace,system-ui;font-size:8px}
+.scan-time{font-size:8px;color:var(--dim)}
+.scan-status{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.scan-ok{background:rgba(34,197,94,0.1);color:var(--green)}
+.scan-new{background:rgba(255,69,98,0.1);color:var(--red)}
+.scan-finding{font-size:8px;color:var(--amber);font-weight:600}
+
+/* Coverage Gaps */
+.gap-card{
+  background:rgba(255,69,98,0.04);border:1px solid rgba(255,69,98,0.12);
+  border-radius:7px;padding:10px 12px;margin-bottom:5px;
+  display:flex;align-items:center;gap:10px;
+}
+.gap-icon{
+  width:28px;height:28px;border-radius:6px;background:rgba(255,69,98,0.1);
+  display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;
+}
+.gap-info{flex:1}
+.gap-title{font-size:9px;font-weight:700}
+.gap-desc{font-size:8px;color:var(--dim);margin-top:1px}
+.gap-action{font-size:8px;color:var(--indigo);font-weight:600;flex-shrink:0;cursor:pointer}
+
+/* Recommendations */
+.rec-card{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  border-radius:7px;padding:10px 12px;margin-bottom:5px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.rec-icon{
+  width:24px;height:24px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:10px;flex-shrink:0;margin-top:2px;
+}
+.rec-info{flex:1}
+.rec-title{font-size:10px;font-weight:700}
+.rec-desc{font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:24px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PROTECTION COVERAGE PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+PAGE PURPOSE:
+This page is about asset management and coverage visibility. The left side
+lets users manage their monitored assets (add/remove/configure). The right
+side shows what those assets are producing — findings, alarms, scan status.
+The core goal is to drive users to FILL THEIR SLOTS (maximize coverage).
+
+LAYOUT: Two columns
+- Left (~40%): Asset management (existing, mostly unchanged)
+- Right (~60%): Coverage data, findings, alarms, scan activity, recommendations
+
+KEY UX PRINCIPLE:
+Everything on the right side should reference assets from the left side.
+When a user sees "socradar.com generated 312 findings", they should
+understand the direct link between what they configured and what they got.
+
+DATA MODELS:
+
+AssetSlot: {
+  category: 'domain' | 'ip_range' | 'company_name' | 'brand_keyword' | 
+            'vip_account' | 'third_party' | 'bin_number' | 'swift_code',
+  used: number,
+  total: number,
+  assets: [{
+    id: string,
+    value: 'socradar.com',
+    status: 'active' | 'inactive' | 'pending',
+    last_scan: '2026-04-29T10:00:00Z',
+    findings_count: 312,
+    alarms_count: 89
+  }]
+}
+
+FindingsByType: {
+  type: 'VIP Credential' | 'Dark Web Suspicious' | 'Black Market Botnet' | 
+        'PII Exposure' | 'Stolen Credentials',
+  count: number,
+  trend: '+12%' | '-5%',
+  source_asset: string  // which asset generated this
+}
+
+ScanEvent: {
+  asset_value: 'socradar.com',
+  asset_type: 'domain',
+  scan_time: '2026-04-29T10:00:00Z',
+  status: 'clean' | 'new_findings',
+  new_findings_count: 3
+}
+
+COMPONENT HIERARCHY:
+ProtectionCoveragePage
+├── CoverageBanner (top, full-width)
+├── LeftColumn
+│   ├── AssetSearch
+│   ├── AssetCategoryList (collapsible accordion)
+│   │   └── AssetRow (per configured asset)
+│   └── TopSources
+└── RightColumn
+    ├── SlotUtilization (visual bar per category)
+    ├── SourceCoverageRadar (existing radar chart)
+    ├── FindingsByAssetType (breakdown per category)
+    ├── TopAlarmAssets (which assets generate most alarms)
+    ├── RecentScanActivity (asset scan timeline)
+    ├── CoverageGaps (empty/partial slot warnings)
+    └── Recommendations (action prompts)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">PROTECTION COVERAGE &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ TOP BANNER ═══════════ -->
+<div class="top-banner">
+  <div class="banner-left">
+    <div class="score-ring"><div class="score-ring-inner">33%</div></div>
+    <div class="banner-text">
+      <div style="font-size:9px;color:var(--amber);font-weight:700;letter-spacing:1px">NEEDS ATTENTION</div>
+      <h2>9 of 27 asset slots configured across 5 categories</h2>
+      <div class="sub"><strong>18 empty slots</strong> &mdash; maximize your dark web coverage</div>
+    </div>
+  </div>
+  <div class="banner-stats">
+    <div class="banner-stat"><div class="banner-stat-label">ASSET GROUPS</div><div class="banner-stat-val" style="color:var(--amber)">5/8</div></div>
+    <div class="banner-stat"><div class="banner-stat-label">ACTIVE ASSETS</div><div class="banner-stat-val">9</div></div>
+    <div class="banner-stat"><div class="banner-stat-label">TOTAL FINDINGS</div><div class="banner-stat-val" style="color:var(--red)">967</div></div>
+    <div class="banner-stat"><div class="banner-stat-label">LAST FULL SCAN</div><div class="banner-stat-val" style="color:var(--green)">5m ago</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ TWO COLUMNS ═══════════ -->
+<div class="cols">
+
+<!-- ═══════════ LEFT: ASSET MANAGEMENT ═══════════ -->
+<div class="col-left">
+  <div class="left-header">
+    <div>
+      <h3>MONITORED ASSETS</h3>
+      <div class="left-title">Expand to view &amp; manage</div>
+    </div>
+    <button class="add-btn">+ Add Asset</button>
+  </div>
+  <input class="search-box" type="text" placeholder="Search assets...">
+
+  <!-- Domain -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(255,69,98,0.1);color:var(--red)">&#9673;</div>
+      <span class="cat-name">Domain</span>
+      <span class="cat-count">1/3</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:33%;background:var(--red)"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-warning">&#9888; 2 of 3 slots remaining &mdash; maximize coverage</div>
+    <div class="cat-desc">Your company domains to monitor for dark web exposure</div>
+    <div class="asset-row">
+      <span class="asset-name">socradar.com</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">312</span>
+    </div>
+  </div>
+
+  <!-- IP Range -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(245,158,11,0.1);color:var(--amber)">&#9632;</div>
+      <span class="cat-name">IP Range</span>
+      <span class="cat-count">1/3</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:33%;background:var(--amber)"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-warning">&#9888; 2 of 3 slots remaining &mdash; maximize coverage</div>
+    <div class="cat-desc">IP address ranges to track for unauthorized access listings</div>
+    <div class="asset-row">
+      <span class="asset-name">10.253.3.13</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">45</span>
+    </div>
+  </div>
+
+  <!-- Company Name -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(99,102,241,0.1);color:var(--indigo)">&#9730;</div>
+      <span class="cat-name">Company Name</span>
+      <span class="cat-count">0/1</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:0%;background:var(--red)"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-desc">Brand and company names to detect dark web mentions</div>
+    <div class="add-asset-link">+ Add Company Name</div>
+  </div>
+
+  <!-- Brand Keyword -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(168,85,247,0.1);color:var(--purple)">#</div>
+      <span class="cat-name">Brand Keyword</span>
+      <span class="cat-count">2/5</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:40%;background:var(--amber)"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-warning">&#9888; 3 of 5 slots remaining</div>
+    <div class="cat-desc">Keywords related to your brand to scan across dark web sources</div>
+    <div class="asset-row">
+      <span class="asset-name">greenanimalsbank</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">56</span>
+    </div>
+    <div class="asset-row">
+      <span class="asset-name">socradar</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">83</span>
+    </div>
+  </div>
+
+  <!-- VIP Account -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(34,211,238,0.1);color:var(--cyan)">&#9734;</div>
+      <span class="cat-name">VIP Account</span>
+      <span class="cat-count">3/5</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:60%;background:var(--green)"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-warning">&#9888; 2 of 5 slots remaining</div>
+    <div class="cat-desc">Executive and high-value accounts to monitor for credential leaks</div>
+    <div class="asset-row">
+      <span class="asset-name">simon.johnsson@greenanimals.com</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">89</span>
+    </div>
+    <div class="asset-row">
+      <span class="asset-name">elena.marchetti@socradar.io</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">0</span>
+    </div>
+    <div class="asset-row">
+      <span class="asset-name">james.chen@greenanimalsbank.com</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">0</span>
+    </div>
+  </div>
+
+  <!-- Third Party Employee -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(51,65,85,0.2);color:var(--muted)">&#9775;</div>
+      <span class="cat-name">Third Party Employee</span>
+      <span class="cat-count">0/3</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:0%"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-desc">Vendor and contractor accounts to track for supply chain risks</div>
+    <div class="add-asset-link">+ Add Third Party Employee</div>
+  </div>
+
+  <!-- BIN Number -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(34,197,94,0.1);color:var(--green)">&#9632;</div>
+      <span class="cat-name">BIN Number</span>
+      <span class="cat-count">2/5</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:40%;background:var(--amber)"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-desc">Bank Identification Numbers to detect compromised payment cards</div>
+    <div class="asset-row">
+      <span class="asset-name">222222</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">204</span>
+    </div>
+    <div class="asset-row">
+      <span class="asset-name">111111</span>
+      <span class="asset-status status-active">ACTIVE</span>
+      <span class="asset-time">5m ago</span>
+      <span class="asset-findings">178</span>
+    </div>
+  </div>
+
+  <!-- SWIFT Code -->
+  <div class="asset-cat">
+    <div class="asset-cat-header">
+      <div class="cat-icon" style="background:rgba(51,65,85,0.2);color:var(--muted)">&#9730;</div>
+      <span class="cat-name">SWIFT Code</span>
+      <span class="cat-count">0/2</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:0%"></div></div>
+      <span class="cat-collapse">}</span>
+    </div>
+    <div class="cat-desc">SWIFT/BIC codes to monitor for financial fraud targeting your institution</div>
+    <div class="add-asset-link">+ Add SWIFT Code</div>
+  </div>
+
+  <!-- Top Sources -->
+  <div class="sources-section">
+    <div class="sources-title">TOP 5 MOST USED SOURCES</div>
+    <div class="sources-row">
+      <div class="source-card"><div class="source-rank" style="background:rgba(255,69,98,0.12);color:var(--red)">1</div><div class="source-name">Hacker Forums</div><div class="source-count">7 sources</div></div>
+      <div class="source-card"><div class="source-rank" style="background:rgba(245,158,11,0.12);color:var(--amber)">2</div><div class="source-name">Telegram</div><div class="source-count">6 sources</div></div>
+      <div class="source-card"><div class="source-rank" style="background:rgba(99,102,241,0.12);color:var(--indigo)">3</div><div class="source-name">Breach Data</div><div class="source-count">6 sources</div></div>
+      <div class="source-card"><div class="source-rank" style="background:rgba(168,85,247,0.12);color:var(--purple)">4</div><div class="source-name">Discord</div><div class="source-count">5 sources</div></div>
+      <div class="source-card"><div class="source-rank" style="background:rgba(51,65,85,0.2);color:var(--muted)">5</div><div class="source-name">IRC</div><div class="source-count">5 sources</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RIGHT: COVERAGE DATA ═══════════ -->
+<div class="col-right">
+
+  <!-- 1. SLOT UTILIZATION -->
+  <div class="pn">
+    <div class="pn-label">SLOT UTILIZATION</div>
+    <div class="pn-title">Are you using your coverage? <span class="val" style="color:var(--amber)">9/27 slots used</span></div>
+    <div class="slot-grid">
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(255,69,98,0.1);color:var(--red)">&#9673;</div>
+        <span class="slot-name">Domain</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:33%;background:var(--red)"></div></div>
+        <span class="slot-fraction">1/3</span>
+        <span class="slot-status slot-partial">+2 AVAIL</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(245,158,11,0.1);color:var(--amber)">&#9632;</div>
+        <span class="slot-name">IP Range</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:33%;background:var(--amber)"></div></div>
+        <span class="slot-fraction">1/3</span>
+        <span class="slot-status slot-partial">+2 AVAIL</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(99,102,241,0.1);color:var(--indigo)">&#9730;</div>
+        <span class="slot-name">Company Name</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:0%"></div></div>
+        <span class="slot-fraction">0/1</span>
+        <span class="slot-status slot-empty">EMPTY</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(168,85,247,0.1);color:var(--purple)">#</div>
+        <span class="slot-name">Brand Keyword</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:40%;background:var(--amber)"></div></div>
+        <span class="slot-fraction">2/5</span>
+        <span class="slot-status slot-partial">+3 AVAIL</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(34,211,238,0.1);color:var(--cyan)">&#9734;</div>
+        <span class="slot-name">VIP Account</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:60%;background:var(--green)"></div></div>
+        <span class="slot-fraction">3/5</span>
+        <span class="slot-status slot-partial">+2 AVAIL</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(51,65,85,0.2);color:var(--muted)">&#9775;</div>
+        <span class="slot-name">Third Party</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:0%"></div></div>
+        <span class="slot-fraction">0/3</span>
+        <span class="slot-status slot-empty">EMPTY</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(34,197,94,0.1);color:var(--green)">&#9632;</div>
+        <span class="slot-name">BIN Number</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:40%;background:var(--amber)"></div></div>
+        <span class="slot-fraction">2/5</span>
+        <span class="slot-status slot-partial">+3 AVAIL</span>
+      </div>
+      <div class="slot-row">
+        <div class="slot-icon" style="background:rgba(51,65,85,0.2);color:var(--muted)">&#9730;</div>
+        <span class="slot-name">SWIFT Code</span>
+        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:0%"></div></div>
+        <span class="slot-fraction">0/2</span>
+        <span class="slot-status slot-empty">EMPTY</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SOURCE COVERAGE RADAR -->
+  <div class="pn">
+    <div class="pn-label">SOURCE COVERAGE</div>
+    <div class="pn-title">Detection depth by channel <span class="val">Avg: <strong style="color:var(--green)">72%</strong></span></div>
+    <div class="radar-wrap">
+      <div class="radar-chart">[Radar Chart]<br>Stealer Logs &middot; Dark Forums<br>Telegram &middot; Paste Sites<br>Marketplaces &middot; Ransomware<br>Code Repos &middot; Brokers</div>
+      <div class="radar-legend">
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--green)"></span><span class="radar-legend-name">Stealer Logs</span><span class="radar-legend-pct" style="color:var(--green)">92%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--green)"></span><span class="radar-legend-name">Dark Forums</span><span class="radar-legend-pct" style="color:var(--green)">85%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--green)"></span><span class="radar-legend-name">Telegram</span><span class="radar-legend-pct" style="color:var(--green)">78%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--amber)"></span><span class="radar-legend-name">Paste Sites</span><span class="radar-legend-pct" style="color:var(--amber)">65%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--amber)"></span><span class="radar-legend-name">Marketplaces</span><span class="radar-legend-pct" style="color:var(--amber)">62%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--amber)"></span><span class="radar-legend-name">Ransomware</span><span class="radar-legend-pct" style="color:var(--amber)">58%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--red)"></span><span class="radar-legend-name">Code Repos</span><span class="radar-legend-pct" style="color:var(--red)">45%</span></div>
+        <div class="radar-legend-row"><span class="radar-legend-dot" style="background:var(--red)"></span><span class="radar-legend-name">Brokers (IAB)</span><span class="radar-legend-pct" style="color:var(--red)">38%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. FINDINGS BY ASSET TYPE -->
+  <div class="pn">
+    <div class="pn-label">FINDINGS BY ASSET TYPE</div>
+    <div class="pn-title">What your assets are catching <span class="val" style="color:var(--red)">967 total</span></div>
+    <div class="findings-type-row">
+      <div class="ft-color" style="background:var(--red)"></div>
+      <div class="ft-info"><div class="ft-name">VIP Credential Leaks</div><div class="ft-desc">From: simon.johnsson@greenanimals.com + 2 VIPs</div></div>
+      <div class="ft-count" style="color:var(--red)">882</div>
+      <span class="ft-trend" style="color:var(--red)">&#9650;+14%</span>
+    </div>
+    <div class="findings-type-row">
+      <div class="ft-color" style="background:var(--amber)"></div>
+      <div class="ft-info"><div class="ft-name">Dark Web Suspicious</div><div class="ft-desc">From: socradar.com, greenanimalsbank keywords</div></div>
+      <div class="ft-count" style="color:var(--amber)">468</div>
+      <span class="ft-trend" style="color:var(--amber)">&#9650;+8%</span>
+    </div>
+    <div class="findings-type-row">
+      <div class="ft-color" style="background:var(--indigo)"></div>
+      <div class="ft-info"><div class="ft-name">Black Market / Botnet</div><div class="ft-desc">From: BIN 222222, BIN 111111</div></div>
+      <div class="ft-count">348</div>
+      <span class="ft-trend" style="color:var(--green)">&#9660;-3%</span>
+    </div>
+    <div class="findings-type-row">
+      <div class="ft-color" style="background:var(--purple)"></div>
+      <div class="ft-info"><div class="ft-name">PII Exposure</div><div class="ft-desc">From: socradar.com domain monitoring</div></div>
+      <div class="ft-count">306</div>
+      <span class="ft-trend" style="color:var(--red)">&#9650;+22%</span>
+    </div>
+    <div class="findings-type-row">
+      <div class="ft-color" style="background:var(--cyan)"></div>
+      <div class="ft-info"><div class="ft-name">Stolen Credentials</div><div class="ft-desc">From: IP range 10.253.3.13</div></div>
+      <div class="ft-count">127</div>
+      <span class="ft-trend" style="color:var(--amber)">&#9650;+5%</span>
+    </div>
+  </div>
+
+  <!-- 4. TOP ALARM-GENERATING ASSETS -->
+  <div class="pn">
+    <div class="pn-label">TOP ALARM-GENERATING ASSETS</div>
+    <div class="pn-title">Which assets trigger the most alarms <span class="val">2,043 total</span></div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">1</span>
+      <span class="alarm-name">socradar.com</span>
+      <span class="alarm-type" style="background:rgba(255,69,98,0.1);color:var(--red)">Domain</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:100%;background:var(--red)"></div></div>
+      <span class="alarm-count" style="color:var(--red)">312</span>
+    </div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">2</span>
+      <span class="alarm-name">BIN: 222222</span>
+      <span class="alarm-type" style="background:rgba(34,197,94,0.1);color:var(--green)">BIN</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:65%;background:var(--amber)"></div></div>
+      <span class="alarm-count" style="color:var(--amber)">204</span>
+    </div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">3</span>
+      <span class="alarm-name">BIN: 111111</span>
+      <span class="alarm-type" style="background:rgba(34,197,94,0.1);color:var(--green)">BIN</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:57%;background:var(--amber)"></div></div>
+      <span class="alarm-count">178</span>
+    </div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">4</span>
+      <span class="alarm-name">simon.johnsson@greenanimals.com</span>
+      <span class="alarm-type" style="background:rgba(34,211,238,0.1);color:var(--cyan)">VIP</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:29%;background:var(--indigo)"></div></div>
+      <span class="alarm-count">89</span>
+    </div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">5</span>
+      <span class="alarm-name">socradar</span>
+      <span class="alarm-type" style="background:rgba(168,85,247,0.1);color:var(--purple)">Keyword</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:27%;background:var(--indigo)"></div></div>
+      <span class="alarm-count">83</span>
+    </div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">6</span>
+      <span class="alarm-name">greenanimalsbank</span>
+      <span class="alarm-type" style="background:rgba(168,85,247,0.1);color:var(--purple)">Keyword</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:18%;background:var(--indigo)"></div></div>
+      <span class="alarm-count">56</span>
+    </div>
+    <div class="alarm-asset-row">
+      <span class="alarm-rank">7</span>
+      <span class="alarm-name">10.253.3.13</span>
+      <span class="alarm-type" style="background:rgba(245,158,11,0.1);color:var(--amber)">IP</span>
+      <div class="alarm-bar"><div class="alarm-bar-fill" style="width:14%;background:var(--faint)"></div></div>
+      <span class="alarm-count">45</span>
+    </div>
+  </div>
+
+  <!-- 5. RECENT SCAN ACTIVITY -->
+  <div class="pn">
+    <div class="pn-label">RECENT SCAN ACTIVITY</div>
+    <div class="pn-title">Latest scans across your assets <span class="val" style="color:var(--green)">All scanned &lt;5m ago</span></div>
+    <div class="scan-row">
+      <span class="scan-asset">socradar.com</span>
+      <span class="scan-finding">+3 new findings</span>
+      <span class="scan-status scan-new">NEW HITS</span>
+      <span class="scan-time">2m ago</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-asset">BIN: 222222</span>
+      <span class="scan-finding">+1 new finding</span>
+      <span class="scan-status scan-new">NEW HITS</span>
+      <span class="scan-time">3m ago</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-asset">greenanimalsbank</span>
+      <span class="scan-finding"></span>
+      <span class="scan-status scan-ok">CLEAN</span>
+      <span class="scan-time">4m ago</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-asset">simon.johnsson@greenanimals.com</span>
+      <span class="scan-finding"></span>
+      <span class="scan-status scan-ok">CLEAN</span>
+      <span class="scan-time">4m ago</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-asset">socradar</span>
+      <span class="scan-finding">+2 new findings</span>
+      <span class="scan-status scan-new">NEW HITS</span>
+      <span class="scan-time">5m ago</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-asset">10.253.3.13</span>
+      <span class="scan-finding"></span>
+      <span class="scan-status scan-ok">CLEAN</span>
+      <span class="scan-time">5m ago</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-asset">BIN: 111111</span>
+      <span class="scan-finding"></span>
+      <span class="scan-status scan-ok">CLEAN</span>
+      <span class="scan-time">5m ago</span>
+    </div>
+  </div>
+
+  <!-- 6. COVERAGE GAPS -->
+  <div class="pn" style="background:transparent;border:none;padding:0">
+    <div class="pn-label">COVERAGE GAPS</div>
+    <div class="pn-title" style="margin-bottom:6px">Unconfigured asset types leaving blind spots</div>
+    <div class="gap-card">
+      <div class="gap-icon">&#9730;</div>
+      <div class="gap-info">
+        <div class="gap-title">Company Name &mdash; 0/1 configured</div>
+        <div class="gap-desc">Your brand name isn't being monitored. Dark web mentions of your company will be missed.</div>
+      </div>
+      <span class="gap-action">+ Add Now</span>
+    </div>
+    <div class="gap-card">
+      <div class="gap-icon">&#9775;</div>
+      <div class="gap-info">
+        <div class="gap-title">Third Party Employees &mdash; 0/3 configured</div>
+        <div class="gap-desc">Vendor and contractor credentials are unmonitored. Supply chain exposure risk.</div>
+      </div>
+      <span class="gap-action">+ Add Now</span>
+    </div>
+    <div class="gap-card">
+      <div class="gap-icon">&#9730;</div>
+      <div class="gap-info">
+        <div class="gap-title">SWIFT Codes &mdash; 0/2 configured</div>
+        <div class="gap-desc">Financial fraud targeting your institution via SWIFT will not be detected.</div>
+      </div>
+      <span class="gap-action">+ Add Now</span>
+    </div>
+  </div>
+
+  <!-- 7. RECOMMENDATIONS -->
+  <div class="pn">
+    <div class="pn-label">RECOMMENDATIONS</div>
+    <div class="pn-title">Improve your coverage</div>
+    <div class="rec-card">
+      <div class="rec-icon" style="background:rgba(255,69,98,0.1);color:var(--red)">&#9673;</div>
+      <div class="rec-info">
+        <div class="rec-title">Add 2 more Domains</div>
+        <div class="rec-desc">1 of 3 slots used. Your company domains to monitor for dark web exposure</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon" style="background:rgba(245,158,11,0.1);color:var(--amber)">&#9632;</div>
+      <div class="rec-info">
+        <div class="rec-title">Add 2 more IP Ranges</div>
+        <div class="rec-desc">1 of 3 slots used. IP address ranges to track for unauthorized access listings</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon" style="background:rgba(99,102,241,0.1);color:var(--indigo)">&#9730;</div>
+      <div class="rec-info">
+        <div class="rec-title">Add Company Name</div>
+        <div class="rec-desc">Brand and company names to detect dark web mentions</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon" style="background:rgba(168,85,247,0.1);color:var(--purple)">#</div>
+      <div class="rec-info">
+        <div class="rec-title">Add 3 more Brand Keywords</div>
+        <div class="rec-desc">2 of 5 slots used. Keywords related to your brand to scan across dark web sources</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon" style="background:rgba(34,211,238,0.1);color:var(--cyan)">&#9734;</div>
+      <div class="rec-info">
+        <div class="rec-title">Add 2 more VIP Accounts</div>
+        <div class="rec-desc">3 of 5 slots used. Executive and high-value accounts to monitor for credential leaks</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3)"></span>Coverage Banner (full-width)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Left ~40%: Asset Management</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.06)"></span>Right ~60%: Coverage Data &amp; Insights</span>
+  </div>
+</div>
+
+</body>
+</html>

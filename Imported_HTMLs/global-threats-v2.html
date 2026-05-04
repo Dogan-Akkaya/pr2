@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Global Threats v2 — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding-top:58px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.section{padding:0 20px;margin-bottom:18px}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.st{font-size:12px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.st .lk{color:var(--indigo);font-size:9px;margin-left:auto}
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+GLOBAL THREATS v2 — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+6 STRUCTURAL CHANGES FROM v1:
+  1. Map REMOVED. Heatmap promoted to top (hero position)
+  2. Threat Actors MERGED with Actor→CVE→Industry flow (expandable rows)
+  3. Auto-detected trending topics made MORE PROMINENT (split section)
+  4. Three-column data row gets shared "Underground Market Activity" header
+  5. Ransomware Operations gets proper space (table, not clipped cards)
+  6. Latest Activity (news) MOVED ABOVE the data row
+
+FULL PAGE ORDER:
+  1. Page header
+  2. Sticky filter bar (All | My Country | My Industry | My Region + time + saves)
+  3. Attack Distribution heatmap (HERO) + Live Pulse stats
+  4. Geographic Targeting (compact widget)
+  5. Threat Actors (merged with CVE→Industry, expandable) + Ransomware Targets + Groups
+  6. Telegram Intelligence (search + feed + trending with AI-detected section)
+  7. Latest Activity / News (MOVED UP)
+  8. Underground Market Activity (shared header: IAB + Stealer + Insider)
+  9. Active Ransomware Operations (proper table)
+
+FILTER STATE: React context + URL query params for shareability.
+  /global-threats?industry=finance&time=last_quarter
+  Saved filters stored server-side per user account.
+  ALL sections respond to filter changes simultaneously.
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
+
+/* ═══ STICKY FILTER BAR ═══ */
+.filter-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,12,21,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(51,65,85,0.3);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;height:58px}
+.fl{display:flex;align-items:center;gap:6px}
+.fr{display:flex;align-items:center;gap:6px}
+.fp{font-size:9px;font-weight:600;padding:5px 14px;border-radius:7px;cursor:pointer;border:1px solid rgba(51,65,85,0.4);background:transparent;color:var(--muted)}
+.fp:hover{border-color:rgba(99,102,241,0.3);color:var(--text)}
+.fp.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:var(--indigo)}
+.fp.active-red{background:rgba(255,69,98,0.12);border-color:rgba(255,69,98,0.3);color:var(--red)}
+.date-box{font-size:9px;color:var(--muted);background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.3);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px}
+.date-box strong{color:var(--text)}
+.fdiv{width:1px;height:24px;background:rgba(51,65,85,0.4);margin:0 6px}
+.save-btn{font-size:8px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;border:1px dashed rgba(51,65,85,0.5);background:transparent;color:var(--dim)}
+.save-btn.filled{border-style:solid;border-color:rgba(99,102,241,0.3);color:var(--indigo);background:rgba(99,102,241,0.06)}
+
+/* ═══ HEATMAP (HERO) ═══ */
+.heatmap-hero{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.hm-grid{display:grid;grid-template-columns:90px repeat(6,1fr);gap:2px;margin-top:8px}
+.hm-h{font-size:7px;color:var(--dim);text-align:center;padding:4px;letter-spacing:.5px;font-weight:700}
+.hm-l{font-size:8px;color:#94A3B8;display:flex;align-items:center;padding:4px 0}
+.hm-c{border-radius:3px;height:32px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:rgba(255,255,255,0.8);cursor:pointer;transition:transform 0.1s}
+.hm-c:hover{transform:scale(1.05)}
+.hm-hot{background:rgba(255,69,98,0.55)}
+.hm-warm{background:rgba(255,69,98,0.32)}
+.hm-med{background:rgba(245,158,11,0.28)}
+.hm-cool{background:rgba(99,102,241,0.18);color:rgba(255,255,255,0.5)}
+.hm-cold{background:rgba(51,65,85,0.18);color:rgba(255,255,255,0.3)}
+
+/* Live Pulse stats */
+.pulse-row{display:flex;gap:8px;margin-bottom:14px}
+.pulse-stat{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.pulse-num{font-size:20px;font-weight:800}
+.pulse-info{font-size:8px;color:var(--muted);line-height:1.3}
+.pulse-trend{font-size:8px;font-weight:600}
+
+/* ═══ GEO TARGETING (compact) ═══ */
+.geo-compact{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px}
+.geo-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.geo-row:last-child{border-bottom:none}
+.geo-rank{color:var(--dim);font-size:8px;width:18px}
+.geo-flag{font-size:12px;width:20px}
+.geo-name{flex:1;font-weight:600}
+.geo-pct{font-weight:700;width:50px;text-align:right}
+.geo-bar{width:60px;height:4px;background:rgba(51,65,85,0.2);border-radius:2px;overflow:hidden}
+.geo-bar-fill{height:100%;border-radius:2px}
+
+/* ═══ THREAT ACTORS (MERGED) ═══ */
+.actor-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:4px;cursor:pointer;transition:border-color 0.15s}
+.actor-row:hover{border-color:rgba(99,102,241,0.25)}
+.actor-row.expanded{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.02)}
+.actor-top{display:flex;align-items:center;gap:8px;font-size:10px}
+.actor-flag{font-size:8px;color:var(--dim);width:20px}
+.actor-name{font-weight:700;flex:1}
+.actor-rank{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px}
+.rank-hot{background:rgba(255,69,98,0.12);color:var(--red)}
+.rank-warm{background:rgba(245,158,11,0.12);color:var(--amber)}
+.rank-cool{background:rgba(99,102,241,0.1);color:var(--indigo)}
+.targets-you{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(255,69,98,0.08);color:var(--red);border:1px solid rgba(255,69,98,0.15)}
+.actor-chevron{color:var(--dim);font-size:10px;transition:transform 0.2s}
+.actor-row.expanded .actor-chevron{transform:rotate(90deg)}
+
+/* Expanded CVE chain */
+.cve-chain{padding:10px 0 4px 28px;border-top:1px solid rgba(51,65,85,0.15);margin-top:8px;display:none}
+.actor-row.expanded .cve-chain{display:block}
+.chain-flow{display:flex;align-items:center;gap:6px;font-size:9px;padding:5px 0;border-bottom:1px solid rgba(51,65,85,0.08)}
+.chain-flow:last-child{border-bottom:none}
+.chain-cve{font-family:'JetBrains Mono',monospace;font-weight:600}
+.chain-arrow{color:var(--faint);font-size:10px}
+.chain-cvss{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700}
+.chain-cvss-c{background:rgba(255,69,98,0.12);color:var(--red)}
+.chain-cvss-h{background:rgba(245,158,11,0.12);color:var(--amber)}
+.chain-ind{font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(99,102,241,0.08);color:var(--indigo)}
+
+/* ═══ THREE-COLUMN INTEL GRID ═══ */
+.intel-3col{display:flex;gap:8px;margin-bottom:14px}
+.intel-3col .pn{flex:1;margin-bottom:0}
+.intel-row{display:flex;align-items:center;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.intel-row:last-child{border-bottom:none}
+
+/* ═══ TELEGRAM ═══ */
+.tg-container{background:var(--card);border:1px solid rgba(0,136,204,0.15);border-radius:10px;display:flex;overflow:hidden;height:300px;margin-bottom:14px}
+.tg-left{width:220px;flex-shrink:0;padding:12px;border-right:1px solid rgba(51,65,85,0.3);display:flex;flex-direction:column}
+.tg-middle{flex:1;padding:12px;overflow-y:auto;border-right:1px solid rgba(51,65,85,0.3)}
+.tg-right{width:220px;flex-shrink:0;padding:12px;overflow-y:auto}
+.tg-search{width:100%;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.4);border-radius:5px;padding:6px 8px;font-size:8px;color:var(--text);font-family:inherit;outline:none;margin-bottom:6px}
+.tg-search::placeholder{color:var(--dim)}
+.tg-pills{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.tg-pill{font-size:6px;padding:2px 6px;border-radius:3px;cursor:pointer}
+.tg-pill-active{background:rgba(0,136,204,0.12);color:#38BDF8;border:1px solid rgba(0,136,204,0.2)}
+.tg-pill-off{background:rgba(51,65,85,0.15);color:var(--dim);border:1px solid rgba(51,65,85,0.2)}
+.tg-mini-label{font-size:6px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-bottom:3px;margin-top:6px}
+.tg-select{width:100%;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.4);border-radius:4px;padding:4px 6px;font-size:7px;color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none}
+.tg-count{font-size:7px;color:var(--dim);margin-top:auto;padding-top:6px;border-top:1px solid rgba(51,65,85,0.2)}
+.tg-count strong{color:var(--text)}
+
+.tg-msg{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.2);border-radius:6px;padding:8px 10px;margin-bottom:4px}
+.tg-ch{font-size:8px;font-weight:700;color:#38BDF8}
+.tg-time{font-size:7px;color:var(--dim);margin-left:4px}
+.tg-text{font-size:8px;color:#94A3B8;margin-top:2px;line-height:1.3}
+.tg-text em{color:var(--red);font-style:normal;font-weight:600}
+.tg-tags{display:flex;gap:2px;margin-top:3px}
+.tg-tag{font-size:5px;padding:1px 4px;border-radius:2px;background:rgba(255,255,255,0.04);color:rgba(148,163,184,0.6)}
+
+/* Trending topics */
+.trend-section-title{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-bottom:4px}
+.trend-card{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.2);border-radius:5px;padding:6px 8px;margin-bottom:3px;cursor:pointer;transition:border-color 0.15s}
+.trend-card:hover{border-color:rgba(0,136,204,0.3)}
+.trend-name{font-size:8px;font-weight:700}
+.trend-meta{display:flex;justify-content:space-between;font-size:7px;color:var(--dim);margin-top:2px}
+.trend-spark{display:flex;align-items:flex-end;gap:1px;height:12px}
+.trend-spark span{width:2px;border-radius:1px}
+.ai-detected{border-color:rgba(168,85,247,0.2);background:rgba(168,85,247,0.03)}
+.ai-badge{font-size:6px;background:rgba(168,85,247,0.12);color:var(--purple);padding:1px 5px;border-radius:3px;font-weight:700}
+
+/* ═══ NEWS MASTER-DETAIL ═══ */
+.news-layout{display:flex;gap:10px;margin-bottom:14px}
+.news-list{width:360px;flex-shrink:0}
+.news-detail{flex:1;min-width:0}
+.news-tabs{display:flex;gap:3px;margin-bottom:8px}
+.news-tab{font-size:8px;font-weight:600;padding:4px 12px;border-radius:5px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.news-tab.active{background:rgba(255,69,98,0.12);border-color:rgba(255,69,98,0.3);color:var(--red)}
+.news-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 10px;margin-bottom:3px;cursor:pointer}
+.news-item.active{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
+.news-tag{font-size:6px;font-weight:700;padding:2px 6px;border-radius:3px}
+.tag-r{background:rgba(255,69,98,0.12);color:var(--red)}
+.tag-f{background:rgba(99,102,241,0.12);color:var(--indigo)}
+.tag-c{background:rgba(245,158,11,0.12);color:var(--amber)}
+.news-nm{color:var(--dim);font-size:7px;margin-left:4px}
+.news-hl{font-size:9px;font-weight:500;margin-top:3px;line-height:1.3}
+.news-detail-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
+.news-dtitle{font-size:14px;font-weight:800;margin-bottom:4px}
+.news-ddate{font-size:8px;color:var(--dim);margin-bottom:8px}
+.news-dtags{display:flex;gap:3px;margin-bottom:10px}
+.news-dtag{font-size:7px;padding:3px 8px;border-radius:4px;background:rgba(99,102,241,0.08);color:var(--indigo)}
+.news-ai{display:flex;align-items:flex-start;gap:8px;background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1);border-radius:6px;padding:10px}
+.news-ai-icon{width:22px;height:22px;background:rgba(168,85,247,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--purple);font-size:10px;flex-shrink:0}
+.news-ai-text{font-size:8px;color:#94A3B8;line-height:1.5}
+
+/* ═══ UNDERGROUND MARKET ACTIVITY ═══ */
+.market-3col{display:flex;gap:8px;margin-bottom:14px}
+.market-3col .pn{flex:1;margin-bottom:0}
+.mkt-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.mkt-stat:last-child{border-bottom:none}
+.mkt-l{color:#94A3B8}.mkt-v{font-weight:700}
+.mkt-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.mkt-row:last-child{border-bottom:none}
+.mkt-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.mkt-name{flex:1;font-weight:600}
+.mkt-share{font-size:7px;color:var(--dim);width:40px}
+.mkt-cnt{font-weight:700;width:34px;text-align:right}
+
+/* ═══ RANSOMWARE OPS TABLE ═══ */
+.ransom-table{width:100%;font-size:9px;border-collapse:collapse}
+.ransom-table th{text-align:left;font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(51,65,85,0.3)}
+.ransom-table td{padding:7px 8px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.ransom-table tr:hover{background:rgba(99,102,241,0.03)}
+
+/* ═══ LEGEND ═══ */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin:18px 20px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 1. STICKY FILTER BAR ═══════════ -->
+<div class="filter-bar">
+  <div class="fl">
+    <span style="font-size:8px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-right:4px">CONTEXT</span>
+    <button class="fp active">All</button>
+    <button class="fp">My Country</button>
+    <button class="fp">My Industry</button>
+    <button class="fp">My Region</button>
+  </div>
+  <div class="fr">
+    <div class="date-box"><strong>Jan 1, 2026</strong> <span style="color:var(--faint)">&mdash;</span> <strong>May 4, 2026</strong></div>
+    <button class="fp active-red">YTD</button>
+    <button class="fp">Last Quarter</button>
+    <button class="fp">Last Month</button>
+    <button class="fp">Last Year</button>
+    <div class="fdiv"></div>
+    <button class="save-btn filled">Save 1</button>
+    <button class="save-btn filled">Save 2</button>
+    <button class="save-btn">+ Save</button>
+  </div>
+</div>
+
+<!-- ═══════════ 3. HEATMAP HERO + LIVE PULSE ═══════════ -->
+<div class="section">
+  <div class="section-label">GLOBAL THREAT TEMPERATURE</div>
+
+  <div class="heatmap-hero">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:700">Attack Distribution by Sector &amp; Type</div>
+      <span style="font-size:8px;color:var(--dim)">Click any cell to filter the page</span>
+    </div>
+    <div class="hm-grid">
+      <div></div><div class="hm-h">FINANCE</div><div class="hm-h">HEALTH</div><div class="hm-h">MANUFACT.</div><div class="hm-h">GOV</div><div class="hm-h">RETAIL</div><div class="hm-h">EDUCATION</div>
+      <div class="hm-l">Ransomware</div><div class="hm-c hm-hot">287</div><div class="hm-c hm-hot">312</div><div class="hm-c hm-warm">243</div><div class="hm-c hm-warm">198</div><div class="hm-c hm-med">145</div><div class="hm-c hm-cool">89</div>
+      <div class="hm-l">Data Breach</div><div class="hm-c hm-hot">345</div><div class="hm-c hm-warm">189</div><div class="hm-c hm-med">156</div><div class="hm-c hm-med">134</div><div class="hm-c hm-warm">201</div><div class="hm-c hm-cool">67</div>
+      <div class="hm-l">Access Sale</div><div class="hm-c hm-warm">198</div><div class="hm-c hm-med">112</div><div class="hm-c hm-warm">187</div><div class="hm-c hm-cool">78</div><div class="hm-c hm-cool">56</div><div class="hm-c hm-cold">23</div>
+      <div class="hm-l">DDoS</div><div class="hm-c hm-med">134</div><div class="hm-c hm-cool">45</div><div class="hm-c hm-cool">67</div><div class="hm-c hm-warm">178</div><div class="hm-c hm-cool">34</div><div class="hm-c hm-med">112</div>
+      <div class="hm-l">Phishing</div><div class="hm-c hm-hot">412</div><div class="hm-c hm-warm">234</div><div class="hm-c hm-med">123</div><div class="hm-c hm-cool">89</div><div class="hm-c hm-warm">267</div><div class="hm-c hm-med">156</div>
+    </div>
+  </div>
+
+  <div class="pulse-row">
+    <div class="pulse-stat"><div class="pulse-num" style="color:var(--red)">312</div><div class="pulse-info">Ransomware<br>Victims<div class="pulse-trend" style="color:var(--red)">&#9650; +28%</div></div></div>
+    <div class="pulse-stat"><div class="pulse-num" style="color:var(--amber)">1,092</div><div class="pulse-info">Data<br>Breaches<div class="pulse-trend" style="color:var(--amber)">&#9650; +15%</div></div></div>
+    <div class="pulse-stat"><div class="pulse-num">647</div><div class="pulse-info">DDoS<br>Campaigns<div class="pulse-trend" style="color:var(--green)">&#9660; -8%</div></div></div>
+    <div class="pulse-stat"><div class="pulse-num" style="color:var(--amber)">247</div><div class="pulse-info">IAB<br>Listings<div class="pulse-trend" style="color:var(--red)">&#9650; +34%</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ 4. GEOGRAPHIC TARGETING (compact) ═══════════ -->
+<div class="section">
+  <div style="display:flex;gap:10px">
+    <div class="geo-compact" style="flex:1">
+      <div class="st">Geographic Targeting <span class="lk">Full Map &rarr;</span></div>
+      <div class="geo-row"><span class="geo-rank">01</span><span class="geo-flag">&#127482;&#127480;</span><span class="geo-name">United States</span><div class="geo-bar"><div class="geo-bar-fill" style="width:90%;background:var(--red)"></div></div><span class="geo-pct">19.91%</span></div>
+      <div class="geo-row"><span class="geo-rank">02</span><span class="geo-flag">&#127467;&#127479;</span><span class="geo-name">France</span><div class="geo-bar"><div class="geo-bar-fill" style="width:45%;background:var(--amber)"></div></div><span class="geo-pct">8.45%</span></div>
+      <div class="geo-row"><span class="geo-rank">03</span><span class="geo-flag">&#127470;&#127475;</span><span class="geo-name">India</span><div class="geo-bar"><div class="geo-bar-fill" style="width:40%;background:var(--amber)"></div></div><span class="geo-pct">7.82%</span></div>
+      <div class="geo-row"><span class="geo-rank">04</span><span class="geo-flag">&#127465;&#127466;</span><span class="geo-name">Germany</span><div class="geo-bar"><div class="geo-bar-fill" style="width:32%;background:var(--indigo)"></div></div><span class="geo-pct">6.33%</span></div>
+      <div class="geo-row"><span class="geo-rank">05</span><span class="geo-flag">&#127468;&#127463;</span><span class="geo-name">United Kingdom</span><div class="geo-bar"><div class="geo-bar-fill" style="width:30%;background:var(--indigo)"></div></div><span class="geo-pct">5.98%</span></div>
+    </div>
+    <!-- Ransomware Groups (compact sidebar) -->
+    <div class="geo-compact" style="flex:1">
+      <div class="st">Ransomware Groups <span style="font-size:8px;color:var(--green);background:rgba(34,197,94,0.1);padding:2px 6px;border-radius:3px;font-weight:600">7 active</span></div>
+      <div class="geo-row"><span class="geo-rank" style="background:rgba(255,69,98,0.1);color:var(--red);width:18px;text-align:center;border-radius:3px">1</span><span class="geo-name">Akira</span><span class="geo-pct" style="color:var(--red)">8.35%</span></div>
+      <div class="geo-row"><span class="geo-rank" style="background:rgba(245,158,11,0.1);color:var(--amber);width:18px;text-align:center;border-radius:3px">2</span><span class="geo-name">LockBit 4.0</span><span class="geo-pct" style="color:var(--amber)">7.91%</span></div>
+      <div class="geo-row"><span class="geo-rank" style="background:rgba(245,158,11,0.1);color:var(--amber);width:18px;text-align:center;border-radius:3px">3</span><span class="geo-name">BlackCat/ALPHV</span><span class="geo-pct">6.44%</span></div>
+      <div class="geo-row"><span class="geo-rank" style="background:rgba(51,65,85,0.2);color:var(--dim);width:18px;text-align:center;border-radius:3px">4</span><span class="geo-name">Cl0p</span><span class="geo-pct">5.88%</span></div>
+      <div class="geo-row"><span class="geo-rank" style="background:rgba(51,65,85,0.2);color:var(--dim);width:18px;text-align:center;border-radius:3px">5</span><span class="geo-name">Play</span><span class="geo-pct">5.12%</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5. THREAT ACTORS (MERGED) + VICTIMS ═══════════ -->
+<div class="section">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1">
+      <div class="st">Threat Actors <span style="font-size:8px;color:var(--muted)">Click to expand CVE chain</span></div>
+
+      <!-- Expanded example -->
+      <div class="actor-row expanded">
+        <div class="actor-top">
+          <span class="actor-flag">CN</span>
+          <span class="actor-name">APT 41</span>
+          <span class="actor-rank rank-hot">Rank: 2</span>
+          <span class="actor-chevron">&#9656;</span>
+        </div>
+        <div class="cve-chain" style="display:block">
+          <div class="chain-flow">
+            <span class="chain-cve">CVE-2026-34159</span>
+            <span class="chain-arrow">&rarr;</span>
+            <span class="chain-cvss chain-cvss-c">CVSS 9.8</span>
+            <span class="chain-arrow">&rarr;</span>
+            <span class="chain-ind">Finance</span>
+            <span class="chain-ind">Healthcare</span>
+          </div>
+          <div class="chain-flow">
+            <span class="chain-cve">CVE-2026-4370</span>
+            <span class="chain-arrow">&rarr;</span>
+            <span class="chain-cvss chain-cvss-c">CVSS 10.0</span>
+            <span class="chain-arrow">&rarr;</span>
+            <span class="chain-ind">Manufacturing</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actor-row"><div class="actor-top"><span class="actor-flag">CN</span><span class="actor-name">Stone Panda</span><span class="actor-rank rank-hot">Rank: 3</span><span class="actor-chevron">&#9656;</span></div></div>
+      <div class="actor-row"><div class="actor-top"><span class="actor-flag">KP</span><span class="actor-name">Lazarus Group</span><span class="actor-rank rank-warm">Rank: 5</span><span class="targets-you">TARGETS YOU</span><span class="actor-chevron">&#9656;</span></div></div>
+      <div class="actor-row"><div class="actor-top"><span class="actor-flag">IR</span><span class="actor-name">Cleaver</span><span class="actor-rank rank-warm">Rank: 8</span><span class="actor-chevron">&#9656;</span></div></div>
+      <div class="actor-row"><div class="actor-top"><span class="actor-flag">RU</span><span class="actor-name">Fancy Bear</span><span class="actor-rank rank-warm">Rank: 4</span><span class="actor-chevron">&#9656;</span></div></div>
+      <div class="actor-row"><div class="actor-top"><span class="actor-flag">RU</span><span class="actor-name">Cozy Bear</span><span class="actor-rank rank-cool">Rank: 6</span><span class="actor-chevron">&#9656;</span></div></div>
+    </div>
+
+    <!-- Recent Victims -->
+    <div style="flex:1">
+      <div class="st">Ransomware Targets <span style="font-size:8px;color:var(--muted)">Recent victims</span></div>
+      <div class="pn">
+        <div class="intel-row"><span style="flex:1;font-weight:600;color:var(--indigo)">Axions</span><span style="font-size:8px;color:var(--dim)">&#127482;&#127480; US</span><span style="font-size:8px;color:var(--dim);width:70px;text-align:right">01 Apr 2026</span></div>
+        <div class="intel-row"><span style="flex:1;font-weight:600;color:var(--indigo)">AstraZeneca</span><span style="font-size:8px;color:var(--dim)">&#127468;&#127463; GB</span><span style="font-size:8px;color:var(--dim);width:70px;text-align:right">31 Mar 2026</span></div>
+        <div class="intel-row"><span style="flex:1;font-weight:600;color:var(--indigo)">Microsoft</span><span style="font-size:8px;color:var(--dim)">&#127482;&#127480; US</span><span style="font-size:8px;color:var(--dim);width:70px;text-align:right">31 Mar 2026</span></div>
+        <div class="intel-row"><span style="flex:1;font-weight:600;color:var(--indigo)">The Co-operative</span><span style="font-size:8px;color:var(--dim)">&#127468;&#127463; GB</span><span style="font-size:8px;color:var(--dim);width:70px;text-align:right">31 Mar 2026</span></div>
+        <div class="intel-row"><span style="flex:1;font-weight:600;color:var(--indigo)">Aqua Security</span><span style="font-size:8px;color:var(--dim)">&#127482;&#127480; US</span><span style="font-size:8px;color:var(--dim);width:70px;text-align:right">27 Mar 2026</span></div>
+        <div class="intel-row"><span style="flex:1;font-weight:600;color:var(--indigo)">Berning GmbH</span><span style="font-size:8px;color:var(--dim)">&#127465;&#127466; DE</span><span style="font-size:8px;color:var(--dim);width:70px;text-align:right">03 Apr 2026</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 6. TELEGRAM INTELLIGENCE ═══════════ -->
+<div class="section">
+  <div class="section-label">TELEGRAM INTELLIGENCE</div>
+  <div class="tg-container">
+    <!-- Left: Filters -->
+    <div class="tg-left">
+      <div style="font-size:10px;font-weight:700;margin-bottom:6px">&#9992; Filters</div>
+      <input class="tg-search" placeholder="Search keywords (AND, OR, NOT)...">
+      <div class="tg-pills">
+        <span class="tg-pill tg-pill-active">ALL</span><span class="tg-pill tg-pill-off">LEAKS</span><span class="tg-pill tg-pill-off">CLAIMS</span><span class="tg-pill tg-pill-off">DDOS</span><span class="tg-pill tg-pill-off">RANSOM</span><span class="tg-pill tg-pill-off">CREDS</span>
+      </div>
+      <div class="tg-mini-label">LANGUAGE</div>
+      <select class="tg-select"><option>All Languages</option><option>English</option><option>Russian</option><option>Arabic</option></select>
+      <div class="tg-mini-label">CHANNEL TYPE</div>
+      <select class="tg-select"><option>All Types</option><option>Stealer Logs</option><option>Hacktivist</option><option>Ransomware</option></select>
+      <div class="tg-count">Showing <strong>1,047</strong> messages matching filters</div>
+    </div>
+
+    <!-- Middle: Message Flow -->
+    <div class="tg-middle">
+      <div class="tg-msg"><div><span class="tg-ch">DarkForums_chat</span><span class="tg-time">2h ago</span></div><div class="tg-text">"New batch of <em>banking sector SSO credentials</em> ready — 12K records, fresh from stealer campaign..."</div><div class="tg-tags"><span class="tg-tag">Banking</span><span class="tg-tag">Credentials</span><span class="tg-tag">SSO</span></div></div>
+      <div class="tg-msg"><div><span class="tg-ch">RansomWatch</span><span class="tg-time">3h ago</span></div><div class="tg-text">"ALPHV posted proof-of-data for the US healthcare breach. Sample includes <em>patient records</em>..."</div><div class="tg-tags"><span class="tg-tag">Ransomware</span><span class="tg-tag">Healthcare</span></div></div>
+      <div class="tg-msg"><div><span class="tg-ch">IntelBroker_Feed</span><span class="tg-time">5h ago</span></div><div class="tg-text">"Selling <em>RDP access to Turkish bank</em> infrastructure. Verified yesterday. Starting at $800..."</div><div class="tg-tags"><span class="tg-tag">IAB</span><span class="tg-tag">Turkey</span><span class="tg-tag">Banking</span></div></div>
+      <div class="tg-msg"><div><span class="tg-ch">CyberUnderground</span><span class="tg-time">6h ago</span></div><div class="tg-text">"Iran-linked group claiming new <em>zero-day in Fortinet</em> products. PoC shared privately. 15 BTC..."</div><div class="tg-tags"><span class="tg-tag">Zero-Day</span><span class="tg-tag">Iran</span></div></div>
+    </div>
+
+    <!-- Right: Trending Topics (CHANGE 3: AI-detected prominent) -->
+    <div class="tg-right">
+      <div class="trend-section-title">TRACKED TOPICS</div>
+      <div class="trend-card"><div class="trend-name">Iran-Israel War</div><div class="trend-meta"><span>3,891 &middot; &#9650;67%</span><div class="trend-spark"><span style="height:4px;background:rgba(255,69,98,0.3)"></span><span style="height:6px;background:rgba(255,69,98,0.4)"></span><span style="height:8px;background:rgba(255,69,98,0.5)"></span><span style="height:12px;background:var(--red)"></span></div></div></div>
+      <div class="trend-card"><div class="trend-name">Ransomware</div><div class="trend-meta"><span>892 &middot; &#9650;12%</span><div class="trend-spark"><span style="height:8px;background:rgba(99,102,241,0.3)"></span><span style="height:9px;background:rgba(99,102,241,0.3)"></span><span style="height:10px;background:rgba(99,102,241,0.3)"></span><span style="height:11px;background:var(--indigo)"></span></div></div></div>
+      <div class="trend-card"><div class="trend-name">Insider Threat</div><div class="trend-meta"><span>87 &middot; &#9650;23%</span><div class="trend-spark"><span style="height:5px;background:rgba(245,158,11,0.3)"></span><span style="height:7px;background:rgba(245,158,11,0.3)"></span><span style="height:8px;background:var(--amber)"></span><span style="height:9px;background:var(--amber)"></span></div></div></div>
+
+      <div class="trend-section-title" style="margin-top:8px;color:var(--purple)">&#10022; AI-DETECTED</div>
+      <div class="trend-card ai-detected"><div style="display:flex;align-items:center;gap:4px"><span class="trend-name" style="color:var(--amber)">Fortinet CVE</span><span class="ai-badge">AI</span></div><div class="trend-meta"><span>456 &middot; <span style="color:var(--red)">&#9650;890%</span></span></div></div>
+      <div class="trend-card ai-detected"><div style="display:flex;align-items:center;gap:4px"><span class="trend-name" style="color:var(--amber)">Snowflake Breach</span><span class="ai-badge">AI</span></div><div class="trend-meta"><span>234 &middot; <span style="color:var(--red)">&#9650;420%</span></span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 7. LATEST ACTIVITY (MOVED UP) ═══════════ -->
+<div class="section">
+  <div class="section-label">LATEST ACTIVITY</div>
+  <div class="news-layout">
+    <div class="news-list">
+      <div class="news-tabs"><span class="news-tab active">Dark Web News</span><span class="news-tab">Ransomware News</span></div>
+      <div class="news-item active"><div><span class="news-tag tag-r">Dark Web</span><span class="news-nm">03 Apr 2026</span></div><div class="news-hl">The Alleged Database of JPMorgan Securities is on Sale</div></div>
+      <div class="news-item"><div><span class="news-tag tag-r">Dark Web</span><span class="news-nm">03 Apr 2026</span></div><div class="news-hl">Provincial Dept of Education Database on Sale</div></div>
+      <div class="news-item"><div><span class="news-tag tag-f">Access Sale</span><span class="news-nm">03 Apr 2026</span></div><div class="news-hl">Unauthorized Access Sale for Dutch Software Co.</div></div>
+      <div class="news-item"><div><span class="news-tag tag-c">Credential</span><span class="news-nm">02 Apr 2026</span></div><div class="news-hl">Massive Credential Dump — European Banking Sector</div></div>
+    </div>
+    <div class="news-detail">
+      <div class="news-detail-card">
+        <div class="news-dtitle">The Alleged Database of JPMorgan Securities is on Sale</div>
+        <div class="news-ddate">&#128197; 03 Apr 2026</div>
+        <div class="news-dtags"><span class="news-dtag">Thailand</span><span class="news-dtag">South-eastern Asia</span><span class="news-dtag">Finance</span><span class="news-dtag">Banking</span></div>
+        <div class="news-ai">
+          <div class="news-ai-icon">&#10022;</div>
+          <div><div style="font-size:8px;font-weight:700;color:var(--purple);margin-bottom:2px">SOCRadar AI Insights</div><div class="news-ai-text">In a hacker forum monitored by SOCRadar, a new alleged database sale is detected for JPMorgan Securities. Key implications: direct exposure of sensitive PII including mobile numbers, ID numbers, gender, and financial holdings.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 8. UNDERGROUND MARKET ACTIVITY (CHANGE 4: shared header) ═══════════ -->
+<div class="section">
+  <div class="section-label">UNDERGROUND MARKET ACTIVITY</div>
+  <div style="font-size:12px;font-weight:700;margin-bottom:10px">Three facets of the underground economy</div>
+  <div class="market-3col">
+    <div class="pn">
+      <div style="font-size:10px;font-weight:700;margin-bottom:6px">IAB Listings <span style="color:var(--red);font-size:9px">247 active</span></div>
+      <div class="mkt-stat"><span class="mkt-l">RDP Access</span><span class="mkt-v" style="color:var(--red)">89</span></div>
+      <div class="mkt-stat"><span class="mkt-l">VPN Access</span><span class="mkt-v" style="color:var(--amber)">67</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Citrix / RD Gateway</span><span class="mkt-v">43</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Web Shell</span><span class="mkt-v">28</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Avg. listing price</span><span class="mkt-v" style="color:var(--amber)">$1,328</span></div>
+      <div style="text-align:right;margin-top:4px"><span class="link">All Listings &rarr;</span></div>
+    </div>
+    <div class="pn">
+      <div style="font-size:10px;font-weight:700;margin-bottom:6px">Stealer Log Trends <span style="color:var(--red);font-size:9px">+18% this month</span></div>
+      <div class="mkt-row"><span class="mkt-dot" style="background:var(--red)"></span><span class="mkt-name">RedLine</span><span class="mkt-share">34%</span><span class="mkt-cnt" style="color:var(--red)">12.4K</span></div>
+      <div class="mkt-row"><span class="mkt-dot" style="background:var(--amber)"></span><span class="mkt-name">Raccoon v2</span><span class="mkt-share">21%</span><span class="mkt-cnt" style="color:var(--amber)">7.8K</span></div>
+      <div class="mkt-row"><span class="mkt-dot" style="background:var(--amber)"></span><span class="mkt-name">Vidar</span><span class="mkt-share">18%</span><span class="mkt-cnt">6.5K</span></div>
+      <div class="mkt-row"><span class="mkt-dot" style="background:var(--indigo)"></span><span class="mkt-name">Lumma</span><span class="mkt-share">12%</span><span class="mkt-cnt">4.3K</span></div>
+      <div class="mkt-row"><span class="mkt-dot" style="background:var(--green)"></span><span class="mkt-name">Stealc</span><span class="mkt-share">8%</span><span class="mkt-cnt">2.9K</span></div>
+      <div style="text-align:right;margin-top:4px"><span class="link">Full Report &rarr;</span></div>
+    </div>
+    <div class="pn">
+      <div style="font-size:10px;font-weight:700;margin-bottom:6px">Insider Threat Activity <span style="color:var(--amber);font-size:9px">34 this month</span></div>
+      <div class="mkt-stat"><span class="mkt-l">SIM Swap recruitment</span><span class="mkt-v" style="color:var(--red)">12</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Database access offers</span><span class="mkt-v" style="color:var(--amber)">8</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Malware deployment</span><span class="mkt-v">6</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Credential sales</span><span class="mkt-v">5</span></div>
+      <div class="mkt-stat"><span class="mkt-l">Avg. payment offered</span><span class="mkt-v" style="color:var(--amber)">$4,200</span></div>
+      <div style="text-align:right;margin-top:4px"><span class="link">All Threats &rarr;</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 9. ACTIVE RANSOMWARE OPERATIONS (CHANGE 5: proper table) ═══════════ -->
+<div class="section">
+  <div class="st">Active Ransomware Operations <span style="font-size:8px;color:var(--green);background:rgba(34,197,94,0.1);padding:2px 6px;border-radius:3px;font-weight:600">12 active</span><span class="lk">View All &rarr;</span></div>
+  <div class="pn">
+    <table class="ransom-table">
+      <thead><tr><th>GROUP</th><th>RANK</th><th>ORIGIN</th><th>VICTIMS (YTD)</th><th>LAST ATTACK</th><th>PRIMARY TARGETS</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700">Hunters</td><td><span style="background:rgba(255,69,98,0.12);color:var(--red);font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700">Rank: 2</span></td><td style="color:var(--dim)">RU</td><td style="font-weight:700;color:var(--red)">127</td><td style="color:var(--dim)">2h ago</td><td style="font-size:8px;color:var(--dim)">Healthcare, Finance</td></tr>
+        <tr><td style="font-weight:700">el dorado</td><td><span style="background:rgba(245,158,11,0.12);color:var(--amber);font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700">Rank: 4</span></td><td style="color:var(--dim)">RU</td><td style="font-weight:700;color:var(--amber)">89</td><td style="color:var(--dim)">1d ago</td><td style="font-size:8px;color:var(--dim)">Manufacturing, Retail</td></tr>
+        <tr><td style="font-weight:700">bianlian</td><td><span style="background:rgba(245,158,11,0.12);color:var(--amber);font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700">Rank: 5</span></td><td style="color:var(--dim)">RU</td><td style="font-weight:700">76</td><td style="color:var(--dim)">3d ago</td><td style="font-size:8px;color:var(--dim)">Government, Education</td></tr>
+        <tr><td style="font-weight:700">Play Ransomware</td><td><span style="background:rgba(99,102,241,0.12);color:var(--indigo);font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700">Rank: 7</span></td><td style="color:var(--dim)">RU</td><td style="font-weight:700">64</td><td style="color:var(--dim)">5d ago</td><td style="font-size:8px;color:var(--dim)">Finance, Technology</td></tr>
+        <tr><td style="font-weight:700">lockbit</td><td><span style="background:rgba(99,102,241,0.12);color:var(--indigo);font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700">Rank: 8</span></td><td style="color:var(--dim)">RU</td><td style="font-weight:700">52</td><td style="color:var(--dim)">1w ago</td><td style="font-size:8px;color:var(--dim)">Healthcare, Manufacturing</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE v2 — DEFINITIVE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3)"></span>Sticky Filter Bar</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.15)"></span>Heatmap Hero + Pulse</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Geo + Groups (compact)</span>
+    <span><span class="lsw" style="background:rgba(245,158,11,0.08)"></span>Actors (merged CVE chain)</span>
+    <span><span class="lsw" style="background:rgba(0,136,204,0.1)"></span>Telegram Intelligence</span>
+    <span><span class="lsw" style="background:rgba(168,85,247,0.08)"></span>Latest Activity (moved up)</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.15)"></span>Underground Markets</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.06)"></span>Ransomware Ops (table)</span>
+  </div>
+</div>
+
+</body>
+</html>

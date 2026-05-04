@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Breach Index — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+BREACH INDEX — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+RENAMED from "Breach Datasets" → "Breach Index"
+
+TABS:
+  1. Breach Catalog (default) — searchable reference table
+  2. Combolists — existing, same pattern
+
+DATA TYPE PILL COLORS:
+  Email → blue (#3B82F6)
+  Password → red (var(--red))
+  Phone → teal (var(--cyan))
+  SSN → dark red (#DC2626)
+  DOB → amber (var(--amber))
+  Address → gray (var(--dim))
+  Financial → purple (var(--purple))
+  IP → cyan
+  Username → green (var(--green))
+
+COMPONENT HIERARCHY:
+BreachIndexPage
+├── SummaryBar
+├── TabBar (Catalog | Combolists)
+├── BreachCatalogTab
+│   ├── SearchBar + Filters
+│   ├── BreachTable
+│   │   └── BreachRow (logo, name, data pills, description, count, dates)
+│   └── Pagination
+├── CombolistsTab (same table pattern)
+└── BreachDetailPanel (slide-in on row click)
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
+
+/* ═══ BANNER ═══ */
+.banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px}
+.banner-icon{width:40px;height:40px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700}
+.banner-name{font-size:16px;font-weight:800;margin-top:2px}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:16px;flex-shrink:0}
+.bs{text-align:center;min-width:65px}
+.bs-val{font-size:18px;font-weight:800}
+.bs-label{font-size:6px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-top:1px}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid rgba(51,65,85,0.3)}
+.tab{font-size:10px;font-weight:600;padding:8px 16px;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;display:flex;align-items:center;gap:5px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+.tab .tc{font-size:7px;background:rgba(51,65,85,0.3);padding:1px 5px;border-radius:3px}
+.tab.active .tc{background:rgba(99,102,241,0.2);color:var(--indigo)}
+.tab-new{font-size:6px;background:rgba(34,197,94,0.12);color:var(--green);padding:1px 5px;border-radius:3px;font-weight:700}
+
+/* ═══ SEARCH + FILTERS ═══ */
+.search-bar{
+  display:flex;gap:6px;margin-bottom:12px;align-items:center;
+}
+.search-input{
+  flex:1;padding:8px 14px;border-radius:7px;
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  font-size:10px;color:var(--text);font-family:inherit;outline:none;
+}
+.search-input::placeholder{color:var(--dim)}
+.filter-pills{display:flex;gap:3px;flex-wrap:wrap}
+.fp{font-size:7px;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.fp.active{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.25);color:var(--indigo)}
+
+/* ═══ BREACH TABLE ═══ */
+.breach-table{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.bt-header{display:flex;padding:8px 14px;font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;border-bottom:1px solid rgba(51,65,85,0.3);background:rgba(15,23,42,0.3)}
+.bt-col-company{width:180px;flex-shrink:0}
+.bt-col-types{flex:1;min-width:0}
+.bt-col-records{width:80px;text-align:center;flex-shrink:0}
+.bt-col-date{width:80px;text-align:center;flex-shrink:0}
+.bt-col-pub{width:80px;text-align:center;flex-shrink:0}
+.bt-col-status{width:60px;text-align:center;flex-shrink:0}
+
+.bt-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(51,65,85,0.08);cursor:pointer;transition:background 0.15s}
+.bt-row:hover{background:rgba(99,102,241,0.03)}
+.bt-row:last-child{border-bottom:none}
+
+.company-cell{display:flex;align-items:center;gap:8px}
+.company-logo{width:32px;height:32px;border-radius:7px;background:rgba(51,65,85,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0}
+.company-name{font-size:10px;font-weight:700}
+.company-domain{font-size:7px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+
+.data-pills{display:flex;gap:3px;flex-wrap:wrap}
+.dp{font-size:6px;padding:2px 6px;border-radius:3px;font-weight:600}
+.dp-email{background:rgba(59,130,246,0.1);color:#3B82F6}
+.dp-password{background:rgba(255,69,98,0.1);color:var(--red)}
+.dp-phone{background:rgba(34,211,238,0.1);color:var(--cyan)}
+.dp-ssn{background:rgba(220,38,38,0.12);color:#DC2626}
+.dp-dob{background:rgba(245,158,11,0.1);color:var(--amber)}
+.dp-address{background:rgba(51,65,85,0.15);color:var(--muted)}
+.dp-financial{background:rgba(168,85,247,0.1);color:var(--purple)}
+.dp-ip{background:rgba(34,211,238,0.08);color:var(--cyan)}
+.dp-username{background:rgba(34,197,94,0.1);color:var(--green)}
+
+.desc-line{font-size:8px;color:var(--dim);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+
+.records-badge{font-size:9px;font-weight:800;padding:3px 8px;border-radius:4px;display:inline-block}
+.rb-critical{background:rgba(255,69,98,0.12);color:var(--red)}
+.rb-high{background:rgba(245,158,11,0.12);color:var(--amber)}
+.rb-medium{background:rgba(99,102,241,0.1);color:var(--indigo)}
+.rb-low{background:rgba(51,65,85,0.15);color:var(--muted)}
+
+.breach-date{font-size:8px;color:var(--dim);text-align:center}
+.verified{font-size:8px;text-align:center}
+.verified-yes{color:var(--green)}
+.verified-no{color:var(--dim)}
+
+/* Pagination */
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:8px;color:var(--dim);border-top:1px solid rgba(51,65,85,0.15)}
+.page-dots{display:flex;gap:3px}
+.pd{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;border:1px solid rgba(51,65,85,0.3);cursor:pointer}
+.pd.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ PASSWORD INTELLIGENCE ═══ */
+.pw-section{margin-bottom:24px}
+.pw-headline{font-size:18px;font-weight:800;margin-bottom:4px;letter-spacing:-0.3px}
+.pw-subline{font-size:10px;color:var(--muted);margin-bottom:14px;max-width:600px}
+
+.chart-ph{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:16px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:9px;text-align:center;
+}
+
+/* World map hero */
+.map-hero{height:320px;position:relative;overflow:hidden}
+.map-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(99,102,241,0.04),transparent 70%)}
+
+/* Top 25 passwords */
+.pw-list{display:flex;gap:12px}
+.pw-col{flex:1}
+.pw-entry{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(51,65,85,0.08);font-size:9px}
+.pw-entry:last-child{border-bottom:none}
+.pw-rank{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0}
+.pw-rank-top{background:rgba(255,69,98,0.12);color:var(--red)}
+.pw-rank-mid{background:rgba(245,158,11,0.1);color:var(--amber)}
+.pw-rank-low{background:rgba(51,65,85,0.15);color:var(--muted)}
+.pw-text{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;flex:1}
+.pw-count{font-size:8px;color:var(--dim);width:60px;text-align:right}
+.pw-crack{font-size:7px;color:var(--red);width:60px;text-align:right}
+
+/* Crack calculator */
+.crack-calc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;display:flex;gap:20px;align-items:center}
+.crack-input-section{flex:1}
+.crack-input{
+  width:100%;padding:12px 16px;border-radius:8px;
+  background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.3);
+  font-size:14px;color:var(--text);font-family:'JetBrains Mono',monospace;
+  outline:none;letter-spacing:2px;
+}
+.crack-input::placeholder{color:var(--faint);letter-spacing:0}
+.crack-presets{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.crack-preset{font-size:7px;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.crack-preset:hover{border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+.crack-results{flex:1;display:flex;gap:12px}
+.crack-result{flex:1;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:8px;padding:12px;text-align:center}
+.crack-time{font-size:20px;font-weight:800;margin-bottom:2px}
+.crack-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700}
+.crack-bar{height:6px;border-radius:3px;margin-top:6px;overflow:hidden;background:rgba(51,65,85,0.2)}
+.crack-bar-fill{height:100%;border-radius:3px;transition:width 0.5s}
+
+/* Industry heatmap */
+.ind-heatmap{display:grid;grid-template-columns:100px repeat(5,1fr);gap:2px}
+.hm-header{font-size:6px;color:var(--dim);text-align:center;padding:4px;letter-spacing:0.5px;font-weight:700}
+.hm-label{font-size:7px;color:#94A3B8;display:flex;align-items:center;padding:4px 0}
+.hm-cell{border-radius:3px;height:28px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:600;color:rgba(255,255,255,0.7)}
+.hm-hot{background:rgba(255,69,98,0.5)}
+.hm-warm{background:rgba(255,69,98,0.3)}
+.hm-med{background:rgba(245,158,11,0.25)}
+.hm-cool{background:rgba(99,102,241,0.15);color:rgba(255,255,255,0.4)}
+.hm-cold{background:rgba(51,65,85,0.15);color:rgba(255,255,255,0.2)}
+.hm-your{border:1px solid var(--red)}
+
+/* Divider */
+.divider{height:1px;background:rgba(51,65,85,0.2);margin:20px 0}
+.divider-label{text-align:center;font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:14px}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<div class="pagetitle">BREACH INDEX &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#128218;</div>
+  <div class="banner-info">
+    <div class="banner-title">CYBER THREAT INTELLIGENCE</div>
+    <div class="banner-name">Breach Index</div>
+    <div class="banner-desc">SOCRadar's comprehensive catalog of indexed data breaches and combolists</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bs"><div class="bs-val">16.4K</div><div class="bs-label">BREACHES TRACKED</div></div>
+    <div class="bs"><div class="bs-val" style="color:var(--indigo)">406</div><div class="bs-label">DATASETS INDEXED</div></div>
+    <div class="bs"><div class="bs-val">9.4K</div><div class="bs-label">COMBOLISTS</div></div>
+    <div class="bs"><div class="bs-val" style="color:var(--red)">6.5B+</div><div class="bs-label">RECORDS</div></div>
+    <div class="bs"><div class="bs-val" style="color:var(--green)">+12</div><div class="bs-label">ADDED THIS MONTH</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ TABS ═══════════ -->
+<div class="tabs">
+  <span class="tab active">Breach Catalog <span class="tc">406</span></span>
+  <span class="tab">Combolists <span class="tc">9.4K</span></span>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 1: BREACH CATALOG (DEFAULT)
+     ═══════════════════════════════════════════ -->
+<div class="search-bar">
+  <input class="search-input" type="text" placeholder="Search breaches by company, domain, or data type...">
+  <div class="filter-pills">
+    <span class="fp active">All</span>
+    <span class="fp"><span style="color:#3B82F6">&#9679;</span> Email</span>
+    <span class="fp"><span style="color:var(--red)">&#9679;</span> Password</span>
+    <span class="fp"><span style="color:var(--cyan)">&#9679;</span> Phone</span>
+    <span class="fp"><span style="color:#DC2626">&#9679;</span> SSN</span>
+    <span class="fp"><span style="color:var(--purple)">&#9679;</span> Financial</span>
+    <span class="fp">Verified</span>
+  </div>
+</div>
+
+<div class="breach-table">
+  <div class="bt-header">
+    <span class="bt-col-company">COMPANY</span>
+    <span class="bt-col-types">DATA TYPES &amp; DESCRIPTION</span>
+    <span class="bt-col-records">RECORDS</span>
+    <span class="bt-col-date">BREACH</span>
+    <span class="bt-col-pub">PUBLISHED</span>
+    <span class="bt-col-status">STATUS</span>
+  </div>
+
+  <!-- Row 1 -->
+  <div class="bt-row">
+    <div class="bt-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(34,211,238,0.1);color:var(--cyan)">S</div><div><div class="company-name">Snowflake</div><div class="company-domain">snowflake.com</div></div></div></div>
+    <div class="bt-col-types">
+      <div class="data-pills"><span class="dp dp-email">Email</span><span class="dp dp-password">Password</span><span class="dp dp-username">Username</span><span class="dp dp-phone">Phone</span><span class="dp dp-ssn">SSN</span></div>
+      <div class="desc-line">Massive cloud data breach affecting 165+ customer organizations including AT&amp;T, Ticketmaster</div>
+    </div>
+    <div class="bt-col-records"><span class="records-badge rb-critical">99.7M</span></div>
+    <div class="bt-col-date"><span class="breach-date">Apr 2026</span></div>
+    <div class="bt-col-pub"><span class="breach-date">May 2026</span></div>
+    <div class="bt-col-status"><span class="verified verified-yes">&#10003; Verified</span></div>
+  </div>
+
+  <!-- Row 2 -->
+  <div class="bt-row">
+    <div class="bt-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(255,69,98,0.1);color:var(--red)">T</div><div><div class="company-name">Ticketmaster</div><div class="company-domain">ticketmaster.com</div></div></div></div>
+    <div class="bt-col-types">
+      <div class="data-pills"><span class="dp dp-email">Email</span><span class="dp dp-password">Password</span><span class="dp dp-financial">Financial</span><span class="dp dp-address">Address</span></div>
+      <div class="desc-line">Data breach exposing customer payment information, event history, and personal details</div>
+    </div>
+    <div class="bt-col-records"><span class="records-badge rb-critical">560M</span></div>
+    <div class="bt-col-date"><span class="breach-date">May 2024</span></div>
+    <div class="bt-col-pub"><span class="breach-date">Jul 2024</span></div>
+    <div class="bt-col-status"><span class="verified verified-yes">&#10003; Verified</span></div>
+  </div>
+
+  <!-- Row 3 -->
+  <div class="bt-row">
+    <div class="bt-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(245,158,11,0.1);color:var(--amber)">CB</div><div><div class="company-name">Coinbase</div><div class="company-domain">coinbase.com</div></div></div></div>
+    <div class="bt-col-types">
+      <div class="data-pills"><span class="dp dp-email">Email</span><span class="dp dp-phone">Phone</span><span class="dp dp-ssn">SSN</span><span class="dp dp-financial">Financial</span><span class="dp dp-ip">IP</span></div>
+      <div class="desc-line">Insider-facilitated breach exposing customer PII and financial data. $400M estimated cost.</div>
+    </div>
+    <div class="bt-col-records"><span class="records-badge rb-high">6.9M</span></div>
+    <div class="bt-col-date"><span class="breach-date">Jan 2025</span></div>
+    <div class="bt-col-pub"><span class="breach-date">May 2025</span></div>
+    <div class="bt-col-status"><span class="verified verified-yes">&#10003; Verified</span></div>
+  </div>
+
+  <!-- Row 4 -->
+  <div class="bt-row">
+    <div class="bt-col-company"><div class="company-cell"><div class="company-logo">ST</div><div><div class="company-name">SongTrivia</div><div class="company-domain">songtrivia2.com</div></div></div></div>
+    <div class="bt-col-types">
+      <div class="data-pills"><span class="dp dp-email">Email</span><span class="dp dp-password">Password</span><span class="dp dp-username">Username</span></div>
+      <div class="desc-line">Music trivia platform breach exposing user credentials and gameplay data</div>
+    </div>
+    <div class="bt-col-records"><span class="records-badge rb-medium">1.2M</span></div>
+    <div class="bt-col-date"><span class="breach-date">Mar 2026</span></div>
+    <div class="bt-col-pub"><span class="breach-date">Apr 2026</span></div>
+    <div class="bt-col-status"><span class="verified verified-no">Unverified</span></div>
+  </div>
+
+  <!-- Row 5 -->
+  <div class="bt-row">
+    <div class="bt-col-company"><div class="company-cell"><div class="company-logo" style="background:rgba(99,102,241,0.1);color:var(--indigo)">NPD</div><div><div class="company-name">Nat'l Public Data</div><div class="company-domain">nationalpublicdata.com</div></div></div></div>
+    <div class="bt-col-types">
+      <div class="data-pills"><span class="dp dp-ssn">SSN</span><span class="dp dp-email">Email</span><span class="dp dp-address">Address</span><span class="dp dp-dob">DOB</span><span class="dp dp-phone">Phone</span></div>
+      <div class="desc-line">Background check firm breach exposing 272M SSNs. Largest SSN breach in US history.</div>
+    </div>
+    <div class="bt-col-records"><span class="records-badge rb-critical">2.9B</span></div>
+    <div class="bt-col-date"><span class="breach-date">Dec 2023</span></div>
+    <div class="bt-col-pub"><span class="breach-date">Aug 2024</span></div>
+    <div class="bt-col-status"><span class="verified verified-yes">&#10003; Verified</span></div>
+  </div>
+
+  <div class="pagination">
+    <span>Showing 1–5 of 406 datasets</span>
+    <div class="page-dots"><span class="pd">&lsaquo;</span><span class="pd active">1</span><span class="pd">2</span><span class="pd">3</span><span class="pd">&hellip;</span><span class="pd">82</span><span class="pd">&rsaquo;</span></div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.25)"></span>Banner + Tabs</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Breach Catalog (default)</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.15)"></span>Combolists</span>
+  </div>
+</div>
+
+</body>
+</html>

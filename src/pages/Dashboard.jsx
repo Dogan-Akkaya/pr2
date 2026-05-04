@@ -4,510 +4,750 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { useData } from "../context/DataContext";
 import { useTheme } from "../context/ThemeContext";
 import { TL, SEV, STR_COL } from "../data/threat-levels";
-
-import AlertCard from "../components/AlertCard";
-import CoverageBar from "../components/CoverageBar";
 import { TimeRangeFilter } from "../components/TableUtils";
 
-const VIP_DATA = [
-  { name: "Gabriel Jackson", email: "gabriel@gmail.com", riskLevel: "HIGH", breaches: 13 },
-  { name: "Simon Johnsson", email: "simon.johnsson@greenanimals.com", riskLevel: "VERY HIGH", breaches: 8 },
-  { name: "Dogan Akkaya", email: "dogan.akkaya@socradar.io", riskLevel: "MEDIUM", breaches: 3 },
+// ═══════════════════════════════════════
+// Page-local fixtures (kept simple — wireframe-faithful)
+// ═══════════════════════════════════════
+
+// Severity banner — coverage strip pairs + 3 inline alerts
+const COVERAGE_PAIRS = [
+  { label: "Domains",         done: 2, total: 3,  incomplete: false },
+  { label: "Keywords",        done: 5, total: 19, incomplete: true  },
+  { label: "VIP Accounts",    done: 1, total: 5,  incomplete: true  },
+  { label: "Financial Assets",done: 8, total: 12, incomplete: false },
+];
+const COVERAGE_PCT = 65;
+
+const BANNER_ALERTS = [
+  { severity: "critical", text: "23 employee credentials found in stealer logs", source: "Russian Market", time: "2h ago" },
+  { severity: "warn",     text: "Company database listed for sale on Breach Forums", source: "Breach Forums", time: "5h ago" },
+  { severity: "warn",     text: "3 VIP accounts detected in combo lists", source: "Telegram", time: "3h ago" },
 ];
 
-const RECENT_SEARCHES = [
-  "socradar.io credentials",
-  "platform.socradar.com",
-  "greenanimalsbank.com leak",
-  "stealer logs 2026",
+// B1 — KPIs
+const KPI_TILES = [
+  { label: "TOTAL DW FINDINGS",   value: "1,345", trend: "+12%", trendColor: "#22C55E", valueColor: null },
+  { label: "EXPOSED EMPLOYEES",   value: "712",   trend: "+45",  trendColor: "#FF4562", valueColor: null },
+  { label: "INFECTED EMPLOYEES",  value: "2,552", trend: null,   trendColor: null,      valueColor: "#FF4562" },
+  { label: "PASSWORD REUSE",      value: "31.8%", trend: "+2%",  trendColor: "#FF4562", valueColor: "#F59E0B" },
 ];
 
+// B3 — Exposed Employees / VIPs (employees rendered with bar weights)
+const EXPOSED_EMP = [
+  { email: "v.walker@greenanimalbank.com",  weight: 55, color: "rgba(255,69,98,0.55)" },
+  { email: "g.barnett@greenanimalbank.com", weight: 40, color: "rgba(255,69,98,0.45)" },
+  { email: "m.white@greenanimalbank.com",   weight: 30, color: "rgba(245,158,11,0.50)" },
+  { email: "bird@greenanimalbank.com",      weight: 20, color: "rgba(34,197,94,0.40)" },
+];
+
+// B4 — VIP Protection table
+const VIP_PROTECTION = [
+  { name: "John Mitchell", role: "CEO", exposures: 3, status: "Exposed", dot: "#FF4562" },
+  { name: "Sarah Chen",    role: "CFO", exposures: 1, status: "Exposed", dot: "#F59E0B" },
+  { name: "David Park",    role: "CTO", exposures: 0, status: "Clear",   dot: "#22C55E" },
+];
+
+// B5 — Stealer Exposure by Domain + Black Market
+const STEALER_EXPOSURE = [
+  { domain: "gateway.example.com", count: "28.7K" },
+  { domain: "example.com",          count: "14.1K" },
+  { domain: "openam.example.com",   count: "460"   },
+  { domain: "www.example.com",      count: "1.1K"  },
+];
+const BLACK_MARKET_LISTINGS = [
+  { asset: "platform.socradar.com", price: "$10", status: "Open" },
+  { asset: "academy.socradar.io",   price: "$10", status: "Open" },
+  { asset: "socradar.com",          price: "$10", status: "Open" },
+  { asset: "fastpay.co.id",         price: "$10", status: "Open" },
+];
+
+// B6 — PII Exposure (5 stat boxes)
+const PII_EXPOSURE = [
+  { label: "EMAIL ADDRESSES", value: "1,204", color: "#FF4562" },
+  { label: "PHONE NUMBERS",   value: "342",   color: "#F59E0B" },
+  { label: "PHYSICAL ADDR.",  value: "89",    color: "#F59E0B" },
+  { label: "NATIONAL IDs",    value: "23",    color: "#FF4562" },
+  { label: "TOTAL PII",       value: "4,821", color: null },
+];
+
+// B7 — Fraud Indicators
+const FRAUD_INDICATORS = [
+  { label: "Phishing domains targeting your brand", value: 7,   color: "#FF4562", iconKey: "warning" },
+  { label: "Stolen credit cards (your BINs)",       value: 156, color: "#F59E0B", iconKey: "card" },
+  { label: "Brand impersonation attempts",          value: 3,   color: "#A855F7", iconKey: "user" },
+  { label: "Suspicious domain registrations",       value: 12,  color: "#22C55E", iconKey: "lock" },
+];
+
+// B8 — Underground Mentions
+const UNDERGROUND_MENTIONS = [
+  { source: "XSS Forum", lang: "English", time: "6h ago", relevance: "High", relevanceColor: "#FF4562",
+    excerpt: "...greenanimalbank.com access for sale, RDP + VPN combo, verified yesterday..." },
+  { source: "Telegram: DarkMarket_Chat", lang: "Russian", time: "1d ago", relevance: "Medium", relevanceColor: "#F59E0B",
+    excerpt: "New batch includes records from banking sector, [em]greenanimalbank[/em] among targets..." },
+];
+
+// B9 — Data Unique Identifiers
+const UNIQUE_IDS = [
+  { label: "UNIQUE FQDNs",     value: "217"  },
+  { label: "UNIQUE PASSWORDS", value: "764"  },
+  { label: "UNIQUE USERNAMES", value: "1.9K" },
+];
+
+// C1 — Threat Actor Spotlight
+const THREAT_SPOTLIGHT = {
+  name: "IntelBroker",
+  badge: "Trending · 48h",
+  description: "Claimed access to 3 Fortune 500 companies this week. Known for database leaks & corporate access sales. Active across BreachForums.",
+};
+
+// C2 — Dark Web News (3 cards)
+const DW_NEWS = [
+  { tag: "RANSOM",  tagColor: "#FF4562", time: "3h ago", headline: "ALPHV claims 2.4M-record breach at US healthcare" },
+  { tag: "DW FORUM",tagColor: "#6366F1", time: "5h ago", headline: "0-day for Citrix NetScaler — $80K BTC" },
+  { tag: "CISA",    tagColor: "#F59E0B", time: "1d ago", headline: "Cisco IOS XE exploit chain across 40K devices" },
+];
+
+// C3 — Ransomware Activity
+const RANSOM_ACTIVITY = {
+  victims: 312,
+  context: "ransomware victims worldwide",
+  trend: "+28% vs 7d",
+  stats: [
+    { label: "New victims today",    value: 7,  color: "#FF4562" },
+    { label: "Negotiations active",  value: 12, color: "#F59E0B" },
+    { label: "Data leaks published", value: 3,  color: "#FF4562" },
+  ],
+};
+
+// C4 — Industry Attack Heatmap
+const INDUSTRY_HEAT = [
+  { sector: "Healthcare",     count: 312, color: "rgba(255,69,98,0.60)" },
+  { sector: "Finance",         count: 287, color: "rgba(255,69,98,0.50)" },
+  { sector: "Manufacturing",   count: 243, color: "rgba(245,158,11,0.40)" },
+  { sector: "Government",      count: 198, color: "rgba(245,158,11,0.30)" },
+  { sector: "Education",       count: 142, color: "rgba(34,197,94,0.30)"  },
+];
+
+// C5 — Most Active Groups
+const ACTIVE_GROUPS = [
+  { name: "LockBit 4.0",      region: "RU",    hits: 127, dot: "#FF4562", countColor: "#FF4562" },
+  { name: "BlackCat / ALPHV", region: "RU",    hits: 98,  dot: "#F59E0B", countColor: "#F59E0B" },
+  { name: "Akira",            region: "RU/CA", hits: 87,  dot: "#F59E0B", countColor: "#F59E0B" },
+  { name: "Cl0p",             region: "RU",    hits: 64,  dot: "#22C55E", countColor: "#22C55E" },
+];
+
+// C6 — Telegram Chatter
+const TG_CHATTER = [
+  { channel: "DarkForums_chat",  time: "2h ago", text: "New batch of banking sector SSO credentials ready — 12K records, fresh from stealer campaign...", tags: ["Banking", "Credentials", "SSO"] },
+  { channel: "RansomWatch",      time: "3h ago", text: "ALPHV posted proof-of-data for the US healthcare breach. Sample includes patient records...",   tags: ["Ransomware", "Healthcare"] },
+  { channel: "IntelBroker_Feed", time: "5h ago", text: "Selling RDP access to Turkish bank infrastructure. Verified yesterday. Starting at $800...",     tags: ["IAB", "Turkey", "Banking"] },
+];
+
+// C7 — IAB Activity
+const IAB_ACTIVITY = {
+  context: "Banking sector · Last 30 days",
+  stats: [
+    { label: "Active listings (your industry)", value: 23,      color: "#FF4562" },
+    { label: "Avg. price VPN access",            value: "$1,328", color: "#F59E0B" },
+  ],
+};
+
+// Exposure Timeline data — generated 24-month series
+const EXPOSURE_TIMELINE = (() => {
+  const months = ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
+  return months.map((m, i) => ({
+    month: m,
+    stealerLogs:    240 + Math.round(Math.sin(i / 2) * 80 + i * 14 + Math.random() * 40),
+    breaches:       110 + Math.round(Math.cos(i / 3) * 50 + i * 8  + Math.random() * 30),
+    logsOnSale:     60  + Math.round(Math.sin(i / 4) * 25 + i * 5  + Math.random() * 20),
+    dwMentions:     140 + Math.round(Math.cos(i / 2) * 40 + i * 6  + Math.random() * 25),
+  }));
+})();
+
+// ═══════════════════════════════════════
+// Inline icon helper for fraud indicators
+// ═══════════════════════════════════════
+function FraudIcon({ name, color }) {
+  const props = { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+  switch (name) {
+    case "warning": return <svg {...props}><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
+    case "card":    return <svg {...props}><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>;
+    case "user":    return <svg {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+    case "lock":    return <svg {...props}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
+    default: return null;
+  }
+}
+
+// ═══════════════════════════════════════
 export default function Dashboard() {
-  const { state, dispatch } = useData();
-  const {
-    threatLevel, heroAlerts, lowerAlarms, coverageBars,
-    blackMarket, fqdnData, thirdPartyData, exposedEmp, expData, stats,
-  } = state;
-
+  const { state } = useData();
+  const { threatLevel, blackMarket, exposedEmp } = state;
   const navigate = useNavigate();
   const { t } = useTheme();
   const [loaded, setLoaded] = useState(false);
-  const [domainTab, setDomainTab] = useState("fqdn");
-  const [timeRange, setTimeRange] = useState("30d");
-  const [timelineMode, setTimelineMode] = useState("new");
   const [empVipTab, setEmpVipTab] = useState("employees");
+  const [timeRange, setTimeRange] = useState("30d");
+  const [searchValue, setSearchValue] = useState("");
+
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
-  const tl = TL[threatLevel] || TL.critical;
-  const dismissHero = (id) => dispatch({ type: "DISMISS_HERO_ALERT", payload: id });
-
   const ttS = {
-    contentStyle: {
-      background: t.bgTooltip, border: `1px solid ${t.borderMed}`,
-      borderRadius: 12, fontSize: 11, fontFamily: "'JetBrains Mono',monospace",
-      backdropFilter: "blur(20px)", boxShadow: "0 12px 48px rgba(0,0,0,0.5)", padding: "10px 14px",
-    },
-    itemStyle: { color: t.text, padding: "2px 0" },
-    labelStyle: { color: t.text50, marginBottom: 4, fontWeight: 600 },
+    contentStyle: { background: t.bgPanel, border: `1px solid ${t.borderLight}`, borderRadius: 8, fontSize: 11, color: t.text },
+    itemStyle: { color: t.text50 }, labelStyle: { color: t.text },
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Dynamic pulseGlow keyframe */}
-      <style>{`@keyframes pulseGlow{0%,100%{box-shadow:0 0 15px ${tl.glow}}50%{box-shadow:0 0 35px ${tl.glow},0 0 50px ${tl.glow}}}`}</style>
+    <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
-      <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative", zIndex: 2 }}>
-
-        {/* 1. HERO */}
-        <div style={{ position: "relative", marginTop: 24 }}>
-          <div style={{ position: "absolute", top: -48, left: "50%", transform: "translateX(-50%)", zIndex: 5, filter: `drop-shadow(0 4px 24px rgba(232,70,58,0.3)) drop-shadow(0 0 40px rgba(232,70,58,0.15))` }}>
-            <img src="/socradar-half-logo.png" alt="SOCRadar" width={120} style={{ display: "block" }} />
-          </div>
-          <div className="glass" style={{
-            position: "relative", overflow: "hidden",
-            animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
-            boxShadow: `0 4px 24px rgba(0,0,0,0.2), 0 0 40px ${tl.glow}`,
-            borderTop: `2px solid ${tl.hex}40`,
-            borderLeft: `1px solid ${tl.hex}12`,
-            borderRight: `1px solid ${tl.hex}12`,
-          }}>
-            {/* Single subtle radial gradient background */}
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1, borderRadius: 16,
-              background: `radial-gradient(ellipse at 50% 30%, ${tl.hex}14 0%, transparent 60%)`,
-            }} />
-            {/* Bright edge line at top */}
-            <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: 2, zIndex: 3, pointerEvents: "none",
-              background: `linear-gradient(90deg, transparent 0%, ${tl.hex}80 10%, ${tl.hex}BB 50%, ${tl.hex}80 90%, transparent 100%)`,
-              borderRadius: "16px 16px 0 0",
-            }} />
-            <div style={{ position: "relative", zIndex: 2, padding: "28px 24px 20px" }}>
-              <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                    <span className="mono" style={{ fontSize: 10, letterSpacing: "0.06em", color: t.text35, textTransform: "uppercase" }}>Status:</span>
-                    <span className="hfont" style={{ fontSize: 12, fontWeight: 700, color: tl.hex, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tl.label} Exposure</span>
-                  </div>
-                  <h2 className="hfont" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 16, color: "#fff", textShadow: "0 2px 24px rgba(0,0,0,0.6)" }}>
-                    {threatLevel === "critical" ? "Immediate attention required" : threatLevel === "high" ? "Elevated risk — review your exposure" : threatLevel === "medium" ? "Moderate exposure detected" : "Your environment looks secure"}
-                  </h2>
-                  {(threatLevel === "critical" || threatLevel === "high") && heroAlerts.map((a) => <AlertCard key={a.id} alert={a} onDismiss={dismissHero} />)}
-                  {threatLevel === "medium" && heroAlerts.slice(0, 2).map((a) => <AlertCard key={a.id} alert={a} onDismiss={dismissHero} />)}
-                  {threatLevel === "low" && (
-                    <div style={{ padding: "14px 16px", borderRadius: 12, background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.12)", display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: "#16A34A", lineHeight: 1.4 }}>All clear — no critical exposures detected</div>
-                        <div style={{ fontSize: 12, color: t.text40, lineHeight: 1.5, marginTop: 2 }}>Continue monitoring to maintain your security posture.</div>
-                      </div>
-                    </div>
-                  )}
-                  <div
-                    onClick={() => navigate("/protection-coverage")}
-                    style={{ padding: "12px 14px", borderRadius: 12, background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.15)", display: "flex", alignItems: "flex-start", gap: 10, marginTop: 4, cursor: "pointer", transition: "all 0.25s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(59,130,246,0.08)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(59,130,246,0.04)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.15)"; }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4m0-4h.01" /></svg>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: t.text70, lineHeight: 1.4 }}>Under-configured protection</div>
-                      <div style={{ fontSize: 12, color: t.text40, lineHeight: 1.5, marginTop: 2 }}>Add additional VIP accounts and IP addresses to maximize coverage.</div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ width: 260, flexShrink: 0 }}>
-                  <div className="glass-sm" style={{ padding: "16px 18px", background: "rgba(255,255,255,0.012)" }}>
-                    <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text30, textTransform: "uppercase", marginBottom: 8 }}>Coverage</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-                      <svg viewBox="0 0 80 44" width={65}>
-                        <path d="M8 42 A32 32 0 0 1 72 42" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" strokeLinecap="round" />
-                        <path d="M8 42 A32 32 0 0 1 72 42" fill="none" stroke={tl.hex} strokeWidth="6" strokeLinecap="round" strokeDasharray="100.5" strokeDashoffset={100.5 * 0.35} opacity="0.8" />
-                        <text x="40" y="38" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="Plus Jakarta Sans" fontWeight="800">65%</text>
-                      </svg>
-                      <div>
-                        <div style={{ fontSize: 11, color: t.text50 }}>Config Score</div>
-                        <div style={{ fontSize: 10, color: t.text25 }}>Improve below ↓</div>
-                      </div>
-                    </div>
-                    <div style={{ height: 1, background: `linear-gradient(90deg,transparent,${t.border},transparent)`, marginBottom: 8 }} />
-                    {coverageBars.map((item) => <CoverageBar key={item.label} item={item} />)}
-                    <div style={{ marginTop: 8, textAlign: "center" }}><span className="mono" style={{ fontSize: 10, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate("/protection-coverage")}>Protection Coverage →</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. STATS STRIP */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr) auto", gap: 12, animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
-          {stats.map((s, i) => (
-            <div key={i} className="glass" style={{ padding: "16px 18px", cursor: "pointer", transition: "all 0.25s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(232,70,58,0.15)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.transform = "translateY(0)"; }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(232,70,58,0.06)", border: "1px solid rgba(232,70,58,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d={s.icon} /></svg>
-                </div>
-                <span style={{ fontSize: 11, color: t.text40, fontWeight: 500 }}>{s.label}</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <span className="hfont" style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.value}</span>
-                <span className="mono" style={{ fontSize: 10, color: "#DC2626", fontWeight: 500 }}>▲ {s.change}</span>
-              </div>
-            </div>
-          ))}
-          {/* Config Score compact card */}
-          <div className="glass" style={{ padding: "12px 18px", display: "flex", alignItems: "center", gap: 14, minWidth: 160 }}>
-            <svg viewBox="0 0 48 28" width={44} style={{ flexShrink: 0 }}>
-              <path d="M6 26 A18 18 0 0 1 42 26" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" strokeLinecap="round" />
-              <path d="M6 26 A18 18 0 0 1 42 26" fill="none" stroke={tl.hex} strokeWidth="4" strokeLinecap="round" strokeDasharray="56.5" strokeDashoffset={56.5 * 0.35} opacity="0.8" />
-              <text x="24" y="24" textAnchor="middle" fill="#fff" fontSize="10" fontFamily="Plus Jakarta Sans" fontWeight="800">65%</text>
-            </svg>
-            <div>
-              <div className="hfont" style={{ fontSize: 14, fontWeight: 800, letterSpacing: "-0.02em" }}>65%</div>
-              <div style={{ fontSize: 10, color: t.text35 }}>Configuration</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. MAIN 12-COLUMN GRID */}
+      {/* ═══════════════════════════════════════
+          SEVERITY BANNER (full-width, top)
+          ═══════════════════════════════════════ */}
+      <div style={{
+        background: "linear-gradient(135deg, rgba(255,69,98,0.13) 0%, rgba(255,69,98,0.03) 100%)",
+        border: "1px solid rgba(255,69,98,0.22)",
+        borderRadius: 14, padding: "20px 24px 16px",
+        position: "relative", overflow: "hidden",
+        animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, 1fr)",
-          gridTemplateRows: "auto auto auto auto",
-          gap: 18,
-          animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none",
+          position: "absolute", top: 0, left: 0, width: 4, height: "100%",
+          background: "linear-gradient(180deg, #FF4562, rgba(255,69,98,0.2))",
+          borderRadius: "14px 0 0 14px",
+        }} />
+        <span style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          padding: "4px 14px", borderRadius: 10,
+          background: "rgba(255,69,98,0.18)", color: "#FF4562",
+          fontSize: 10, fontWeight: 700, letterSpacing: "0.14em",
+          fontFamily: "'JetBrains Mono', monospace",
         }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF4562" }} />
+          CRITICAL EXPOSURE
+        </span>
+        <h2 className="hfont" style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 4px", color: t.text, letterSpacing: "-0.02em" }}>Immediate attention required</h2>
+        <div style={{ color: t.text45, fontSize: 11 }}>3 critical findings in the last 24h · Exposure increased 12% this week</div>
 
-          {/* Row 1-2: Critical Alerts (col 1-3, row 1-2) */}
-          <div className="glass" style={{ gridColumn: "1 / 4", gridRow: "1 / 3", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "18px 20px 14px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Your Critical Alerts</div>
-                <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>{lowerAlarms.length} open alerts</span>
-              </div>
-              <span className="mono" style={{ fontSize: 11, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate("/incidents")}>View All →</span>
-            </div>
-            <div style={{ flex: 1, overflow: "auto" }}>
-              {lowerAlarms.map((a) => (
-                <div key={a.id} className="alarm-row">
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: SEV[a.severity], boxShadow: `0 0 6px ${SEV[a.severity]}50`, marginTop: 6, flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.4, marginBottom: 4 }}>{a.title}</div>
-                      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                        <span className="mono" style={{ fontSize: 10, color: t.text25 }}>{a.source}</span>
-                        <span style={{ width: 3, height: 3, borderRadius: "50%", background: t.text15 }} />
-                        <span className="mono" style={{ fontSize: 10, color: t.text20 }}>{a.time}</span>
-                      </div>
-                    </div>
-                    <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: SEV[a.severity], opacity: 0.6, flexShrink: 0 }}>{a.count}</div>
-                  </div>
+        {/* Coverage strip */}
+        <div style={{ display: "flex", gap: 18, marginTop: 8, fontSize: 10, color: t.text45, alignItems: "center", flexWrap: "wrap" }}>
+          {COVERAGE_PAIRS.map((p, i) => (
+            <span key={i}>
+              {p.label}{" "}
+              <strong style={{ color: p.incomplete ? "#F59E0B" : t.text }}>{p.done}</strong>
+              <span style={{ color: t.text25 }}>/{p.total}</span>
+            </span>
+          ))}
+          <span style={{ marginLeft: "auto", color: "#3B82F6", cursor: "pointer", fontSize: 10, fontWeight: 600 }} onClick={() => navigate("/protection-coverage")}>
+            Coverage: <strong style={{ color: "#F59E0B" }}>{COVERAGE_PCT}%</strong> · Improve →
+          </span>
+        </div>
+
+        {/* 3 inline alerts */}
+        <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 4 }}>
+          {BANNER_ALERTS.map((a, i) => {
+            const isCrit = a.severity === "critical";
+            return (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "9px 14px", borderRadius: 6,
+                background: isCrit ? "rgba(255,69,98,0.06)" : "rgba(245,158,11,0.05)",
+                border: `1px solid ${isCrit ? "rgba(255,69,98,0.16)" : "rgba(245,158,11,0.12)"}`,
+                fontSize: 10,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, color: t.text }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: isCrit ? "#FF4562" : "#F59E0B" }} />
+                  {a.text}
                 </div>
-              ))}
-            </div>
+                <div className="mono" style={{ color: t.text30, fontSize: 9 }}>{a.source} · {a.time}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════
+          TWO COLUMNS — YOURS (60%) | GLOBAL (40%)
+          ═══════════════════════════════════════ */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr)", gap: 20,
+        animation: loaded ? "fadeUp 0.6s 0.05s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
+        {/* ───────────────────────────────────────
+             LEFT COLUMN — YOURS (B1–B9)
+             ─────────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
+          {/* Column header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{
+              padding: "4px 11px", borderRadius: 7,
+              background: "rgba(255,69,98,0.12)", color: "#FF4562",
+              fontSize: 9, fontWeight: 800, letterSpacing: "0.14em",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>YOURS</span>
+            <span style={{ color: t.text45, fontSize: 11 }}>Your Dark Web Exposure</span>
           </div>
 
-          {/* Row 1: Exposure Timeline (col 4-8) */}
-          <div className="glass" style={{ gridColumn: "4 / 9", gridRow: "1 / 2", padding: "18px 18px 12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 4px" }}>
-              <div>
-                <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Exposure Timeline</div>
-                <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>Threat activity — last 24 months</span>
-              </div>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                {/* New Records / Cumulative toggle */}
-                <div style={{ display: "flex", gap: 4 }}>
-                  <button className={`tab-btn ${timelineMode === "new" ? "on" : ""}`} onClick={() => setTimelineMode("new")} style={{ fontSize: 9, padding: "4px 10px" }}>New Records</button>
-                  <button className={`tab-btn ${timelineMode === "cumulative" ? "on" : ""}`} onClick={() => setTimelineMode("cumulative")} style={{ fontSize: 9, padding: "4px 10px" }}>Cumulative</button>
+          {/* B1 — KPI tiles */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 7 }}>
+            {KPI_TILES.map((k, i) => (
+              <div key={i} className="glass" style={{ padding: "11px 13px" }}>
+                <div className="mono" style={{ fontSize: 7, color: t.text30, letterSpacing: "0.12em", fontWeight: 700 }}>{k.label}</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginTop: 3 }}>
+                  <span className="hfont" style={{ fontSize: 19, fontWeight: 800, color: k.valueColor || t.text }}>{k.value}</span>
+                  {k.trend && <span className="mono" style={{ fontSize: 9, fontWeight: 700, color: k.trendColor }}>{k.trend}</span>}
                 </div>
-                <div style={{ width: 1, height: 14, background: t.borderLight }} />
-                <TimeRangeFilter range={timeRange} onRangeChange={setTimeRange} />
               </div>
+            ))}
+          </div>
+
+          {/* B2 — Exposure Timeline */}
+          <div className="glass" style={{ padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Exposure Timeline</span>
+              <TimeRangeFilter range={timeRange} onRangeChange={setTimeRange} />
             </div>
-            <div style={{ display: "flex", gap: 12, marginBottom: 10, padding: "0 4px" }}>
-              {[{ l: "Stealer Logs", c: "#E8463A" }, { l: "Breaches", c: "#F59E0B" }, { l: "Logs on Sale", c: "#A855F7" }, { l: "DW Mentions", c: "#3B82F6" }].map((i) => (
+            <div style={{ display: "flex", gap: 14, marginBottom: 6 }}>
+              {[
+                { l: "Stealer Logs",  c: "#FF4562" },
+                { l: "Breaches",      c: "#F59E0B" },
+                { l: "Logs on Sale",  c: "#A855F7" },
+                { l: "DW Mentions",   c: "#3B82F6" },
+              ].map(i => (
                 <div key={i.l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 3, background: i.c, opacity: 0.7 }} />
-                  <span className="mono" style={{ fontSize: 9, color: t.text30 }}>{i.l}</span>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: i.c, opacity: 0.75 }} />
+                  <span className="mono" style={{ fontSize: 9, color: t.text40 }}>{i.l}</span>
                 </div>
               ))}
             </div>
-            <ResponsiveContainer width="100%" height={150}>
-              <AreaChart data={expData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} interval={3} />
-                <YAxis axisLine={false} tickLine={false} width={30} />
+            <ResponsiveContainer width="100%" height={130}>
+              <AreaChart data={EXPOSURE_TIMELINE} margin={{ top: 4, right: 6, bottom: 0, left: -16 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={t.gridLine} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text30 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text30 }} width={32} />
                 <Tooltip {...ttS} />
-                <Area type="monotone" dataKey="infostealerLogs" stroke="#E8463A" fill="#E8463A" fillOpacity={0.08} strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="dataBreaches" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.05} strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="logsOnSale" stroke="#A855F7" fill="#A855F7" fillOpacity={0.05} strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="darkWebMentions" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.04} strokeWidth={1.5} dot={false} />
+                <Area type="monotone" dataKey="stealerLogs" stackId="1" stroke="#FF4562" fill="#FF4562" fillOpacity={0.18} strokeWidth={1.5} name="Stealer Logs" />
+                <Area type="monotone" dataKey="breaches"    stackId="1" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.18} strokeWidth={1.5} name="Breaches" />
+                <Area type="monotone" dataKey="logsOnSale"  stackId="1" stroke="#A855F7" fill="#A855F7" fillOpacity={0.18} strokeWidth={1.5} name="Logs on Sale" />
+                <Area type="monotone" dataKey="dwMentions"  stackId="1" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.15} strokeWidth={1.5} name="DW Mentions" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Row 1-2: Exposed Employees / VIPs (col 9-12, row 1-2) */}
-          <div className="glass" style={{ gridColumn: "9 / 13", gridRow: "1 / 3", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "14px 16px 10px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div className="mono" style={{ fontSize: 9, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 3 }}>
-                  {empVipTab === "employees" ? "Exposed Employees" : "VIP Monitoring"}
-                </div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span className="hfont" style={{ fontSize: 18, fontWeight: 800 }}>{empVipTab === "employees" ? exposedEmp.length : VIP_DATA.length}</span>
-                  <span className="mono" style={{ fontSize: 9, color: "#DC2626" }}>▲ {empVipTab === "employees" ? "+8%" : "+3%"}</span>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ display: "flex", gap: 4 }}>
-                  <button className={`tab-btn ${empVipTab === "employees" ? "on" : ""}`} onClick={() => setEmpVipTab("employees")} style={{ padding: "4px 10px", fontSize: 10 }}>Employees</button>
-                  <button className={`tab-btn ${empVipTab === "vips" ? "on" : ""}`} onClick={() => setEmpVipTab("vips")} style={{ padding: "4px 10px", fontSize: 10 }}>VIPs</button>
-                </div>
-                <span className="mono" style={{ fontSize: 10, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate(empVipTab === "employees" ? "/identity-exposure" : "/executive-protection")}>All →</span>
-              </div>
-            </div>
-            <div style={{ flex: 1, overflow: "auto" }}>
-              {empVipTab === "employees" ? (
-                <>
-                  {exposedEmp.map((r, i) => (
-                    <div key={i} style={{ padding: "7px 16px", borderBottom: `1px solid ${t.borderRow}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="mono" style={{ fontSize: 10, color: t.text50, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.email}</div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-                          <div style={{ display: "flex", gap: 1.5 }}>
-                            {[1, 2, 3, 4, 5].map((b) => (
-                              <div key={b} style={{ width: 8, height: 4, borderRadius: 1, background: b <= ({ Weak: 1, Poor: 2, Fair: 3, Strong: 4, Excellent: 5 }[r.strength] || 0) ? STR_COL[r.strength] : t.borderLight }} />
-                            ))}
-                          </div>
-                          <span className="mono" style={{ fontSize: 8, color: t.text20 }}>{r.date}</span>
-                        </div>
-                      </div>
-                      <span className="mono" style={{ fontSize: 9, color: t.text30, flexShrink: 0 }}>{Math.floor(Math.random() * 12 + 1)}</span>
-                    </div>
-                  ))}
-                  <div style={{ padding: "8px 16px" }}><span className="mono" style={{ fontSize: 9, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate("/identity-exposure")}>View Exposed Employees →</span></div>
-                </>
-              ) : (
-                <>
-                  {VIP_DATA.map((v, i) => (
-                    <div key={i} style={{ padding: "9px 16px", borderBottom: `1px solid ${t.borderRow}`, display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 500, color: t.text60, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.name}</div>
-                        <div className="mono" style={{ fontSize: 9, color: t.text25 }}>{v.email}</div>
-                      </div>
-                      <span style={{ padding: "2px 6px", borderRadius: 4, fontSize: 8, fontWeight: 700, background: v.riskLevel === "VERY HIGH" ? "rgba(220,38,38,0.12)" : v.riskLevel === "HIGH" ? "rgba(234,88,12,0.1)" : "rgba(202,138,4,0.1)", color: v.riskLevel === "VERY HIGH" ? "#DC2626" : v.riskLevel === "HIGH" ? "#EA580C" : "#CA8A04", fontFamily: "'JetBrains Mono',monospace" }}>{v.riskLevel}</span>
-                      <span className="mono" style={{ fontSize: 9, color: t.text30, flexShrink: 0 }}>{v.breaches}</span>
-                    </div>
-                  ))}
-                  <div style={{ padding: "8px 16px" }}><span className="mono" style={{ fontSize: 9, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate("/executive-protection")}>View VIP Monitoring →</span></div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Row 2: AI Assessment (col 4-8) */}
-          <div className="glass" style={{
-            gridColumn: "4 / 9", gridRow: "2 / 3",
-            overflow: "hidden", padding: "16px 20px",
-            background: "linear-gradient(135deg, rgba(232,70,58,0.03) 0%, rgba(255,255,255,0.02) 50%, rgba(168,85,247,0.02) 100%)",
-            border: "1px solid rgba(232,70,58,0.08)",
-          }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                background: "linear-gradient(135deg, rgba(232,70,58,0.12) 0%, rgba(168,85,247,0.12) 100%)",
-                border: "1px solid rgba(232,70,58,0.15)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="1.5">
-                  <path d="M12 2L9 8.5 2 9.5l5 5-1 7 6-3.5 6 3.5-1-7 5-5-7-1z" />
-                </svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span className="hfont" style={{ fontSize: 13, fontWeight: 700, color: t.text70 }}>SOCRadar AI Assessment</span>
-                  <span className="mono" style={{ fontSize: 8, padding: "2px 6px", borderRadius: 4, background: "rgba(168,85,247,0.1)", color: "#A855F7", letterSpacing: "0.06em", fontWeight: 600 }}>AI</span>
-                  <span className="mono" style={{ fontSize: 9, color: t.text20, marginLeft: "auto" }}>Updated 2m ago</span>
-                </div>
-                <p style={{ fontSize: 12, lineHeight: 1.6, color: t.text55, margin: 0 }}>
-                  Your exposure increased <span style={{ color: "#DC2626", fontWeight: 600 }}>12% this week</span>, driven by
-                  <span style={{ color: "#F59E0B", fontWeight: 500 }}> 3 new stealer log batches</span> on Russian Market
-                  targeting <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: t.text70 }}>socradar.io</span> credentials.
-                  <span style={{ color: "#DC2626", fontWeight: 500 }}> 2 VIP accounts</span> require immediate password resets.
-                  Domain <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: t.text70 }}>platform.socradar.com</span> appears
-                  in <span style={{ color: "#EA580C", fontWeight: 500 }}>4 active marketplace listings</span> with a combined value of $60.
-                </p>
-                <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                  {[
-                    { label: "Credential Exposure", color: "#DC2626" },
-                    { label: "Black Market Activity", color: "#F59E0B" },
-                    { label: "VIP Risk", color: "#EA580C" },
-                  ].map((tag, i) => (
-                    <span key={i} style={{
-                      padding: "3px 8px", borderRadius: 5, fontSize: 9, fontWeight: 500,
-                      background: `${tag.color}0A`, border: `1px solid ${tag.color}18`,
-                      color: tag.color, fontFamily: "'JetBrains Mono',monospace",
-                    }}>{tag.label}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 3: DW Search Engine (full width) */}
-          <div style={{ gridColumn: "1 / 13", gridRow: "3 / 4", background: t.bgWhiteSearch, borderRadius: 16, padding: "24px 28px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-              <div style={{ position: "relative", width: 44, height: 44 }}>
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke={t.textInverse} strokeWidth="1.5" /><ellipse cx="22" cy="22" rx="10" ry="18" stroke={t.textInverse} strokeWidth="1" /><line x1="4" y1="22" x2="40" y2="22" stroke={t.textInverse} strokeWidth="0.8" /><line x1="22" y1="4" x2="22" y2="40" stroke={t.textInverse} strokeWidth="0.8" /></svg>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#E8463A" style={{ position: "absolute", bottom: -2, right: -4 }}><path d="M12 2C9.24 2 7 4.24 7 7c0 1.4.58 2.66 1.5 3.56L12 14l3.5-3.44C16.42 9.66 17 8.4 17 7c0-2.76-2.24-5-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" /></svg>
-              </div>
-              <span className="hfont" style={{ fontSize: 20, fontWeight: 800, color: t.textInverse, letterSpacing: "-0.02em" }}>Dark Web <span style={{ color: "#E8463A" }}>Search Engine</span></span>
-            </div>
-            <div style={{ flex: 1, position: "relative" }}>
-              <svg style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", opacity: 0.25 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.textInverse} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-              <input placeholder="Search keywords, domains, IPs, emails, hashes..." style={{ width: "100%", padding: "14px 16px 14px 42px", fontSize: 14, fontFamily: "'Satoshi'", background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, color: t.textInverse, outline: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} />
-            </div>
-            <button onClick={() => navigate("/dark-web-search")} style={{ padding: "14px 28px", borderRadius: 12, border: "none", cursor: "pointer", background: "#E8463A", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Plus Jakarta Sans'", boxShadow: "0 4px 16px rgba(232,70,58,0.3)", flexShrink: 0 }}>Search</button>
-          </div>
-
-          {/* Row 4: Data Identifiers (col 1-4) */}
-          <div className="glass" style={{ gridColumn: "1 / 5", gridRow: "4 / 5", padding: "16px 20px" }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Data Unique Identifiers</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-              {[{ label: "Unique FQDNs", value: "217", trend: "-6.0%", down: true }, { label: "Unique Passwords", value: "764", trend: "-2.2%", down: true }, { label: "Unique Usernames", value: "1.9K", trend: "-0.8%", down: true }].map((d, i) => (
-                <div key={i} style={{ padding: "12px 14px", borderRadius: 12, background: t.bgCard, border: `1px solid ${t.borderSection}` }}>
-                  <div style={{ fontSize: 10, color: t.text30, marginBottom: 6, fontWeight: 500 }}>{d.label}</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                    <span className="hfont" style={{ fontSize: 20, fontWeight: 800 }}>{d.value}</span>
-                    <span className="mono" style={{ fontSize: 9, color: d.down ? "#16A34A" : "#DC2626" }}>{d.down ? "▼" : "▲"} {d.trend}</span>
-                  </div>
-                  <svg width="100%" height="24" viewBox="0 0 100 24" preserveAspectRatio="none" style={{ marginTop: 6, display: "block", opacity: 0.4 }}>
-                    <polyline points={Array.from({ length: 12 }, (_, j) => `${j * 9},${12 + Math.sin(j * 0.8 + i * 2) * 8 - j * 0.3}`).join(" ")} fill="none" stroke={d.down ? "#16A34A" : "#DC2626"} strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Row 4: Exposure Distribution (col 5-8) */}
-          <div className="glass" style={{ gridColumn: "5 / 9", gridRow: "4 / 5", overflow: "hidden" }}>
-            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <div>
-                  <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Exposure Distribution</div>
-                  <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>{domainTab === "fqdn" ? "Stealer Exposure by Domain" : "Third-Party Service Risk"}</span>
-                </div>
-                <span className="mono" style={{ fontSize: 11, color: "#E8463A", cursor: "pointer" }}>Details →</span>
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button className={`tab-btn ${domainTab === "fqdn" ? "on" : ""}`} onClick={() => setDomainTab("fqdn")}>Unique FQDNs</button>
-                <button className={`tab-btn ${domainTab === "thirdparty" ? "on" : ""}`} onClick={() => setDomainTab("thirdparty")}>Third-Party Risk</button>
-              </div>
-            </div>
-            <div style={{ padding: "4px 0" }}>
-              {domainTab === "fqdn" ? (<>
-                <div style={{ padding: "0 20px 4px", display: "flex", justifyContent: "space-between" }}>
-                  <span className="mono" style={{ fontSize: 9, color: t.text15, textTransform: "uppercase" }}>Domain</span>
-                  <span className="mono" style={{ fontSize: 9, color: t.text15 }}>Exposures</span>
-                </div>
-                {fqdnData.map((r, i) => {
-                  const max = fqdnData[0].count;
+          {/* B3 — Exposed Employees / VIPs (with tab) */}
+          <div className="glass" style={{ padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Exposed Employees</span>
+              <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
+                {[
+                  { id: "employees", label: "Employees", color: "#3B82F6" },
+                  { id: "vips",      label: "VIPs",      color: "#A855F7" },
+                ].map(tab => {
+                  const active = empVipTab === tab.id;
                   return (
-                    <div key={i} className="trow">
-                      <div style={{ flex: 1, minWidth: 0 }}><span className="mono" style={{ fontSize: 11, color: t.text50 }}>{r.domain}</span></div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, width: 160 }}>
-                        <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.borderLight, overflow: "hidden" }}>
-                          <div style={{ height: "100%", borderRadius: 2, background: "#E8463A", width: `${(r.count / max) * 100}%`, opacity: 0.6 }} />
-                        </div>
-                        <span className="mono" style={{ fontSize: 10, color: t.text40, minWidth: 40, textAlign: "right" }}>
-                          {r.count >= 1000 ? (r.count / 1000).toFixed(1) + "K" : r.count}
-                        </span>
-                      </div>
-                    </div>
+                    <button key={tab.id} onClick={() => setEmpVipTab(tab.id)} style={{
+                      padding: "3px 10px", borderRadius: 5,
+                      border: `1px solid ${active ? `${tab.color}55` : t.borderLight}`,
+                      background: active ? `${tab.color}14` : "transparent",
+                      color: active ? tab.color : t.text40,
+                      fontSize: 9, fontWeight: 700, cursor: "pointer",
+                      fontFamily: "'Inter', sans-serif",
+                    }}>{tab.label}</button>
                   );
                 })}
-              </>) : (<>
-                <div style={{ padding: "6px 20px 2px" }}>
-                  <p style={{ fontSize: 12, color: t.text35, lineHeight: 1.5, marginBottom: 8 }}>Employee credentials found on these third-party services. These accounts may provide lateral access to your organization.</p>
-                </div>
-                {thirdPartyData.map((r, i) => (
-                  <div key={i} className="trow">
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(232,70,58,0.06)", border: "1px solid rgba(232,70,58,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#E8463A" }}>{r.service[0]}</span>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, fontWeight: 500, color: t.text70 }}>{r.service}</div>
-                        <div className="mono" style={{ fontSize: 10, color: t.text25 }}>{r.domain}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span className="hfont" style={{ fontSize: 16, fontWeight: 700, color: "#E8463A" }}>{r.creds}</span>
-                      <span style={{ fontSize: 10, color: t.text25 }}>credentials</span>
-                    </div>
-                  </div>
-                ))}
-              </>)}
-              <div style={{ padding: "12px 20px" }}>
-                <span className="mono" style={{ fontSize: 10, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate("/domain-exposure")}>
-                  {domainTab === "fqdn" ? "View All Domains →" : "View All Third-Party Risk →"}
-                </span>
               </div>
+            </div>
+            {empVipTab === "employees" ? (
+              EXPOSED_EMP.map((e, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", padding: "5px 0", fontSize: 10,
+                  color: t.text50, borderBottom: i < EXPOSED_EMP.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                }}>
+                  <span className="mono">{e.email}</span>
+                  <span style={{
+                    marginLeft: "auto", display: "inline-block",
+                    width: e.weight, height: 4, borderRadius: 2, background: e.color,
+                  }} />
+                </div>
+              ))
+            ) : (
+              VIP_DATA.map((v, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", padding: "6px 0", fontSize: 10, gap: 8,
+                  borderBottom: i < VIP_DATA.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                }}>
+                  <span style={{ fontWeight: 600, color: t.text }}>{v.name}</span>
+                  <span className="mono" style={{ fontSize: 9, color: t.text30, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.email}</span>
+                  <span style={{
+                    padding: "2px 7px", borderRadius: 4, fontSize: 8, fontWeight: 700,
+                    background: v.riskLevel === "VERY HIGH" ? "rgba(220,38,38,0.12)" : v.riskLevel === "HIGH" ? "rgba(234,88,12,0.12)" : "rgba(202,138,4,0.10)",
+                    color: v.riskLevel === "VERY HIGH" ? "#DC2626" : v.riskLevel === "HIGH" ? "#EA580C" : "#CA8A04",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}>{v.riskLevel}</span>
+                  <span className="mono" style={{ fontSize: 9, color: t.text35 }}>{v.breaches}</span>
+                </div>
+              ))
+            )}
+            <div style={{ textAlign: "right", marginTop: 6 }}>
+              <span className="mono" style={{ fontSize: 9, color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate(empVipTab === "employees" ? "/pii" : "/executive-protection")}>View All →</span>
             </div>
           </div>
 
-          {/* Row 3: Black Market Activity (col 9-12) */}
-          <div className="glass" style={{ gridColumn: "9 / 13", gridRow: "4 / 5", overflow: "hidden" }}>
-            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Black Market Activity</div>
-                <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>{blackMarket.length} active listings</span>
-              </div>
-              <span className="mono" style={{ fontSize: 11, color: "#E8463A", cursor: "pointer" }} onClick={() => navigate("/black-market")}>View All →</span>
+          {/* B4 — VIP Protection */}
+          <div className="glass" style={{ padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 9 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>VIP Protection</span>
+              <span className="mono" style={{ fontSize: 9, color: "#FF4562", fontWeight: 700, marginLeft: 8 }}>2 at risk</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/executive-protection")}>Manage VIPs →</span>
             </div>
-            <div>
-              <div style={{ padding: "6px 20px", display: "flex", justifyContent: "space-between" }}>
-                <span className="mono" style={{ fontSize: 9, color: t.text15, textTransform: "uppercase" }}>Asset</span>
-                <div style={{ display: "flex", gap: 40 }}>
-                  <span className="mono" style={{ fontSize: 9, color: t.text15 }}>Price</span>
-                  <span className="mono" style={{ fontSize: 9, color: t.text15 }}>Status</span>
+            {VIP_PROTECTION.map((v, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", padding: "6px 0", fontSize: 10,
+                borderBottom: i < VIP_PROTECTION.length - 1 ? `1px solid ${t.borderRow}` : "none",
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: v.dot, marginRight: 8, boxShadow: `0 0 5px ${v.dot}55` }} />
+                <span style={{ fontWeight: 600, color: t.text, width: 120, flexShrink: 0 }}>{v.name}</span>
+                <span className="mono" style={{ fontSize: 9, color: t.text35, width: 44, flexShrink: 0 }}>{v.role}</span>
+                <span style={{ fontSize: 9, color: t.text40, flex: 1 }}>{v.exposures} exposure{v.exposures !== 1 ? "s" : ""}</span>
+                <span style={{
+                  padding: "2px 7px", borderRadius: 4, fontSize: 8, fontWeight: 700,
+                  background: v.status === "Exposed" ? "rgba(255,69,98,0.10)" : "rgba(34,197,94,0.10)",
+                  color: v.status === "Exposed" ? "#FF4562" : "#22C55E",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}>{v.status}</span>
+              </div>
+            ))}
+            <div style={{ fontSize: 10, color: t.text30, marginTop: 8, textAlign: "center" }}>
+              Monitoring <strong style={{ color: t.text }}>3</strong> / <strong style={{ color: "#F59E0B" }}>5</strong> VIP slots ·{" "}
+              <span style={{ color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/executive-protection")}>Add VIPs →</span>
+            </div>
+          </div>
+
+          {/* B5 — Stealer Exposure | Black Market */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <div className="glass" style={{ padding: "12px 14px" }}>
+              <div className="hfont" style={{ fontSize: 12, fontWeight: 700, marginBottom: 7 }}>Stealer Exposure by Domain</div>
+              {STEALER_EXPOSURE.map((s, i) => (
+                <div key={i} style={{
+                  display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 9, color: t.text45,
+                  borderBottom: i < STEALER_EXPOSURE.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                }}>
+                  <span className="mono">{s.domain}</span>
+                  <span className="mono" style={{ fontWeight: 700, color: t.text }}>{s.count}</span>
+                </div>
+              ))}
+              <div style={{ textAlign: "center", marginTop: 6 }}>
+                <span className="mono" style={{ fontSize: 9, color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/domain-exposure")}>View All Domains →</span>
+              </div>
+            </div>
+            <div className="glass" style={{ padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", marginBottom: 7 }}>
+                <span className="hfont" style={{ fontSize: 12, fontWeight: 700 }}>Black Market Activity</span>
+                <span className="mono" style={{ fontSize: 9, color: "#FF4562", fontWeight: 700, marginLeft: 8 }}>4 listings</span>
+              </div>
+              {BLACK_MARKET_LISTINGS.map((b, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", padding: "4px 0", fontSize: 9, color: t.text45, gap: 6,
+                  borderBottom: i < BLACK_MARKET_LISTINGS.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                }}>
+                  <span className="mono" style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.asset}</span>
+                  <span className="mono" style={{ fontWeight: 700, color: "#F59E0B" }}>{b.price}</span>
+                  <span style={{
+                    padding: "1px 6px", borderRadius: 3,
+                    background: "rgba(34,197,94,0.10)", color: "#22C55E",
+                    fontSize: 8, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+                  }}>{b.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* B6 — PII Exposure */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>PII Exposure</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/pii")}>Details →</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
+              {PII_EXPOSURE.map((p, i) => (
+                <div key={i} className="glass" style={{ padding: "10px 6px", textAlign: "center" }}>
+                  <div className="hfont" style={{ fontSize: 17, fontWeight: 800, color: p.color || t.text }}>{p.value}</div>
+                  <div className="mono" style={{ fontSize: 7, color: t.text30, letterSpacing: "0.10em", fontWeight: 700, marginTop: 3 }}>{p.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* B7 — Fraud Indicators */}
+          <div className="glass" style={{ padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 7 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Fraud Indicators</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/fraud-intelligence")}>View All →</span>
+            </div>
+            {FRAUD_INDICATORS.map((f, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 8, padding: "6px 0", fontSize: 10,
+                borderBottom: i < FRAUD_INDICATORS.length - 1 ? `1px solid ${t.borderRow}` : "none",
+              }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: 5,
+                  background: `${f.color}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}>
+                  <FraudIcon name={f.iconKey} color={f.color} />
+                </div>
+                <span style={{ flex: 1, color: t.text50 }}>{f.label}</span>
+                <span className="hfont" style={{ fontWeight: 800, color: f.color }}>{f.value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* B8 — Underground Mentions */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Underground Mentions</span>
+              <span className="mono" style={{ fontSize: 9, color: "#FF4562", fontWeight: 700, marginLeft: 8 }}>4 this week</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/telegram")}>All Mentions →</span>
+            </div>
+            {UNDERGROUND_MENTIONS.map((m, i) => (
+              <div key={i} className="glass" style={{ padding: "9px 12px", marginBottom: 5 }}>
+                <div className="mono" style={{ fontSize: 9, fontWeight: 700, color: "#3B82F6", marginBottom: 3 }}>
+                  {m.source} · <span style={{ color: t.text35, fontWeight: 500 }}>{m.lang}</span>
+                </div>
+                <div style={{ fontSize: 10, color: t.text50, lineHeight: 1.5, marginBottom: 4 }}>
+                  {m.excerpt.split(/\[em\]|\[\/em\]/).map((part, j) => j % 2 === 1
+                    ? <em key={j} style={{ color: "#FF4562", fontStyle: "normal", fontWeight: 600 }}>{part}</em>
+                    : <span key={j}>{part}</span>
+                  )}
+                </div>
+                <div className="mono" style={{ fontSize: 9, color: t.text30 }}>
+                  {m.time} · <span style={{ color: m.relevanceColor, fontWeight: 700 }}>{m.relevance} relevance</span>
                 </div>
               </div>
-              {blackMarket.map((bm) => (
-                <div key={bm.id} className="trow">
-                  <span className="mono" style={{ fontSize: 11, color: t.text50 }}>{bm.asset}</span>
-                  <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-                    <span className="mono" style={{ fontSize: 11, color: "#F59E0B", fontWeight: 500 }}>{bm.price}</span>
-                    <span className="tag" style={{ background: "rgba(22,163,74,0.08)", color: "#16A34A", fontSize: 9 }}>{bm.status}</span>
-                  </div>
+            ))}
+          </div>
+
+          {/* B9 — Data Unique Identifiers */}
+          <div>
+            <div className="hfont" style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Data Unique Identifiers</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+              {UNIQUE_IDS.map((u, i) => (
+                <div key={i} className="glass" style={{ padding: "11px 6px", textAlign: "center" }}>
+                  <div className="hfont" style={{ fontSize: 18, fontWeight: 800 }}>{u.value}</div>
+                  <div className="mono" style={{ fontSize: 7, color: t.text30, letterSpacing: "0.10em", fontWeight: 700, marginTop: 3 }}>{u.label}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* 5. I&A INTELLIGENCE SEARCH — white */}
-        <div style={{ background: t.bgWhiteSearch, borderRadius: 18, padding: "28px 32px", display: "flex", alignItems: "center", gap: 20, animation: loaded ? "fadeUp 0.6s 0.25s cubic-bezier(0.16,1,0.3,1) both" : "none", boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
-          <div style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: t.textInverse, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2" strokeLinecap="round"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /><path d="M2 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /></svg>
-            </div>
-            <span className="hfont" style={{ fontSize: 20, fontWeight: 800, color: t.textInverse, letterSpacing: "-0.02em" }}>Identity & Access <span style={{ color: "#E8463A" }}>Intelligence</span></span>
+        {/* ───────────────────────────────────────
+             RIGHT COLUMN — GLOBAL (C1–C7)
+             ─────────────────────────────────────── */}
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 12, minWidth: 0,
+          paddingLeft: 16, position: "relative",
+        }}>
+          {/* Vertical gradient divider */}
+          <div style={{
+            position: "absolute", left: 0, top: 0, bottom: 0, width: 1,
+            background: "linear-gradient(180deg, rgba(99,102,241,0.32), rgba(99,102,241,0.06), transparent)",
+          }} />
+          {/* Column header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{
+              padding: "4px 11px", borderRadius: 7,
+              background: "rgba(99,102,241,0.12)", color: "#6366F1",
+              fontSize: 9, fontWeight: 800, letterSpacing: "0.14em",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>GLOBAL</span>
+            <span style={{ color: t.text45, fontSize: 11 }}>Dark Web Intelligence</span>
           </div>
-          <div style={{ flex: 1, position: "relative" }}>
-            <svg style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", opacity: 0.25 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.textInverse} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input placeholder="Search by domain, email, IP address, or username..." style={{ width: "100%", padding: "14px 16px 14px 42px", fontSize: 14, fontFamily: "'Satoshi'", background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, color: t.textInverse, outline: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} />
-          </div>
-          <button style={{ padding: "14px 28px", borderRadius: 12, border: "none", cursor: "pointer", background: "#E8463A", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Plus Jakarta Sans'", boxShadow: "0 4px 16px rgba(232,70,58,0.3)", flexShrink: 0 }}>Search</button>
-        </div>
 
+          {/* C1 — Threat Actor Spotlight */}
+          <div>
+            <div className="hfont" style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Threat Actor Spotlight</div>
+            <div className="glass" style={{ padding: "12px 14px", border: "1px solid rgba(255,69,98,0.18)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span className="hfont" style={{ fontSize: 13, fontWeight: 800, color: "#FF4562" }}>{THREAT_SPOTLIGHT.name}</span>
+                <span style={{
+                  fontSize: 8, padding: "2px 7px", borderRadius: 3,
+                  background: "rgba(51,65,85,0.25)", color: t.text40,
+                  fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                }}>{THREAT_SPOTLIGHT.badge}</span>
+              </div>
+              <div style={{ fontSize: 10, color: t.text50, lineHeight: 1.5, marginTop: 5 }}>{THREAT_SPOTLIGHT.description}</div>
+              <div style={{ textAlign: "right", marginTop: 5 }}>
+                <span className="mono" style={{ fontSize: 9, color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/global-threats")}>Full Profile →</span>
+              </div>
+            </div>
+          </div>
+
+          {/* C2 — Dark Web News (3 cards) */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Dark Web News</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/dark-web-news")}>Open Feed →</span>
+            </div>
+            {DW_NEWS.map((n, i) => (
+              <div key={i} className="glass" style={{ padding: "8px 12px", marginBottom: 4 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{
+                    padding: "2px 8px", borderRadius: 3,
+                    background: `${n.tagColor}1F`, color: n.tagColor,
+                    fontSize: 8, fontWeight: 800, letterSpacing: "0.06em",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}>{n.tag}</span>
+                  <span className="mono" style={{ fontSize: 8, color: t.text30 }}>{n.time}</span>
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 500, color: t.text50, marginTop: 4, lineHeight: 1.4 }}>{n.headline}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* C3 — Ransomware Activity */}
+          <div className="glass" style={{ padding: "12px 14px" }}>
+            <div className="hfont" style={{ fontSize: 13, fontWeight: 700, marginBottom: 7 }}>Ransomware Activity</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
+              <span className="hfont" style={{ fontSize: 22, fontWeight: 800, color: t.text }}>{RANSOM_ACTIVITY.victims}</span>
+              <span style={{ fontSize: 9, color: t.text40 }}>{RANSOM_ACTIVITY.context}</span>
+              <span className="mono" style={{ fontSize: 9, fontWeight: 700, color: "#22C55E", marginLeft: "auto" }}>{RANSOM_ACTIVITY.trend}</span>
+            </div>
+            {RANSOM_ACTIVITY.stats.map((s, i) => (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 10,
+                borderBottom: i < RANSOM_ACTIVITY.stats.length - 1 ? `1px solid ${t.borderRow}` : "none",
+              }}>
+                <span style={{ color: t.text50 }}>{s.label}</span>
+                <span className="mono" style={{ fontWeight: 700, color: s.color }}>{s.value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* C4 — Industry Attack Heatmap */}
+          <div>
+            <div className="hfont" style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Industry Attack Heatmap</div>
+            <div className="glass" style={{ padding: "12px 14px" }}>
+              {INDUSTRY_HEAT.map((r, i) => {
+                const max = INDUSTRY_HEAT[0].count;
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", fontSize: 9, color: t.text50 }}>
+                    <span style={{ width: 86, flexShrink: 0 }}>{r.sector}</span>
+                    <div style={{ flex: 1, height: 6, borderRadius: 3, overflow: "hidden", background: t.bgInput }}>
+                      <div style={{ height: "100%", width: `${(r.count / max) * 100}%`, background: r.color, borderRadius: 3 }} />
+                    </div>
+                    <span className="mono" style={{ width: 28, textAlign: "right", fontWeight: 700, color: t.text }}>{r.count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* C5 — Most Active Groups */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Most Active Groups</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/global-threats")}>All →</span>
+            </div>
+            <div className="glass" style={{ padding: "12px 14px" }}>
+              {ACTIVE_GROUPS.map((g, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", padding: "5px 0", fontSize: 10, gap: 8,
+                  borderBottom: i < ACTIVE_GROUPS.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: g.dot, flexShrink: 0 }} />
+                  <span style={{ flex: 1, color: t.text }}>{g.name}</span>
+                  <span className="mono" style={{ fontSize: 8, color: t.text30 }}>{g.region}</span>
+                  <span className="mono" style={{ fontWeight: 800, color: g.countColor }}>{g.hits}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* C6 — Telegram Chatter */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+              <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Telegram Chatter</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" strokeWidth="2" style={{ marginLeft: 5 }}><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/telegram")}>Open →</span>
+            </div>
+            {TG_CHATTER.map((m, i) => (
+              <div key={i} className="glass" style={{ padding: "8px 11px", marginBottom: 4 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span className="mono" style={{ fontSize: 9, fontWeight: 700, color: "#22D3EE" }}>{m.channel}</span>
+                  <span className="mono" style={{ fontSize: 8, color: t.text30 }}>{m.time}</span>
+                </div>
+                <div style={{ fontSize: 9, color: t.text50, lineHeight: 1.45, marginTop: 3 }}>{m.text}</div>
+                <div style={{ display: "flex", gap: 3, marginTop: 4, flexWrap: "wrap" }}>
+                  {m.tags.map((tag, j) => (
+                    <span key={j} style={{
+                      padding: "1px 6px", borderRadius: 3,
+                      background: "rgba(255,255,255,0.04)", color: t.text40,
+                      fontSize: 7, fontWeight: 600, fontFamily: "'JetBrains Mono', monospace",
+                    }}>{tag}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* C7 — IAB Activity */}
+          <div className="glass" style={{ padding: "12px 14px" }}>
+            <div className="hfont" style={{ fontSize: 13, fontWeight: 700, marginBottom: 7 }}>Initial Access Broker Activity</div>
+            {IAB_ACTIVITY.stats.map((s, i) => (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 10,
+                borderBottom: i < IAB_ACTIVITY.stats.length - 1 ? `1px solid ${t.borderRow}` : "none",
+              }}>
+                <span style={{ color: t.text50 }}>{s.label}</span>
+                <span className="mono" style={{ fontWeight: 700, color: s.color }}>{s.value}</span>
+              </div>
+            ))}
+            <div className="mono" style={{ fontSize: 8, color: t.text30, marginTop: 5 }}>{IAB_ACTIVITY.context}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════
+          DARK WEB SEARCH ENGINE (full-width, bottom)
+          ═══════════════════════════════════════ */}
+      <div className="glass" style={{
+        padding: "16px 22px",
+        display: "flex", alignItems: "center", gap: 14,
+        animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 9,
+            background: "rgba(255,69,98,0.10)", border: "1px solid rgba(255,69,98,0.22)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+          </div>
+          <span className="hfont" style={{ fontSize: 14, fontWeight: 700, color: t.text }}>
+            Dark Web <span style={{ color: "#FF4562", fontStyle: "italic" }}>Search Engine</span>
+          </span>
+        </div>
+        <input
+          value={searchValue}
+          onChange={e => setSearchValue(e.target.value)}
+          placeholder="Search keywords, domains, IPs, emails, hashes..."
+          style={{
+            flex: 1, padding: "11px 14px",
+            background: t.bgInput, border: `1px solid ${t.borderLight}`,
+            borderRadius: 8, color: t.text, fontSize: 11,
+            fontFamily: "'Inter', sans-serif", outline: "none",
+          }}
+          onKeyDown={e => { if (e.key === "Enter" && searchValue.trim()) navigate("/dark-web-search"); }}
+        />
+        <button
+          onClick={() => navigate("/dark-web-search")}
+          style={{
+            padding: "11px 24px", borderRadius: 8, border: "none",
+            background: "#FF4562", color: "#fff",
+            fontSize: 11, fontWeight: 700, cursor: "pointer",
+            fontFamily: "'Inter', sans-serif",
+            boxShadow: "0 4px 12px rgba(255,69,98,0.25)",
+          }}
+        >Search</button>
       </div>
     </div>
   );

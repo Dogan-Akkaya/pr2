@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dark Web Dashboard — Main</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+MAIN DASHBOARD — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+This is the CISO's home screen. First page seen on login.
+It's a SCROLLABLE morning briefing, NOT a single-viewport cockpit.
+
+LAYOUT:
+  Full-width: Severity Banner (top) + Search Engine (bottom)
+  Two columns: Left ~60% (YOURS) + Right ~40% (GLOBAL)
+
+LOAD ORDER (progressive):
+  1. Severity banner (instant, SSR)
+  2. Left column stats (B1)
+  3. Right column spotlight + news (C1, C2)
+  4. Everything else streams in
+
+LEFT COLUMN SECTIONS (in order):
+  B1: Stat boxes (4 KPIs)
+  B2: Exposure Timeline (stacked area chart)
+  B3: Exposed Employees (list with tabs)
+  B4: VIP Protection (table)
+  B5: Stealer Exposure + Black Market (side by side)
+  B6: PII Exposure (5 stat boxes)
+  B7: Fraud Indicators (compact list)
+  B8: Underground Mentions (feed cards)
+  B9: Data Unique Identifiers (3 stat boxes)
+
+RIGHT COLUMN SECTIONS (REORDERED):
+  C1: Threat Actor Spotlight (TOP — highest engagement)
+  C2: Dark Web News (3 cards)
+  C3: Ransomware Activity (pulse stat + detail rows)
+  C4: Industry Attack Heatmap
+  C5: Most Active Groups
+  C6: Telegram Chatter (3-4 messages)
+  C7: Initial Access Broker Activity
+
+DATA SOURCES:
+  Left = customer-specific APIs (scoped to registered assets)
+  Right = global threat intelligence APIs (shared across all customers)
+
+EXPORT: Full dashboard → PDF "Daily Threat Report" with SOCRadar branding
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
+
+/* ═══ SHARED ═══ */
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+.st{font-size:12px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.st .c{color:var(--red);font-size:10px;font-weight:600}
+.st .lk{color:var(--indigo);font-size:9px;margin-left:auto;font-weight:500}
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.drow{display:flex;justify-content:space-between;padding:4px 0;font-size:8px;color:#94A3B8;border-bottom:1px solid rgba(51,65,85,0.12)}
+.drow:last-child{border-bottom:none}
+
+/* ═══ SEVERITY BANNER ═══ */
+.banner{
+  background:linear-gradient(135deg,rgba(255,69,98,0.13),rgba(255,69,98,0.03));
+  border:1px solid rgba(255,69,98,0.2);border-radius:14px;padding:18px 22px 14px;
+  margin-bottom:18px;position:relative;overflow:hidden;
+}
+.banner::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--red),rgba(255,69,98,0.2));border-radius:14px 0 0 14px}
+.banner-top{display:flex;justify-content:space-between;align-items:flex-start}
+.badge-sev{background:rgba(255,69,98,0.18);color:var(--red);font-size:9px;font-weight:700;padding:3px 12px;border-radius:10px;letter-spacing:1.5px}
+.banner h2{font-size:20px;font-weight:800;margin:8px 0 3px}
+.banner .sub{color:var(--muted);font-size:10px}
+.cov-strip{display:flex;gap:14px;margin-top:6px;font-size:9px;color:var(--muted);align-items:center}
+.cov-strip strong{color:var(--text)}.cov-strip .incomplete{color:var(--amber)}
+.cov-link{color:var(--indigo);font-size:9px;margin-left:auto}
+.banner-alerts{margin-top:12px;display:flex;flex-direction:column;gap:3px}
+.b-alert{border-radius:5px;padding:8px 12px;font-size:9px;display:flex;justify-content:space-between;align-items:center}
+.b-alert-c{background:rgba(255,69,98,0.05);border:1px solid rgba(255,69,98,0.14)}
+.b-alert-w{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1)}
+.b-alert .dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin-right:6px}
+.b-alert-meta{color:var(--dim);font-size:8px;white-space:nowrap;margin-left:8px}
+
+/* ═══ COLUMNS ═══ */
+.cols{display:flex;gap:20px;margin-bottom:20px}
+.col-l{flex:6;min-width:0}
+.col-r{flex:4;min-width:0;padding-left:20px;position:relative}
+.col-r::before{content:'';position:absolute;left:0;top:0;width:1px;height:100%;background:linear-gradient(180deg,rgba(99,102,241,0.25),rgba(51,65,85,0.1),transparent)}
+.col-hdr{margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.badge-yours{background:rgba(255,69,98,0.12);color:var(--red);font-size:8px;font-weight:700;padding:3px 10px;border-radius:7px;letter-spacing:1.5px}
+.badge-global{background:rgba(99,102,241,0.12);color:var(--indigo);font-size:8px;font-weight:700;padding:3px 10px;border-radius:7px;letter-spacing:1.5px}
+.col-title{color:#94A3B8;font-size:11px}
+
+/* ═══ KPI ROW ═══ */
+.kpi-row{display:flex;gap:7px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;flex:1}
+.kpi-lbl{color:var(--dim);font-size:7px;letter-spacing:1.2px;font-weight:700}
+.kpi-val{font-size:18px;font-weight:800;margin-top:2px}
+.trend-g{color:var(--green);font-size:9px;font-weight:600;margin-left:3px}
+.trend-r{color:#EF4444;font-size:9px;font-weight:600;margin-left:3px}
+
+/* ═══ CHART PLACEHOLDER ═══ */
+.chart-ph{height:90px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);border-radius:5px;text-align:center;margin-top:6px}
+
+/* ═══ PANEL ROW ═══ */
+.prow{display:flex;gap:7px;margin-bottom:10px}
+.prow .pn{flex:1;margin-bottom:0}
+
+/* ═══ VIP TABLE ═══ */
+.vip-row{display:flex;align-items:center;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.12)}
+.vip-row:last-child{border-bottom:none}
+.vip-dot{width:5px;height:5px;border-radius:50%;margin-right:6px;flex-shrink:0}
+.vip-name{font-weight:600;width:110px;flex-shrink:0}
+.vip-role{color:var(--dim);font-size:8px;width:40px;flex-shrink:0}
+.vip-exp{font-size:8px;color:var(--dim);flex:1}
+.vip-status{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.vip-exposed{background:rgba(255,69,98,0.1);color:var(--red)}
+.vip-clear{background:rgba(34,197,94,0.1);color:var(--green)}
+
+/* ═══ PII / FRAUD / UID ═══ */
+.pii-row{display:flex;gap:6px}
+.pii-box{flex:1;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);border-radius:6px;padding:8px;text-align:center}
+.pii-val{font-size:16px;font-weight:800}
+.pii-lbl{font-size:6px;color:var(--dim);letter-spacing:0.8px;font-weight:600;margin-top:1px}
+.fraud-row{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.fraud-row:last-child{border-bottom:none}
+.fraud-icon{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.fraud-label{flex:1;color:#94A3B8}
+.fraud-val{font-weight:700}
+
+/* ═══ MENTIONS ═══ */
+.mention{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);border-radius:6px;padding:8px 10px;margin-bottom:4px;font-size:9px}
+.mention-src{font-size:8px;color:var(--indigo);font-weight:600}
+.mention-txt{font-size:8px;color:#94A3B8;margin-top:2px;line-height:1.3}
+.mention-txt em{color:var(--red);font-style:normal;font-weight:600}
+.mention-meta{font-size:7px;color:var(--dim);margin-top:2px}
+
+/* ═══ RIGHT: SPOTLIGHT ═══ */
+.spotlight{background:var(--card);border:1px solid rgba(255,69,98,0.12);border-radius:8px;padding:12px;margin-bottom:10px}
+.spot-name{color:var(--red);font-size:11px;font-weight:700}
+.spot-badge{font-size:7px;color:var(--dim);background:rgba(51,65,85,0.2);padding:1px 6px;border-radius:3px;margin-left:6px}
+.spot-desc{font-size:9px;color:#94A3B8;margin-top:4px;line-height:1.4}
+
+/* ═══ RIGHT: NEWS ═══ */
+.news-card{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px 12px;margin-bottom:4px}
+.news-tag{font-size:7px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.5px}
+.tag-r{background:rgba(255,69,98,0.12);color:var(--red)}
+.tag-f{background:rgba(99,102,241,0.12);color:var(--indigo)}
+.tag-c{background:rgba(245,158,11,0.12);color:var(--amber)}
+.news-time{color:var(--dim);font-size:7px;margin-left:5px}
+.news-hl{font-size:9px;margin-top:4px;font-weight:500;line-height:1.3}
+
+/* ═══ RIGHT: RANSOMWARE ═══ */
+.ransom-hero{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
+.ransom-num{font-size:22px;font-weight:800}
+.ransom-ctx{color:var(--muted);font-size:9px}
+.ransom-trend{color:var(--green);font-size:9px;font-weight:600}
+.ransom-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.ransom-stat:last-child{border-bottom:none}
+.ransom-stat-l{color:#94A3B8}
+.ransom-stat-v{font-weight:700}
+
+/* ═══ RIGHT: HEATMAP ═══ */
+.hm-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:8px;color:#94A3B8}
+.hm-lbl{width:80px;flex-shrink:0}
+.hm-bar{height:6px;border-radius:3px}
+.hm-cnt{width:26px;text-align:right}
+
+/* ═══ RIGHT: GROUPS ═══ */
+.grp-row{display:flex;align-items:center;padding:4px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.grp-row:last-child{border-bottom:none}
+.grp-dot{width:5px;height:5px;border-radius:50%;margin-right:6px}
+.grp-name{flex:1}
+.grp-cnt{font-weight:700}
+
+/* ═══ RIGHT: TELEGRAM ═══ */
+.tg-msg{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:6px;padding:8px 10px;margin-bottom:4px}
+.tg-ch{font-size:8px;font-weight:700;color:#38BDF8}
+.tg-time{font-size:7px;color:var(--dim);margin-left:4px}
+.tg-text{font-size:8px;color:#94A3B8;margin-top:2px;line-height:1.3}
+.tg-tags{display:flex;gap:3px;margin-top:3px}
+.tg-tag{font-size:6px;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,0.04);color:rgba(148,163,184,0.6)}
+
+/* ═══ RIGHT: IAB ═══ */
+.iab-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.iab-stat:last-child{border-bottom:none}
+.iab-l{color:#94A3B8}
+.iab-v{font-weight:700}
+
+/* ═══ SEARCH ENGINE ═══ */
+.search-engine{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:16px 20px;display:flex;align-items:center;gap:12px;
+}
+.se-brand{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.se-icon{font-size:18px}
+.se-label{font-size:11px;font-weight:700}
+.se-label span{color:var(--red);font-style:italic}
+.se-input{
+  flex:1;padding:10px 14px;border-radius:8px;
+  background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.3);
+  font-size:10px;color:var(--text);font-family:inherit;outline:none;
+}
+.se-input::placeholder{color:var(--dim)}
+.se-btn{
+  padding:10px 22px;border-radius:8px;border:none;
+  background:var(--red);color:white;font-size:10px;font-weight:700;
+  font-family:inherit;cursor:pointer;
+}
+
+/* ═══ LEGEND ═══ */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+
+.price{color:var(--amber);font-weight:600}
+.sb{background:rgba(34,197,94,0.12);color:var(--green);font-size:7px;padding:1px 5px;border-radius:5px;margin-left:4px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 3A: SEVERITY BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-top">
+    <div style="flex:1">
+      <span class="badge-sev">&#9679; CRITICAL EXPOSURE</span>
+      <h2>Immediate attention required</h2>
+      <div class="sub">3 critical findings in the last 24h &middot; Exposure increased 12% this week</div>
+      <div class="cov-strip">
+        <span>Domains <strong>2</strong>/3</span>
+        <span>Keywords <strong class="incomplete">5</strong>/19</span>
+        <span>VIP Accounts <strong class="incomplete">1</strong>/5</span>
+        <span>Financial Assets <strong>8</strong>/12</span>
+        <span class="cov-link">Coverage: <strong style="color:var(--amber)">65%</strong> &middot; Improve &rarr;</span>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alerts">
+    <div class="b-alert b-alert-c"><div><span class="dot" style="background:var(--red)"></span>23 employee credentials found in stealer logs</div><div class="b-alert-meta">Russian Market &middot; 2h ago</div></div>
+    <div class="b-alert b-alert-w"><div><span class="dot" style="background:var(--amber)"></span>Company database listed for sale on Breach Forums</div><div class="b-alert-meta">Breach Forums &middot; 5h ago</div></div>
+    <div class="b-alert b-alert-w"><div><span class="dot" style="background:var(--amber)"></span>3 VIP accounts detected in combo lists</div><div class="b-alert-meta">Telegram &middot; 3h ago</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ TWO COLUMNS ═══════════ -->
+<div class="cols">
+
+<!-- ═══ LEFT: YOURS ═══ -->
+<div class="col-l">
+<div class="col-hdr"><span class="badge-yours">YOURS</span><span class="col-title">Your Dark Web Exposure</span></div>
+
+<!-- B1: KPIs -->
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-lbl">TOTAL DW FINDINGS</div><div class="kpi-val">1,345<span class="trend-g">+12%</span></div></div>
+  <div class="kpi"><div class="kpi-lbl">EXPOSED EMPLOYEES</div><div class="kpi-val">712<span class="trend-r">+45</span></div></div>
+  <div class="kpi"><div class="kpi-lbl">INFECTED EMPLOYEES</div><div class="kpi-val" style="color:var(--red)">2,552</div></div>
+  <div class="kpi"><div class="kpi-lbl">PASSWORD REUSE</div><div class="kpi-val" style="color:var(--amber)">31.8%<span class="trend-r">+2%</span></div></div>
+</div>
+
+<!-- B2: Exposure Timeline -->
+<div class="pn">
+  <div class="st">Exposure Timeline</div>
+  <div class="chart-ph" style="height:100px">[Stacked Area Chart]<br>Stealer Logs &middot; Breaches &middot; Logs on Sale &middot; DW Mentions<br>New Records / Cumulative | 24h / 7d / 30d / 90d / All</div>
+</div>
+
+<!-- B3: Exposed Employees -->
+<div class="pn">
+  <div class="st">Exposed Employees <span style="font-size:9px;color:var(--indigo);display:flex;gap:6px;margin-left:auto"><span style="background:rgba(99,102,241,0.1);padding:2px 8px;border-radius:4px">Employees</span><span style="background:rgba(168,85,247,0.1);padding:2px 8px;border-radius:4px;color:var(--purple)">VIPs</span></span></div>
+  <div class="drow">v.walker@greenanimalbank.com<span style="display:inline-block;width:55px;height:4px;background:rgba(255,69,98,0.5);border-radius:2px;margin-left:auto"></span></div>
+  <div class="drow">g.barnett@greenanimalbank.com<span style="display:inline-block;width:40px;height:4px;background:rgba(255,69,98,0.4);border-radius:2px;margin-left:auto"></span></div>
+  <div class="drow">m.white@greenanimalbank.com<span style="display:inline-block;width:30px;height:4px;background:rgba(245,158,11,0.4);border-radius:2px;margin-left:auto"></span></div>
+  <div class="drow">bird@greenanimalbank.com<span style="display:inline-block;width:20px;height:4px;background:rgba(34,197,94,0.3);border-radius:2px;margin-left:auto"></span></div>
+  <div style="text-align:right;margin-top:4px"><span class="link">View All &rarr;</span></div>
+</div>
+
+<!-- B4: VIP Protection -->
+<div class="pn">
+  <div class="st">VIP Protection <span class="c">2 at risk</span><span class="lk">Manage VIPs &rarr;</span></div>
+  <div class="vip-row"><span class="vip-dot" style="background:var(--red)"></span><span class="vip-name">John Mitchell</span><span class="vip-role">CEO</span><span class="vip-exp">3 exposures</span><span class="vip-status vip-exposed">Exposed</span></div>
+  <div class="vip-row"><span class="vip-dot" style="background:var(--amber)"></span><span class="vip-name">Sarah Chen</span><span class="vip-role">CFO</span><span class="vip-exp">1 exposure</span><span class="vip-status vip-exposed">Exposed</span></div>
+  <div class="vip-row"><span class="vip-dot" style="background:var(--green)"></span><span class="vip-name">David Park</span><span class="vip-role">CTO</span><span class="vip-exp">0 exposures</span><span class="vip-status vip-clear">Clear</span></div>
+  <div style="font-size:8px;color:var(--dim);margin-top:6px;text-align:center">Monitoring <strong style="color:var(--text)">3</strong> / <strong style="color:var(--amber)">5</strong> VIP slots &middot; <span class="link">Add VIPs &rarr;</span></div>
+</div>
+
+<!-- B5: Stealer Exposure + Black Market (side by side) -->
+<div class="prow">
+  <div class="pn">
+    <div class="st" style="margin-bottom:4px">Stealer Exposure by Domain</div>
+    <div class="drow">gateway.example.com<span style="margin-left:auto">28.7K</span></div>
+    <div class="drow">example.com<span style="margin-left:auto">14.1K</span></div>
+    <div class="drow">openam.example.com<span style="margin-left:auto">460</span></div>
+    <div class="drow">www.example.com<span style="margin-left:auto">1.1K</span></div>
+    <div style="text-align:center;margin-top:4px"><span class="link">View All Domains &rarr;</span></div>
+  </div>
+  <div class="pn">
+    <div class="st" style="margin-bottom:4px">Black Market Activity <span class="c">4 listings</span></div>
+    <div class="drow">platform.socradar.com<span style="margin-left:auto"><span class="price">$10</span><span class="sb">Open</span></span></div>
+    <div class="drow">academy.socradar.is<span style="margin-left:auto"><span class="price">$10</span><span class="sb">Open</span></span></div>
+    <div class="drow">socradar.com<span style="margin-left:auto"><span class="price">$10</span><span class="sb">Open</span></span></div>
+    <div class="drow">fastpay.co.id<span style="margin-left:auto"><span class="price">$10</span><span class="sb">Open</span></span></div>
+  </div>
+</div>
+
+<!-- B6: PII Exposure -->
+<div class="st">PII Exposure <span class="lk">Details &rarr;</span></div>
+<div class="pii-row" style="margin-bottom:10px">
+  <div class="pii-box"><div class="pii-val" style="color:var(--red)">1,204</div><div class="pii-lbl">EMAIL ADDRESSES</div></div>
+  <div class="pii-box"><div class="pii-val" style="color:var(--amber)">342</div><div class="pii-lbl">PHONE NUMBERS</div></div>
+  <div class="pii-box"><div class="pii-val" style="color:var(--amber)">89</div><div class="pii-lbl">PHYSICAL ADDR.</div></div>
+  <div class="pii-box"><div class="pii-val" style="color:var(--red)">23</div><div class="pii-lbl">NATIONAL IDs</div></div>
+  <div class="pii-box"><div class="pii-val">4,821</div><div class="pii-lbl">TOTAL PII</div></div>
+</div>
+
+<!-- B7: Fraud Indicators -->
+<div class="pn">
+  <div class="st">Fraud Indicators <span class="lk">View All &rarr;</span></div>
+  <div class="fraud-row"><div class="fraud-icon" style="background:rgba(255,69,98,0.1);color:var(--red)">&#9888;</div><span class="fraud-label">Phishing domains targeting your brand</span><span class="fraud-val" style="color:var(--red)">7</span></div>
+  <div class="fraud-row"><div class="fraud-icon" style="background:rgba(245,158,11,0.1);color:var(--amber)">&#128179;</div><span class="fraud-label">Stolen credit cards (your BINs)</span><span class="fraud-val" style="color:var(--amber)">156</span></div>
+  <div class="fraud-row"><div class="fraud-icon" style="background:rgba(99,102,241,0.1);color:var(--indigo)">&#128100;</div><span class="fraud-label">Brand impersonation attempts</span><span class="fraud-val">3</span></div>
+  <div class="fraud-row"><div class="fraud-icon" style="background:rgba(34,197,94,0.1);color:var(--green)">&#128274;</div><span class="fraud-label">Suspicious domain registrations</span><span class="fraud-val">12</span></div>
+</div>
+
+<!-- B8: Underground Mentions -->
+<div class="st">Underground Mentions <span class="c">4 this week</span><span class="lk">All Mentions &rarr;</span></div>
+<div class="mention">
+  <div class="mention-src">XSS Forum &middot; English</div>
+  <div class="mention-txt">"...greenanimalbank.com access for sale, RDP + VPN combo, verified yesterday..."</div>
+  <div class="mention-meta">6h ago &middot; <span style="color:var(--red);font-weight:600">High relevance</span></div>
+</div>
+<div class="mention" style="margin-bottom:10px">
+  <div class="mention-src">Telegram: DarkMarket_Chat &middot; Russian</div>
+  <div class="mention-txt">"New batch includes records from banking sector, <em>greenanimalbank</em> among targets..."</div>
+  <div class="mention-meta">1d ago &middot; <span style="color:var(--amber);font-weight:600">Medium relevance</span></div>
+</div>
+
+<!-- B9: Data Unique Identifiers -->
+<div class="st">Data Unique Identifiers</div>
+<div class="pii-row">
+  <div class="pii-box"><div class="pii-val">217</div><div class="pii-lbl">UNIQUE FQDNs</div></div>
+  <div class="pii-box"><div class="pii-val">764</div><div class="pii-lbl">UNIQUE PASSWORDS</div></div>
+  <div class="pii-box"><div class="pii-val">1.9K</div><div class="pii-lbl">UNIQUE USERNAMES</div></div>
+</div>
+</div>
+
+<!-- ═══ RIGHT: GLOBAL ═══ -->
+<div class="col-r">
+<div class="col-hdr"><span class="badge-global">GLOBAL</span><span class="col-title">Dark Web Intelligence</span></div>
+
+<!-- C1: Threat Actor Spotlight (TOP) -->
+<div class="st">Threat Actor Spotlight</div>
+<div class="spotlight">
+  <div><span class="spot-name">IntelBroker</span><span class="spot-badge">Trending &middot; 48h</span></div>
+  <div class="spot-desc">Claimed access to 3 Fortune 500 companies this week. Known for database leaks &amp; corporate access sales. Active across BreachForums.</div>
+  <div style="text-align:right;margin-top:4px"><span class="link">Full Profile &rarr;</span></div>
+</div>
+
+<!-- C2: Dark Web News -->
+<div class="st">Dark Web News <span class="lk">Open Feed &rarr;</span></div>
+<div class="news-card"><div><span class="news-tag tag-r">RANSOM</span><span class="news-time">3h ago</span></div><div class="news-hl">ALPHV claims 2.4M-record breach at US healthcare</div></div>
+<div class="news-card"><div><span class="news-tag tag-f">DW FORUM</span><span class="news-time">5h ago</span></div><div class="news-hl">0-day for Citrix NetScaler &mdash; $80K BTC</div></div>
+<div class="news-card" style="margin-bottom:10px"><div><span class="news-tag tag-c">CISA</span><span class="news-time">1d ago</span></div><div class="news-hl">Cisco IOS XE exploit chain across 40K devices</div></div>
+
+<!-- C3: Ransomware Activity (combined pulse + detail) -->
+<div class="pn">
+  <div class="st">Ransomware Activity</div>
+  <div class="ransom-hero"><span class="ransom-num">312</span><span class="ransom-ctx">ransomware victims worldwide</span><span class="ransom-trend">+28% vs 7d</span></div>
+  <div class="ransom-stat"><span class="ransom-stat-l">New victims today</span><span class="ransom-stat-v" style="color:var(--red)">7</span></div>
+  <div class="ransom-stat"><span class="ransom-stat-l">Negotiations active</span><span class="ransom-stat-v" style="color:var(--amber)">12</span></div>
+  <div class="ransom-stat"><span class="ransom-stat-l">Data leaks published</span><span class="ransom-stat-v" style="color:#EF4444">3</span></div>
+</div>
+
+<!-- C4: Industry Attack Heatmap -->
+<div class="st">Industry Attack Heatmap</div>
+<div class="pn">
+  <div class="hm-row"><span class="hm-lbl">Healthcare</span><span class="hm-bar" style="width:170px;background:rgba(255,69,98,0.6)"></span><span class="hm-cnt">312</span></div>
+  <div class="hm-row"><span class="hm-lbl">Finance</span><span class="hm-bar" style="width:140px;background:rgba(255,69,98,0.5)"></span><span class="hm-cnt">287</span></div>
+  <div class="hm-row"><span class="hm-lbl">Manufacturing</span><span class="hm-bar" style="width:110px;background:rgba(245,158,11,0.4)"></span><span class="hm-cnt">243</span></div>
+  <div class="hm-row"><span class="hm-lbl">Government</span><span class="hm-bar" style="width:85px;background:rgba(245,158,11,0.3)"></span><span class="hm-cnt">198</span></div>
+  <div class="hm-row"><span class="hm-lbl">Education</span><span class="hm-bar" style="width:65px;background:rgba(34,197,94,0.3)"></span><span class="hm-cnt">142</span></div>
+</div>
+
+<!-- C5: Most Active Groups -->
+<div class="st">Most Active Groups <span class="lk">All &rarr;</span></div>
+<div class="pn">
+  <div class="grp-row"><span class="grp-dot" style="background:var(--red)"></span><span class="grp-name">LockBit 4.0</span><span style="color:var(--dim);font-size:8px;margin-right:6px">RU</span><span class="grp-cnt" style="color:var(--red)">127</span></div>
+  <div class="grp-row"><span class="grp-dot" style="background:var(--amber)"></span><span class="grp-name">BlackCat / ALPHV</span><span style="color:var(--dim);font-size:8px;margin-right:6px">RU</span><span class="grp-cnt" style="color:var(--amber)">98</span></div>
+  <div class="grp-row"><span class="grp-dot" style="background:var(--amber)"></span><span class="grp-name">Akira</span><span style="color:var(--dim);font-size:8px;margin-right:6px">RU/CA</span><span class="grp-cnt" style="color:var(--amber)">87</span></div>
+  <div class="grp-row"><span class="grp-dot" style="background:var(--green)"></span><span class="grp-name">Cl0p</span><span style="color:var(--dim);font-size:8px;margin-right:6px">RU</span><span class="grp-cnt" style="color:var(--green)">64</span></div>
+</div>
+
+<!-- C6: Telegram Chatter (expanded — 3 messages) -->
+<div class="st">Telegram Chatter <span style="color:#38BDF8;font-size:11px">&#9992;</span></div>
+<div class="tg-msg">
+  <div><span class="tg-ch">DarkForums_chat</span><span class="tg-time">2h ago</span></div>
+  <div class="tg-text">"New batch of banking sector SSO credentials ready &mdash; 12K records, fresh from stealer campaign..."</div>
+  <div class="tg-tags"><span class="tg-tag">Banking</span><span class="tg-tag">Credentials</span><span class="tg-tag">SSO</span></div>
+</div>
+<div class="tg-msg">
+  <div><span class="tg-ch">RansomWatch</span><span class="tg-time">3h ago</span></div>
+  <div class="tg-text">"ALPHV posted proof-of-data for the US healthcare breach. Sample includes patient records..."</div>
+  <div class="tg-tags"><span class="tg-tag">Ransomware</span><span class="tg-tag">Healthcare</span></div>
+</div>
+<div class="tg-msg" style="margin-bottom:10px">
+  <div><span class="tg-ch">IntelBroker_Feed</span><span class="tg-time">5h ago</span></div>
+  <div class="tg-text">"Selling RDP access to Turkish bank infrastructure. Verified yesterday. Starting at $800..."</div>
+  <div class="tg-tags"><span class="tg-tag">IAB</span><span class="tg-tag">Turkey</span><span class="tg-tag">Banking</span></div>
+</div>
+
+<!-- C7: IAB Activity -->
+<div class="pn">
+  <div class="st">Initial Access Broker Activity</div>
+  <div class="iab-stat"><span class="iab-l">Active listings (your industry)</span><span class="iab-v" style="color:var(--red)">23</span></div>
+  <div class="iab-stat"><span class="iab-l">Avg. price VPN access</span><span class="iab-v" style="color:var(--amber)">$1,328</span></div>
+  <div style="font-size:7px;color:var(--dim);margin-top:3px">Banking sector &middot; Last 30 days</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════ 3D: DARK WEB SEARCH ENGINE ═══════════ -->
+<div class="search-engine">
+  <div class="se-brand"><span class="se-icon">&#128375;</span><div class="se-label">Dark Web <span>Search Engine</span></div></div>
+  <input class="se-input" type="text" placeholder="Search keywords, domains, IPs, emails, hashes...">
+  <button class="se-btn">Search</button>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE — DEFINITIVE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(255,69,98,0.2);border:1px solid rgba(255,69,98,0.3)"></span>Severity Banner (full-width)</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.06)"></span>Left ~60%: YOURS (B1–B9)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.1)"></span>Right ~40%: GLOBAL (C1–C7)</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.2)"></span>Search Engine (full-width)</span>
+  </div>
+</div>
+
+</body>
+</html>

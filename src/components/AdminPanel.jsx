@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { useData } from "../context/DataContext";
+import { useTheme } from "../context/ThemeContext";
 import { TL, SEV } from "../data/threat-levels";
 
-const inputStyle = {
-  width: "100%", padding: "8px 10px", borderRadius: 8,
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.04)", color: "#E8ECF1",
-  fontSize: 12, fontFamily: "'Satoshi',sans-serif", outline: "none",
-};
+function makeStyles(t) {
+  const inputStyle = {
+    width: "100%", padding: "8px 10px", borderRadius: 8,
+    border: `1px solid ${t.borderMed}`,
+    background: t.bgHover, color: t.text,
+    fontSize: 12, fontFamily: "'Inter', sans-serif", outline: "none",
+  };
+  const selectStyle = {
+    ...inputStyle, cursor: "pointer", appearance: "none",
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\")",
+    backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
+    paddingRight: 28,
+  };
+  return { inputStyle, selectStyle };
+}
 
-const selectStyle = {
-  ...inputStyle, cursor: "pointer", appearance: "none",
-  backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\")",
-  backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
-  paddingRight: 28,
-};
-
-function SectionLabel({ children }) {
+function SectionLabel({ children, t }) {
   return (
     <div className="mono" style={{
-      fontSize: 10, letterSpacing: "0.08em", color: "rgba(232,236,241,0.25)",
+      fontSize: 10, letterSpacing: "0.08em", color: t.text25,
       textTransform: "uppercase", marginBottom: 8, marginTop: 20,
     }}>
       {children}
@@ -29,6 +32,8 @@ function SectionLabel({ children }) {
 
 export default function AdminPanel() {
   const { state, dispatch } = useData();
+  const { t } = useTheme();
+  const { inputStyle, selectStyle } = makeStyles(t);
   const [editSection, setEditSection] = useState(null);
 
   return (
@@ -37,15 +42,15 @@ export default function AdminPanel() {
       <div
         onClick={() => dispatch({ type: "TOGGLE_ADMIN" })}
         style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
+          position: "fixed", inset: 0, background: t.bgOverlay,
           zIndex: 39, cursor: "pointer",
         }}
       />
       {/* Panel */}
       <div style={{
         position: "fixed", top: 0, right: 0, bottom: 0, width: 380,
-        background: "rgba(12,16,33,0.98)", backdropFilter: "blur(20px)",
-        borderLeft: "1px solid rgba(255,255,255,0.06)",
+        background: t.bgPanel, backdropFilter: "blur(20px)",
+        borderLeft: `1px solid ${t.borderLight}`,
         zIndex: 40, overflow: "auto", padding: "20px 24px",
         animation: "fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both",
       }}>
@@ -56,19 +61,19 @@ export default function AdminPanel() {
             onClick={() => dispatch({ type: "TOGGLE_ADMIN" })}
             style={{
               width: 28, height: 28, borderRadius: 8, border: "none",
-              background: "rgba(255,255,255,0.06)", color: "rgba(232,236,241,0.5)",
+              background: t.bgElevated, color: t.text50,
               fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
             }}
           >
             ✕
           </button>
         </div>
-        <p style={{ fontSize: 12, color: "rgba(232,236,241,0.35)", lineHeight: 1.5, marginBottom: 12 }}>
+        <p style={{ fontSize: 12, color: t.text35, lineHeight: 1.5, marginBottom: 12 }}>
           Change data and alarm states to preview different UI scenarios.
         </p>
 
         {/* ── Threat Level ── */}
-        <SectionLabel>Threat Level</SectionLabel>
+        <SectionLabel t={t}>Threat Level</SectionLabel>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6 }}>
           {Object.entries(TL).map(([key, val]) => (
             <button
@@ -76,11 +81,11 @@ export default function AdminPanel() {
               onClick={() => dispatch({ type: "SET_THREAT_LEVEL", payload: key })}
               style={{
                 padding: "8px 4px", borderRadius: 8, border: "1px solid",
-                borderColor: state.threatLevel === key ? val.hex + "60" : "rgba(255,255,255,0.06)",
-                background: state.threatLevel === key ? val.hex + "15" : "rgba(255,255,255,0.02)",
-                color: state.threatLevel === key ? val.hex : "rgba(232,236,241,0.4)",
+                borderColor: state.threatLevel === key ? val.hex + "60" : t.borderLight,
+                background: state.threatLevel === key ? val.hex + "15" : t.bgCard,
+                color: state.threatLevel === key ? val.hex : t.text40,
                 fontSize: 11, fontWeight: state.threatLevel === key ? 600 : 400,
-                cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+                cursor: "pointer", fontFamily: "'Inter', sans-serif",
                 transition: "all 0.2s",
               }}
             >
@@ -94,11 +99,11 @@ export default function AdminPanel() {
         </div>
 
         {/* ── Hero Alerts ── */}
-        <SectionLabel>Hero Alerts ({state.heroAlerts.length})</SectionLabel>
+        <SectionLabel t={t}>Hero Alerts ({state.heroAlerts.length})</SectionLabel>
         {state.heroAlerts.map((alert, i) => (
           <div key={alert.id} style={{
             padding: "10px 12px", borderRadius: 10, marginBottom: 6,
-            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
+            background: t.bgCard, border: `1px solid ${t.border}`,
           }}>
             <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
               <select
@@ -156,25 +161,25 @@ export default function AdminPanel() {
           }}
           style={{
             width: "100%", padding: "8px", borderRadius: 8,
-            border: "1px dashed rgba(255,255,255,0.1)",
-            background: "transparent", color: "rgba(232,236,241,0.3)",
-            fontSize: 11, cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+            border: `1px dashed ${t.borderMed}`,
+            background: "transparent", color: t.text30,
+            fontSize: 11, cursor: "pointer", fontFamily: "'Inter', sans-serif",
           }}
         >
           + Add Alert
         </button>
 
         {/* ── Lower Alarms ── */}
-        <SectionLabel>Critical Alerts ({state.lowerAlarms.length})</SectionLabel>
+        <SectionLabel t={t}>Critical Alerts ({state.lowerAlarms.length})</SectionLabel>
         {state.lowerAlarms.map((alarm, i) => (
           <div key={alarm.id} style={{
             padding: "8px 12px", borderRadius: 10, marginBottom: 4,
-            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
+            background: t.bgCard, border: `1px solid ${t.border}`,
             display: "flex", alignItems: "center", gap: 8,
           }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: SEV[alarm.severity], flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11, color: "rgba(232,236,241,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ fontSize: 11, color: t.text60, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {alarm.title}
               </div>
             </div>
@@ -193,12 +198,12 @@ export default function AdminPanel() {
         ))}
 
         {/* ── Coverage ── */}
-        <SectionLabel>Coverage Bars</SectionLabel>
+        <SectionLabel t={t}>Coverage Bars</SectionLabel>
         {state.coverageBars.map((bar, i) => (
           <div key={bar.label} style={{
             display: "flex", alignItems: "center", gap: 8, marginBottom: 6,
           }}>
-            <span style={{ fontSize: 11, color: "rgba(232,236,241,0.5)", width: 90, flexShrink: 0 }}>{bar.label}</span>
+            <span style={{ fontSize: 11, color: t.text50, width: 90, flexShrink: 0 }}>{bar.label}</span>
             <input
               type="number" min="0" max={bar.total}
               value={bar.used}
@@ -209,12 +214,12 @@ export default function AdminPanel() {
               }}
               style={{ ...inputStyle, width: 50, padding: "4px 6px", textAlign: "center", fontSize: 11 }}
             />
-            <span style={{ fontSize: 10, color: "rgba(232,236,241,0.25)" }}>/ {bar.total}</span>
+            <span style={{ fontSize: 10, color: t.text25 }}>/ {bar.total}</span>
           </div>
         ))}
 
         {/* ── Reset ── */}
-        <div style={{ marginTop: 28, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ marginTop: 28, paddingTop: 16, borderTop: `1px solid ${t.border}` }}>
           <button
             onClick={() => dispatch({ type: "RESET_ALL" })}
             style={{
@@ -222,7 +227,7 @@ export default function AdminPanel() {
               border: "1px solid rgba(220,38,38,0.2)",
               background: "rgba(220,38,38,0.06)", color: "#DC2626",
               fontSize: 12, fontWeight: 600, cursor: "pointer",
-              fontFamily: "'Satoshi',sans-serif", transition: "all 0.2s",
+              fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(220,38,38,0.12)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(220,38,38,0.06)"; }}

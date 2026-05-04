@@ -7,17 +7,26 @@ import GlobalThreats from "./pages/GlobalThreats";
 import ProtectionCoverage from "./pages/ProtectionCoverage";
 import BlackMarket from "./pages/BlackMarket";
 import DomainExposure from "./pages/DomainExposure";
-import IdentityExposure from "./pages/IdentityExposure";
+import PII from "./pages/PII";
 import ExecutiveProtection from "./pages/ExecutiveProtection";
 import FinancialIntelligence from "./pages/FinancialIntelligence";
 import DarkWebSearch from "./pages/DarkWebSearch";
-import IAIntelligence from "./pages/IAIntelligence";
+import IABMonitor from "./pages/IABMonitor";
 import TacticalIntel from "./pages/TacticalIntel";
 import DarkWebNews from "./pages/DarkWebNews";
 import RansomwareNews from "./pages/RansomwareNews";
 import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import CustomerLeaks from "./pages/CustomerLeaks";
+import ThirdParty from "./pages/ThirdParty";
+import Telegram from "./pages/Telegram";
+import FraudIntelligence from "./pages/FraudIntelligence";
+import InsiderThreat from "./pages/InsiderThreat";
+import LatestDataAdded from "./pages/LatestDataAdded";
+import RFI from "./pages/RFI";
+import Coverage from "./pages/Coverage";
+import BreachIndex from "./pages/BreachIndex";
 
 export default function App() {
   return (
@@ -32,17 +41,26 @@ export default function App() {
             <Route path="protection-coverage" element={<ProtectionCoverage />} />
             <Route path="black-market" element={<BlackMarket />} />
             <Route path="domain-exposure" element={<DomainExposure />} />
-            <Route path="identity-exposure" element={<IdentityExposure />} />
+            <Route path="pii" element={<PII />} />
             <Route path="executive-protection" element={<ExecutiveProtection />} />
             <Route path="financial-intelligence" element={<FinancialIntelligence />} />
             <Route path="dark-web-search" element={<DarkWebSearch />} />
-            <Route path="ia-intelligence" element={<IAIntelligence />} />
+            <Route path="iab-monitor" element={<IABMonitor />} />
             <Route path="tactical-intel" element={<TacticalIntel />} />
             <Route path="dark-web-news" element={<DarkWebNews />} />
             <Route path="ransomware-news" element={<RansomwareNews />} />
             <Route path="incidents" element={<Incidents />} />
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="customer-leaks" element={<CustomerLeaks />} />
+            <Route path="third-party" element={<ThirdParty />} />
+            <Route path="telegram" element={<Telegram />} />
+            <Route path="fraud-intelligence" element={<FraudIntelligence />} />
+            <Route path="insider-threat" element={<InsiderThreat />} />
+            <Route path="latest-data-added" element={<LatestDataAdded />} />
+            <Route path="rfi" element={<RFI />} />
+            <Route path="coverage" element={<Coverage />} />
+            <Route path="breach-index" element={<BreachIndex />} />
           </Route>
         </Routes>
       </BrowserRouter>

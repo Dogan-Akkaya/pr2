@@ -13,7 +13,7 @@ export default function AppLayout() {
     <div style={{
       display: "flex", minHeight: "100vh",
       background: t.bgBase, color: t.text,
-      fontFamily: "'Satoshi','DM Sans',sans-serif",
+      fontFamily: "'Inter', sans-serif",
       transition: "background 0.3s, color 0.3s",
     }}>
       <Sidebar />

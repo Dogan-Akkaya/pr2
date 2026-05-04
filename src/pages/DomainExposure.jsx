@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell } from "recharts";
 import { SortHeader, useSort, exportCSV, ExportButton, RowChevron, TimeCell, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
+import { tooltipStyles } from "../components/chartTheme";
 
 // ── Password Strength ──
 const STR_COL = { Weak: "#DC2626", Poor: "#EA580C", Fair: "#CA8A04", Strong: "#16A34A", Excellent: "#059669" };
@@ -21,14 +22,14 @@ const TIMELINE = Array.from({ length: 14 }, (_, i) => {
 
 // ── Record Statuses ──
 const RECORD_STATUS = [
-  { label: "Open", count: 2700, color: "#E8463A" },
+  { label: "Open", count: 2700, color: "#FF4562" },
   { label: "On Hold", count: 0, color: "#F59E0B" },
   { label: "Closed", count: 1, color: "#3B82F6" },
 ];
 
 // ── Top Exposed Domains ──
 const TOP_DOMAINS = [
-  { label: "3000", count: 12, color: "#E8463A" },
+  { label: "3000", count: 12, color: "#FF4562" },
   { label: "mail@mail.com", count: 109, color: "#A855F7" },
   { label: "kevin.koestoro@jtrust...", count: 22, color: "#3B82F6" },
   { label: "admin", count: 14, color: "#F59E0B" },
@@ -102,19 +103,19 @@ const DW_MENTIONS = [
 ];
 
 // ── Mini Donut ──
-function MiniDonut({ segments, size = 100 }) {
+function MiniDonut({ segments, size = 100, t }) {
   const total = segments.reduce((s, seg) => s + seg.count, 0);
   let cumulative = 0;
   const r = 36, circ = 2 * Math.PI * r;
   return (
     <svg width={size} height={size} viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="12" />
+      <circle cx="50" cy="50" r={r} fill="none" stroke={t?.borderSection || "rgba(255,255,255,0.04)"} strokeWidth="12" />
       {segments.map((seg, i) => {
         const pct = total > 0 ? seg.count / total : 0;
         const offset = cumulative; cumulative += pct;
         return <circle key={i} cx="50" cy="50" r={r} fill="none" stroke={seg.color} strokeWidth="12" strokeDasharray={`${pct * circ} ${circ}`} strokeDashoffset={-offset * circ} transform="rotate(-90 50 50)" />;
       })}
-      <text x="50" y="48" textAnchor="middle" dominantBaseline="central" fill="#E8ECF1" fontSize="14" fontWeight="800" fontFamily="'Plus Jakarta Sans'">{total > 1000 ? (total / 1000).toFixed(1) + "K" : total}</text>
+      <text x="50" y="48" textAnchor="middle" dominantBaseline="central" fill={t?.text || "#E8ECF1"} fontSize="14" fontWeight="800" fontFamily="'Red Hat Display'">{total > 1000 ? (total / 1000).toFixed(1) + "K" : total}</text>
     </svg>
   );
 }
@@ -133,10 +134,7 @@ const bulkActions = [
 // ═══════════════════════════════════════
 export default function DomainExposure() {
   const { t } = useTheme();
-  const ttS = {
-    contentStyle: { background: "rgba(12,16,28,0.96)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 11, fontFamily: "'JetBrains Mono',monospace", backdropFilter: "blur(20px)", boxShadow: "0 12px 48px rgba(0,0,0,0.5)", padding: "10px 14px" },
-    itemStyle: { color: t.text, padding: "2px 0" }, labelStyle: { color: t.text50, marginBottom: 4, fontWeight: 600 },
-  };
+  const ttS = tooltipStyles(t);
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState("credentials");
   const [searchQuery, setSearchQuery] = useState("");
@@ -177,14 +175,14 @@ export default function DomainExposure() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Left: Icon + Title */}
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(232,70,58,0.08)", border: "1px solid rgba(232,70,58,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="1.5">
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,69,98,0.08)", border: "1px solid rgba(255,69,98,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="1.5">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
               </svg>
             </div>
             <div>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#E8463A", textTransform: "uppercase", marginBottom: 3 }}>Domain Exposure</div>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#FF4562", textTransform: "uppercase", marginBottom: 3 }}>Domain Exposure</div>
               <span style={{ fontSize: 13, color: t.text50 }}>Stealer log exposure across <span style={{ color: t.text, fontWeight: 600 }}>5</span> monitored domains and their subdomains</span>
             </div>
           </div>
@@ -194,11 +192,11 @@ export default function DomainExposure() {
               { label: "Unique FQDNs", value: "217", color: "#A855F7" },
               { label: "Unique Passwords", value: "764", color: "#3B82F6" },
               { label: "Unique Usernames", value: "1.9K", color: "#10B981" },
-              { label: "Record Statuses", value: "2.7K Open", color: "#E8463A" },
+              { label: "Record Statuses", value: "2.7K Open", color: "#FF4562" },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: "right" }}>
                 <div className="mono" style={{ fontSize: 9, letterSpacing: "0.06em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>{s.label}</div>
-                <span className="hfont" style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", color: s.color }}>{s.value}</span>
+                <span className="hfont" style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em", color: s.color }}>{s.value}</span>
               </div>
             ))}
           </div>
@@ -222,7 +220,7 @@ export default function DomainExposure() {
               </div>
               <div style={{ position: "relative", width: 120 }}>
                 <svg style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input value={domainSearch} onChange={e => setDomainSearch(e.target.value)} placeholder="Filter..." style={{ width: "100%", padding: "6px 8px 6px 26px", fontSize: 10, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 8, color: t.text, outline: "none" }} />
+                <input value={domainSearch} onChange={e => setDomainSearch(e.target.value)} placeholder="Filter..." style={{ width: "100%", padding: "6px 8px 6px 26px", fontSize: 10, fontFamily: "'Inter', sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 8, color: t.text, outline: "none" }} />
               </div>
             </div>
           </div>
@@ -236,7 +234,7 @@ export default function DomainExposure() {
               const subCount = d.subs ? d.subs.length : 0;
               return (
                 <div key={d.domain} style={{ borderBottom: `1px solid ${t.borderRow}` }}>
-                  <div onClick={() => setExpandedDomain(isExpanded ? -1 : i)} style={{ padding: "14px 16px", cursor: "pointer", background: isExpanded ? "rgba(255,255,255,0.015)" : "transparent", transition: "background 0.15s" }}>
+                  <div onClick={() => setExpandedDomain(isExpanded ? -1 : i)} style={{ padding: "14px 16px", cursor: "pointer", background: isExpanded ? t.bgCard : "transparent", transition: "background 0.15s" }}>
                     {/* Row 1: domain + badges + chevron */}
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                       <div style={{ width: 7, height: 7, borderRadius: "50%", background: sevColor, boxShadow: `0 0 6px ${sevColor}50`, flexShrink: 0 }} />
@@ -260,17 +258,17 @@ export default function DomainExposure() {
                   </div>
                   {/* Expanded content */}
                   {isExpanded && (
-                    <div style={{ padding: "0 16px 14px", background: "rgba(255,255,255,0.01)" }}>
+                    <div style={{ padding: "0 16px 14px", background: t.bgCard }}>
                       {/* Stat boxes */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
                         {[
-                          { label: "Stealer Logs", value: d.stats?.stealerLogs || d.stealerLogs, color: "#E8463A" },
+                          { label: "Stealer Logs", value: d.stats?.stealerLogs || d.stealerLogs, color: "#FF4562" },
                           { label: "Breaches", value: d.stats?.breaches || 0, color: "#EA580C" },
                           { label: "Mentions", value: d.stats?.mentions || 0, color: "#3B82F6" },
                         ].map((st, si) => (
-                          <div key={si} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: `1px solid ${t.borderLight}` }}>
+                          <div key={si} style={{ padding: "10px 12px", borderRadius: 8, background: t.bgCard, border: `1px solid ${t.borderLight}` }}>
                             <div className="mono" style={{ fontSize: 8, color: t.text25, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{st.label}</div>
-                            <span className="hfont" style={{ fontSize: 16, fontWeight: 800, color: st.color }}>{st.value}</span>
+                            <span className="hfont" style={{ fontSize: 16, fontWeight: 700, color: st.color }}>{st.value}</span>
                           </div>
                         ))}
                       </div>
@@ -359,7 +357,7 @@ export default function DomainExposure() {
             </div>
             <div style={{ position: "relative", flex: 1 }}>
               <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={tab === "credentials" ? "Search by URL or user..." : "Search by platform..."} style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={tab === "credentials" ? "Search by URL or user..." : "Search by platform..."} style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Inter', sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
             </div>
             <TimeRangeFilter range={range} onRangeChange={setRange} />
             <ExportButton onClick={() => exportCSV(tab === "credentials" ? filteredCreds : filteredMentions, tab === "credentials" ? credExportCols : mentionExportCols, tab === "credentials" ? "credential_findings.csv" : "dark_web_mentions.csv")} />
@@ -382,20 +380,20 @@ export default function DomainExposure() {
                 <span />
               </div>
               {sortData(filteredCreds).map((r, i) => (
-                <div key={r.id} onClick={() => setSelectedCredId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "24px 1fr 1fr 80px 80px 64px 60px 90px 64px 24px", gap: 6, alignItems: "center", padding: "10px 16px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(232,70,58,0.06)" : selectedCredId === r.id ? "rgba(232,70,58,0.04)" : i % 2 === 0 ? "rgba(255,255,255,0.008)" : "transparent", borderLeft: selectedCredId === r.id ? "3px solid #E8463A" : "3px solid transparent" }}>
+                <div key={r.id} onClick={() => setSelectedCredId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "24px 1fr 1fr 80px 80px 64px 60px 90px 64px 24px", gap: 6, alignItems: "center", padding: "10px 16px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(255,69,98,0.06)" : selectedCredId === r.id ? "rgba(255,69,98,0.04)" : i % 2 === 0 ? t.bgCard : "transparent", borderLeft: selectedCredId === r.id ? "3px solid #FF4562" : "3px solid transparent" }}>
                   <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
                   <span className="mono" style={{ fontSize: 10, color: "#3B82F6", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.url}</span>
                   <span style={{ fontSize: 10, color: t.text50, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.user}</span>
                   <span className="mono" style={{ fontSize: 10, color: t.text40 }}>{r.password}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <div style={{ display: "flex", gap: 2 }}>
-                      {[1, 2, 3, 4, 5].map(b => <div key={b} style={{ width: 8, height: 5, borderRadius: 1, background: b <= STR_VAL[r.strength] ? STR_COL[r.strength] : "rgba(255,255,255,0.06)" }} />)}
+                      {[1, 2, 3, 4, 5].map(b => <div key={b} style={{ width: 8, height: 5, borderRadius: 1, background: b <= STR_VAL[r.strength] ? STR_COL[r.strength] : t.borderLight }} />)}
                     </div>
                   </div>
                   <span style={{ padding: "2px 6px", borderRadius: 5, fontSize: 8, fontWeight: 600, background: "rgba(59,130,246,0.1)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace" }}>{r.type}</span>
-                  <span className="tag" style={{ background: r.status === "Open" ? "rgba(22,163,74,0.08)" : "rgba(255,255,255,0.04)", color: r.status === "Open" ? "#16A34A" : "rgba(232,236,241,0.3)", fontSize: 8, display: "inline-flex", alignItems: "center", gap: 2 }}>{r.status} <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
+                  <span className="tag" style={{ background: r.status === "Open" ? "rgba(22,163,74,0.08)" : t.bgHover, color: r.status === "Open" ? "#16A34A" : t.text30, fontSize: 8, display: "inline-flex", alignItems: "center", gap: 2 }}>{r.status} <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
                   <TimeCell date={r.date} />
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "#E8463A", fontSize: 8, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "#FF4562", fontSize: 8, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
                   <RowChevron />
                 </div>
               ))}
@@ -410,13 +408,13 @@ export default function DomainExposure() {
                 ))}
               </div>
               {filteredMentions.map(r => (
-                <div key={r.id} onClick={() => setSelectedMentionId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "24px 1fr 1fr 70px 100px 64px", gap: 6, alignItems: "center", padding: "10px 16px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(232,70,58,0.06)" : selectedMentionId === r.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedMentionId === r.id ? "3px solid #E8463A" : "3px solid transparent" }}>
+                <div key={r.id} onClick={() => setSelectedMentionId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "24px 1fr 1fr 70px 100px 64px", gap: 6, alignItems: "center", padding: "10px 16px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(255,69,98,0.06)" : selectedMentionId === r.id ? "rgba(255,69,98,0.04)" : undefined, borderLeft: selectedMentionId === r.id ? "3px solid #FF4562" : "3px solid transparent" }}>
                   <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
                   <span style={{ fontSize: 11, fontWeight: 500, color: t.text60 }}>{r.platform}</span>
                   <span style={{ padding: "3px 8px", borderRadius: 6, fontSize: 10, background: "rgba(59,130,246,0.08)", color: "#3B82F6", fontFamily: "'JetBrains Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%" }}>{r.source}</span>
                   <span className="tag" style={{ background: "rgba(22,163,74,0.08)", color: "#16A34A", fontSize: 8, display: "inline-flex", alignItems: "center", gap: 2 }}>{r.status} <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
                   <span className="mono" style={{ fontSize: 10, color: t.text30 }}>{r.date}</span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "#E8463A", fontSize: 8, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "#FF4562", fontSize: 8, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
                 </div>
               ))}
             </>)}
@@ -442,7 +440,7 @@ export default function DomainExposure() {
           {/* Legend */}
           <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
             {[
-              { label: "Stealer Logs", color: "#E8463A" },
+              { label: "Stealer Logs", color: "#FF4562" },
               { label: "Breaches", color: "#EA580C" },
               { label: "Mentions", color: "#3B82F6" },
             ].map((l, i) => (
@@ -454,11 +452,11 @@ export default function DomainExposure() {
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={TIMELINE}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={t.gridLine} />
               <XAxis dataKey="date" axisLine={false} tickLine={false} interval={3} tick={{ fontSize: 9, fill: t.text25, fontFamily: "'JetBrains Mono',monospace" }} />
               <YAxis axisLine={false} tickLine={false} width={30} tick={{ fontSize: 9, fill: t.text25, fontFamily: "'JetBrains Mono',monospace" }} />
               <Tooltip {...ttS} />
-              <Area type="monotone" dataKey="stealerLogs" stroke="#E8463A" fill="#E8463A" fillOpacity={0.06} strokeWidth={2} dot={false} />
+              <Area type="monotone" dataKey="stealerLogs" stroke="#FF4562" fill="#FF4562" fillOpacity={0.06} strokeWidth={2} dot={false} />
               <Area type="monotone" dataKey="breaches" stroke="#EA580C" fill="#EA580C" fillOpacity={0.04} strokeWidth={1.5} dot={false} />
               <Area type="monotone" dataKey="mentions" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.04} strokeWidth={1.5} dot={false} />
             </AreaChart>
@@ -474,7 +472,7 @@ export default function DomainExposure() {
           {/* Legend */}
           <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
             {[
-              { label: "Stealer Logs", color: "#E8463A" },
+              { label: "Stealer Logs", color: "#FF4562" },
               { label: "Breaches", color: "#EA580C" },
               { label: "Mentions", color: "#3B82F6" },
             ].map((l, i) => (
@@ -498,9 +496,9 @@ export default function DomainExposure() {
                     <span className="mono" style={{ fontSize: 10, color: t.text50, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 180 }}>{d.domain}</span>
                     <span className="mono" style={{ fontSize: 10, color: t.text30 }}>{total}</span>
                   </div>
-                  <div style={{ width: "100%", height: 14, borderRadius: 4, background: "rgba(255,255,255,0.03)", overflow: "hidden" }}>
+                  <div style={{ width: "100%", height: 14, borderRadius: 4, background: t.bgInput, overflow: "hidden" }}>
                     <div style={{ width: `${barWidth}%`, height: "100%", display: "flex", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ width: `${slPct}%`, height: "100%", background: "#E8463A" }} />
+                      <div style={{ width: `${slPct}%`, height: "100%", background: "#FF4562" }} />
                       <div style={{ width: `${brPct}%`, height: "100%", background: "#EA580C" }} />
                       <div style={{ flex: 1, height: "100%", background: "#3B82F6" }} />
                     </div>
@@ -520,12 +518,12 @@ export default function DomainExposure() {
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${t.borderSection}` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(232,70,58,0.1)", border: "1px solid rgba(232,70,58,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4m0-4h.01" /></svg>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,69,98,0.1)", border: "1px solid rgba(255,69,98,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4m0-4h.01" /></svg>
                   </div>
                   <div>
                     <span className="hfont" style={{ fontSize: 18, fontWeight: 700 }}>Credential Finding</span>
-                    <div style={{ fontSize: 12, color: "#E8463A", marginTop: 2 }}>Botnet Data</div>
+                    <div style={{ fontSize: 12, color: "#FF4562", marginTop: 2 }}>Botnet Data</div>
                   </div>
                 </div>
                 <button onClick={() => setSelectedCredId(null)} style={{ width: 28, height: 28, borderRadius: 8, border: "none", background: t.borderLight, color: t.text50, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>&#10005;</button>
@@ -546,7 +544,7 @@ export default function DomainExposure() {
                   <span style={{ fontSize: 13, fontWeight: 500, color: t.text55 }}>{row.label}</span>
                   {row.label === "Password Strength" ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ display: "flex", gap: 2 }}>{[1,2,3,4,5].map(b => <div key={b} style={{ width: 10, height: 6, borderRadius: 1, background: b <= STR_VAL[row.value] ? STR_COL[row.value] : "rgba(255,255,255,0.06)" }} />)}</div>
+                      <div style={{ display: "flex", gap: 2 }}>{[1,2,3,4,5].map(b => <div key={b} style={{ width: 10, height: 6, borderRadius: 1, background: b <= STR_VAL[row.value] ? STR_COL[row.value] : t.borderLight }} />)}</div>
                       <span style={{ fontSize: 11, color: STR_COL[row.value] }}>{row.value}</span>
                     </div>
                   ) : row.label === "URL" ? (

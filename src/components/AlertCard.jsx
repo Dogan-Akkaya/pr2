@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { SEV } from "../data/threat-levels";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AlertCard({ alert, onDismiss }) {
+  const { t } = useTheme();
   const [hov, setHov] = useState(false);
   return (
     <div
@@ -12,7 +14,7 @@ export default function AlertCard({ alert, onDismiss }) {
         borderRadius: 12,
         position: "relative",
         overflow: "hidden",
-        background: "rgba(255,255,255,0.02)",
+        background: t.bgCard,
         border: `1px solid ${SEV[alert.sev]}18`,
         transition: "all 0.25s",
         marginBottom: 8,
@@ -31,9 +33,9 @@ export default function AlertCard({ alert, onDismiss }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.4, marginBottom: 3 }}>{alert.text}</div>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <span className="mono" style={{ fontSize: 10, color: "rgba(232,236,241,0.25)" }}>{alert.source}</span>
-            <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />
-            <span className="mono" style={{ fontSize: 10, color: "rgba(232,236,241,0.2)" }}>{alert.time}</span>
+            <span className="mono" style={{ fontSize: 10, color: t.text25 }}>{alert.source}</span>
+            <span style={{ width: 3, height: 3, borderRadius: "50%", background: t.text15 }} />
+            <span className="mono" style={{ fontSize: 10, color: t.text20 }}>{alert.time}</span>
           </div>
         </div>
       </div>
@@ -44,7 +46,7 @@ export default function AlertCard({ alert, onDismiss }) {
           width: "55%",
           display: "flex", alignItems: "center", justifyContent: "flex-end",
           gap: 6, padding: "0 12px",
-          background: "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.02) 20%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.07) 100%)",
+          background: `linear-gradient(to right, transparent 0%, ${t.bgCard} 20%, ${t.bgHover} 60%, ${t.bgElevated} 100%)`,
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           opacity: hov ? 1 : 0,
@@ -58,7 +60,7 @@ export default function AlertCard({ alert, onDismiss }) {
           style={{
             padding: "6px 14px", borderRadius: 8, border: "none",
             background: SEV[alert.sev], color: "#fff", fontSize: 11,
-            fontWeight: 600, cursor: "pointer", fontFamily: "'Satoshi'",
+            fontWeight: 600, cursor: "pointer", fontFamily: "'Inter'",
             boxShadow: `0 2px 8px ${SEV[alert.sev]}30`, whiteSpace: "nowrap",
           }}
         >
@@ -67,10 +69,10 @@ export default function AlertCard({ alert, onDismiss }) {
         <button
           style={{
             padding: "6px 12px", borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.12)",
-            background: "rgba(255,255,255,0.04)",
-            color: "rgba(232,236,241,0.65)", fontSize: 11,
-            fontWeight: 500, cursor: "pointer", fontFamily: "'Satoshi'",
+            border: `1px solid ${t.borderStrong}`,
+            background: t.bgHover,
+            color: t.text60, fontSize: 11,
+            fontWeight: 500, cursor: "pointer", fontFamily: "'Inter'",
             whiteSpace: "nowrap",
           }}
         >
@@ -80,8 +82,8 @@ export default function AlertCard({ alert, onDismiss }) {
           onClick={(e) => { e.stopPropagation(); onDismiss?.(alert.id); }}
           style={{
             width: 24, height: 24, borderRadius: 6, border: "none",
-            background: "rgba(255,255,255,0.06)",
-            color: "rgba(232,236,241,0.35)", fontSize: 13,
+            background: t.bgElevated,
+            color: t.text35, fontSize: 13,
             cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >

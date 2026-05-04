@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Executive Protection — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ BANNER ═══ */
+.banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:18px}
+.banner-icon{width:40px;height:40px;border-radius:10px;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:8px}
+.banner-title .badge{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:20px;flex-shrink:0}
+.bs{text-align:center;min-width:55px}
+.bs-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.bs-val{font-size:18px;font-weight:800;margin-top:1px}
+
+/* ═══ EXECUTIVE RISK PROFILES (HERO) ═══ */
+.profiles-row{display:flex;gap:10px;margin-bottom:18px}
+.profile-card{
+  flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:16px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;
+}
+.profile-card:hover{border-color:rgba(99,102,241,0.3)}
+.profile-card.selected{border-color:rgba(168,85,247,0.4);background:rgba(168,85,247,0.03)}
+.profile-card.selected::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:var(--purple)}
+.profile-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.profile-avatar{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;
+}
+.profile-name{font-size:12px;font-weight:700}
+.profile-email{font-size:8px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.profile-risk{margin-left:auto;text-align:right;flex-shrink:0}
+.profile-risk-badge{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px}
+.profile-score{font-size:11px;font-weight:700;margin-top:2px}
+.profile-kpis{display:flex;gap:4px;margin-bottom:10px}
+.profile-kpi{flex:1;text-align:center;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:5px;padding:6px 4px}
+.profile-kpi-val{font-size:14px;font-weight:800}
+.profile-kpi-label{font-size:6px;color:var(--dim);letter-spacing:0.5px;font-weight:700;margin-top:1px}
+.profile-attacks{font-size:8px}
+.profile-attack-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.profile-attack-name{color:#94A3B8}
+.profile-attack-sev{font-size:7px;padding:1px 6px;border-radius:3px;font-weight:700}
+.profile-link{text-align:center;margin-top:8px;font-size:9px;color:var(--indigo);font-weight:500}
+
+/* ═══ TWO-COLUMN: LEFT + RIGHT ═══ */
+.two-col{display:flex;gap:12px;margin-bottom:18px}
+.col-main{flex:6;min-width:0}
+.col-side{flex:4;min-width:0}
+
+/* ═══ EXPOSURE CATEGORIES ═══ */
+.exp-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+.exp-cat{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);
+  border-radius:7px;padding:10px;cursor:pointer;transition:border-color 0.15s;
+}
+.exp-cat:hover{border-color:rgba(99,102,241,0.2)}
+.exp-cat-icon{font-size:14px;margin-bottom:4px}
+.exp-cat-name{font-size:9px;font-weight:700}
+.exp-cat-desc{font-size:7px;color:var(--dim);margin-top:2px;line-height:1.3}
+.exp-cat-sev{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px;float:right;margin-top:-20px}
+
+/* ═══ ALARM TRENDS ═══ */
+.chart-ph{
+  height:100px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);
+  border-radius:6px;text-align:center;
+}
+
+/* ═══ MONITORING TABLE ═══ */
+.table-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.table-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.table-count{font-size:9px;color:var(--muted)}
+.table-search{
+  width:280px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  border-radius:6px;padding:6px 10px;font-size:9px;color:var(--text);
+  font-family:inherit;outline:none;
+}
+.table-search::placeholder{color:var(--dim)}
+.time-pills{display:flex;gap:3px}
+.tpill{font-size:7px;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.tpill.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+.data-table{width:100%;font-size:9px;border-collapse:collapse}
+.data-table th{text-align:left;font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(51,65,85,0.3)}
+.data-table td{padding:7px 8px;border-bottom:1px solid rgba(51,65,85,0.08);vertical-align:middle}
+.data-table tr:hover{background:rgba(99,102,241,0.03)}
+.td-name{font-weight:600}
+.td-email{font-family:'JetBrains Mono',monospace;font-size:8px;color:#94A3B8}
+.td-source{font-size:8px;color:var(--indigo);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-status{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.td-alarm{font-size:8px;color:var(--muted)}
+.table-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:8px;color:var(--dim)}
+.page-dots{display:flex;gap:3px}
+.page-dot{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;border:1px solid rgba(51,65,85,0.3);cursor:pointer}
+.page-dot.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ RIGHT SIDE PANELS ═══ */
+.donut-wrap{display:flex;align-items:center;gap:14px}
+.donut-ph{width:80px;height:80px;border-radius:50%;border:7px solid rgba(255,69,98,0.15);border-top-color:var(--red);border-right-color:var(--red);border-bottom-color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.donut-center{font-size:14px;font-weight:800}
+.donut-legend{font-size:9px}
+.donut-legend-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.donut-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+
+.alarm-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.alarm-row:last-child{border-bottom:none}
+.alarm-rank{width:16px;font-size:8px;color:var(--dim);font-weight:700;flex-shrink:0}
+.alarm-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.alarm-email{flex:1;font-family:'JetBrains Mono',monospace;font-size:8px}
+.alarm-count{font-weight:700;width:30px;text-align:right}
+
+/* Breach Timeline */
+.breach-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.breach-row:last-child{border-bottom:none}
+.breach-date{font-size:8px;color:var(--dim);width:55px;flex-shrink:0}
+.breach-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.breach-tags{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+.breach-tag{font-size:6px;padding:2px 6px;border-radius:3px;font-weight:600}
+
+/* Intelligence Sources */
+.intel-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.intel-row:last-child{border-bottom:none}
+.intel-name{font-weight:500}
+.intel-sev{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700}
+
+/* ═══ POTENTIAL ATTACK VECTORS ═══ */
+.attack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.attack-card{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:12px;position:relative;
+}
+.attack-icon{font-size:16px;margin-bottom:6px}
+.attack-name{font-size:10px;font-weight:700;margin-bottom:2px}
+.attack-sev{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700;position:absolute;top:10px;right:10px}
+.attack-desc{font-size:8px;color:var(--dim);line-height:1.4;margin-bottom:6px}
+.attack-data{font-size:7px;color:var(--dim);padding-top:6px;border-top:1px solid rgba(51,65,85,0.2);line-height:1.3}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+EXECUTIVE PROTECTION PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+KEY CHANGES FROM CURRENT:
+1. Executive Risk Profiles promoted to HERO position (top of page, not bottom)
+2. Exposure Categories added (from VIP Radar inspiration)
+3. Potential Attack Vectors section added (what attackers can DO with the data)
+4. Breach Timeline per VIP (from inspiration)
+5. Intelligence Sources panel (from inspiration)
+6. Profile cards are selectable - clicking one filters all data below to that VIP
+
+INTERACTION MODEL:
+- Clicking a profile card filters: monitoring table, alarm trends, exposure
+  categories, breach timeline, intelligence sources — all to that VIP
+- Default: "All VIPs" view (aggregated)
+- "View Full Profile" opens the detailed dossier (slide-out or dedicated page)
+
+DATA MODELS:
+
+VIPProfile: {
+  id: string,
+  name: 'Simon Johnsson',
+  email: 'simon.johnsson@greenanimals.com',
+  role: 'CFO',
+  risk_score: 72,
+  risk_level: 'very_high' | 'high' | 'medium' | 'low',
+  stats: {
+    data_breaches: 8,
+    passwords: 6,
+    data_classes: 9,
+    paste_exposures: 2
+  },
+  exposure_categories: [{
+    name: 'Online Accounts & Email',
+    severity: 'very_high',
+    description: 'Email addresses, Usernames, OAuth tokens'
+  }, ...],
+  attack_vectors: [{
+    name: 'Credential Stuffing',
+    severity: 'very_high',
+    description: '115 breaches exposed passwords...',
+    data_sources: ['Adobe', 'Stratfor', 'Bitcoin Security Forum']
+  }, ...],
+  breach_timeline: [{
+    date: '2025-08',
+    severity: 'critical',
+    data_types: ['Email addresses', 'Passwords']
+  }, ...],
+  intelligence_sources: [{
+    name: 'Credential Databases',
+    severity: 'very_high'
+  }, ...]
+}
+
+COMPONENT HIERARCHY:
+ExecutiveProtectionPage
+├── TopBanner
+├── ProfileCards (hero, selectable)
+├── TwoColumnLayout
+│   ├── MainColumn (60%)
+│   │   ├── ExposureCategories (grid of 6-7 categories)
+│   │   ├── AlarmTrends (chart)
+│   │   └── MonitoringTable (VIP alarms)
+│   └── SideColumn (40%)
+│       ├── RecordStatuses (donut)
+│       ├── TopAlarmAccounts
+│       ├── BreachTimeline
+│       └── IntelligenceSources
+├── PotentialAttackVectors (4-column grid)
+└── Legend
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">EXECUTIVE PROTECTION &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#128737;</div>
+  <div class="banner-info">
+    <div class="banner-title">EXECUTIVE PROTECTION <span class="badge" style="background:rgba(255,69,98,0.15);color:var(--red)">448 open</span></div>
+    <div class="banner-desc">VIP threat monitoring and executive profile protection</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bs"><div class="bs-label">TOTAL ALARMS</div><div class="bs-val">440</div></div>
+    <div class="bs"><div class="bs-label">VIP ACCOUNTS</div><div class="bs-val">3</div></div>
+    <div class="bs"><div class="bs-label">DATA BREACHES</div><div class="bs-val" style="color:var(--red)">19</div></div>
+    <div class="bs"><div class="bs-label">RISK LEVEL</div><div class="bs-val"><span style="background:rgba(255,69,98,0.15);color:var(--red);font-size:9px;padding:3px 10px;border-radius:5px;font-weight:700">HIGH</span></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ EXECUTIVE RISK PROFILES (HERO) ═══════════ -->
+<!-- CLAUDE CODE: Clicking a card filters all data below to that VIP.
+     Default state: all three selected (aggregated view).
+     Selected state has purple accent border + bottom bar. -->
+<div class="section-label">EXECUTIVE RISK PROFILES</div>
+<div class="profiles-row">
+  <!-- Gabriel Jackson -->
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="profile-avatar" style="background:rgba(255,69,98,0.15);color:var(--red)">GJ</div>
+      <div>
+        <div class="profile-name">Gabriel Jackson</div>
+        <div class="profile-email">gabriel@gmail.com</div>
+      </div>
+      <div class="profile-risk">
+        <span class="profile-risk-badge" style="background:rgba(255,69,98,0.15);color:var(--red)">HIGH RISK</span>
+        <div class="profile-score">Score: 55/100</div>
+      </div>
+    </div>
+    <div class="profile-kpis">
+      <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--red)">13</div><div class="profile-kpi-label">BREACHES</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--amber)">10</div><div class="profile-kpi-label">PASSWORDS</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">13</div><div class="profile-kpi-label">DATA CLASSES</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">0</div><div class="profile-kpi-label">PASTES</div></div>
+    </div>
+    <div class="profile-attacks">
+      <div class="profile-attack-row"><span class="profile-attack-name">Credential Stuffing</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="profile-attack-row"><span class="profile-attack-name">SIM Swap Attack</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="profile-attack-row"><span class="profile-attack-name">Spear Phishing</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+    </div>
+    <div class="profile-link">View Full Profile &rarr;</div>
+  </div>
+
+  <!-- Simon Johnsson -->
+  <div class="profile-card selected">
+    <div class="profile-top">
+      <div class="profile-avatar" style="background:rgba(168,85,247,0.15);color:var(--purple)">SJ</div>
+      <div>
+        <div class="profile-name">Simon Johnsson</div>
+        <div class="profile-email">simon.johnsson@greenanimals.com</div>
+      </div>
+      <div class="profile-risk">
+        <span class="profile-risk-badge" style="background:rgba(255,69,98,0.15);color:var(--red)">VERY HIGH RISK</span>
+        <div class="profile-score">Score: 72/100</div>
+      </div>
+    </div>
+    <div class="profile-kpis">
+      <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--red)">8</div><div class="profile-kpi-label">BREACHES</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--amber)">6</div><div class="profile-kpi-label">PASSWORDS</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">9</div><div class="profile-kpi-label">DATA CLASSES</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">2</div><div class="profile-kpi-label">PASTES</div></div>
+    </div>
+    <div class="profile-attacks">
+      <div class="profile-attack-row"><span class="profile-attack-name">Credential Stuffing</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="profile-attack-row"><span class="profile-attack-name">Identity Theft</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="profile-attack-row"><span class="profile-attack-name">Spear Phishing</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+    </div>
+    <div class="profile-link">View Full Profile &rarr;</div>
+  </div>
+
+  <!-- Dogan Akkaya -->
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="profile-avatar" style="background:rgba(34,197,94,0.15);color:var(--green)">DA</div>
+      <div>
+        <div class="profile-name">Dogan Akkaya</div>
+        <div class="profile-email">dogan.akkaya@socradar.io</div>
+      </div>
+      <div class="profile-risk">
+        <span class="profile-risk-badge" style="background:rgba(245,158,11,0.12);color:var(--amber)">MEDIUM RISK</span>
+        <div class="profile-score">Score: 18/100</div>
+      </div>
+    </div>
+    <div class="profile-kpis">
+      <div class="profile-kpi"><div class="profile-kpi-val">3</div><div class="profile-kpi-label">BREACHES</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">1</div><div class="profile-kpi-label">PASSWORDS</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">5</div><div class="profile-kpi-label">DATA CLASSES</div></div>
+      <div class="profile-kpi"><div class="profile-kpi-val">0</div><div class="profile-kpi-label">PASTES</div></div>
+    </div>
+    <div class="profile-attacks">
+      <div class="profile-attack-row"><span class="profile-attack-name">Spear Phishing</span><span class="profile-attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">HIGH</span></div>
+      <div class="profile-attack-row"><span class="profile-attack-name">Credential Stuffing</span><span class="profile-attack-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">MEDIUM</span></div>
+    </div>
+    <div class="profile-link">View Full Profile &rarr;</div>
+  </div>
+</div>
+
+<!-- ═══════════ TWO-COLUMN LAYOUT ═══════════ -->
+<div class="two-col">
+  <div class="col-main">
+
+    <!-- Exposure Categories -->
+    <div class="section-label">EXPOSURE CATEGORIES</div>
+    <div class="exp-cats">
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#128231;</div>
+        <span class="exp-cat-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+        <div class="exp-cat-name">Online Accounts &amp; Email</div>
+        <div class="exp-cat-desc">Email addresses, Usernames, OAuth tokens, Website activity</div>
+      </div>
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#128274;</div>
+        <span class="exp-cat-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+        <div class="exp-cat-name">Credentials</div>
+        <div class="exp-cat-desc">Passwords, Password hints, Security questions</div>
+      </div>
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#128179;</div>
+        <span class="exp-cat-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+        <div class="exp-cat-name">Financial Data</div>
+        <div class="exp-cat-desc">Bank account numbers, Credit cards</div>
+      </div>
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#127380;</div>
+        <span class="exp-cat-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">HIGH</span>
+        <div class="exp-cat-name">Identity &amp; PII</div>
+        <div class="exp-cat-desc">Full name, DOB, National ID</div>
+      </div>
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#127968;</div>
+        <span class="exp-cat-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">MEDIUM</span>
+        <div class="exp-cat-name">Location &amp; IP</div>
+        <div class="exp-cat-desc">Office IP ranges, Home IP, City</div>
+      </div>
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#128222;</div>
+        <span class="exp-cat-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">HIGH</span>
+        <div class="exp-cat-name">Phone &amp; Contact</div>
+        <div class="exp-cat-desc">Personal mobile, Office direct line</div>
+      </div>
+      <div class="exp-cat">
+        <div class="exp-cat-icon">&#128188;</div>
+        <span class="exp-cat-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+        <div class="exp-cat-name">Professional Intel</div>
+        <div class="exp-cat-desc">Employer, Role: CFO, Department</div>
+      </div>
+    </div>
+
+    <!-- Alarm Trends -->
+    <div class="pn">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div class="section-label" style="margin-bottom:2px">ALARM TRENDS BY TYPE</div>
+          <div style="font-size:12px;font-weight:700">Exposure over time</div>
+        </div>
+        <span class="tpill active" style="font-size:8px">Last Year</span>
+      </div>
+      <div class="chart-ph">[Area Chart]<br>Breach Data (336) &middot; VIP Mentions (0) &middot; Info Stealer (0)<br>Monthly &middot; Last 12 months</div>
+      <div style="display:flex;gap:12px;margin-top:6px;font-size:8px">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--indigo);margin-right:4px;vertical-align:middle"></span>Breach Data <strong>336</strong></span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--red);margin-right:4px;vertical-align:middle"></span>VIP Mentions <strong>0</strong></span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--green);margin-right:4px;vertical-align:middle"></span>Info Stealer <strong>0</strong></span>
+      </div>
+    </div>
+
+    <!-- Monitoring Table -->
+    <div class="pn">
+      <div class="table-header">
+        <div>
+          <div class="section-label" style="margin-bottom:2px">10 TOTAL ALARMS</div>
+          <div class="table-title">VIP Monitoring</div>
+        </div>
+        <input class="table-search" type="text" placeholder="Search by VIP name or email...">
+        <div class="time-pills">
+          <span class="tpill">24h</span>
+          <span class="tpill">7d</span>
+          <span class="tpill">30d</span>
+          <span class="tpill">90d</span>
+          <span class="tpill active">ALL</span>
+          <span style="margin-left:4px;color:var(--dim);font-size:12px;cursor:pointer">&#8615;</span>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th style="width:24px"></th>
+          <th>VIP NAME</th>
+          <th>KEYWORD</th>
+          <th>SOURCE</th>
+          <th>STATUS</th>
+          <th>DISCOVERY</th>
+          <th>RELATED ALARM</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" style="opacity:0.3"></td><td class="td-name">Dogan Akkaya</td><td class="td-email">dogan.akkaya@socradar.io</td><td class="td-source">https://t.me/leaked_databases_2025/5521</td><td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td><td style="font-size:8px;color:var(--dim)">7mo ago</td><td class="td-alarm">VIP Mentions &rsaquo;</td></tr>
+          <tr><td><input type="checkbox" style="opacity:0.3"></td><td class="td-name">Simon Johnsson</td><td class="td-email">simon.johnsson@greenanimals.com</td><td class="td-source">https://t.me/-1001389201445/9102</td><td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td><td style="font-size:8px;color:var(--dim)">8mo ago</td><td class="td-alarm">Breach Data &rsaquo;</td></tr>
+          <tr><td><input type="checkbox" style="opacity:0.3"></td><td class="td-name">Simon Johnsson</td><td class="td-email">simon.johnsson@greenanimals.com</td><td class="td-source">https://darkforums.st/thread/combo-aug-2025</td><td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td><td style="font-size:8px;color:var(--dim)">8mo ago</td><td class="td-alarm">Breach Data &rsaquo;</td></tr>
+          <tr><td><input type="checkbox" style="opacity:0.3"></td><td class="td-name">Gabriel Jackson</td><td class="td-email">gabriel@gmail.com</td><td class="td-source">https://t.me/emp_chat/273664</td><td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td><td style="font-size:8px;color:var(--dim)">10mo ago</td><td class="td-alarm">Breach Data &rsaquo;</td></tr>
+          <tr><td><input type="checkbox" style="opacity:0.3"></td><td class="td-name">Elena Marchetti</td><td class="td-email">elena.marchetti@socradar.io</td><td class="td-source">—</td><td><span class="td-status" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Closed</span></td><td style="font-size:8px;color:var(--dim)">1y ago</td><td class="td-alarm">Monitoring &rsaquo;</td></tr>
+        </tbody>
+      </table>
+      <div class="table-footer"><span>Showing 1&ndash;5 of 10</span><div class="page-dots"><span class="page-dot">&lsaquo;</span><span class="page-dot active">1</span><span class="page-dot">2</span><span class="page-dot">&rsaquo;</span></div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="col-side">
+    <!-- Record Statuses -->
+    <div class="pn">
+      <div class="section-label">RECORD STATUSES</div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">440 total records</div>
+      <div class="donut-wrap">
+        <div class="donut-ph"><span class="donut-center">440</span></div>
+        <div class="donut-legend">
+          <div class="donut-legend-row"><span class="donut-dot" style="background:var(--red)"></span>Open <strong>440</strong></div>
+          <div class="donut-legend-row"><span class="donut-dot" style="background:var(--amber)"></span>On Hold <strong>0</strong></div>
+          <div class="donut-legend-row"><span class="donut-dot" style="background:var(--indigo)"></span>Closed <strong>8</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Alarm Accounts -->
+    <div class="pn">
+      <div class="section-label">TOP ALARM GENERATED ACCOUNTS</div>
+      <div class="alarm-row"><span class="alarm-rank">1.</span><span class="alarm-dot" style="background:var(--red)"></span><span class="alarm-email">gabriel@gmail.com</span><span class="alarm-count" style="color:var(--red)">336</span></div>
+      <div class="alarm-row"><span class="alarm-rank">2.</span><span class="alarm-dot" style="background:var(--amber)"></span><span class="alarm-email">mail@mail.com</span><span class="alarm-count" style="color:var(--amber)">102</span></div>
+      <div class="alarm-row"><span class="alarm-rank">3.</span><span class="alarm-dot" style="background:var(--indigo)"></span><span class="alarm-email">tanya.southey@gmail.c...</span><span class="alarm-count">1</span></div>
+      <div class="alarm-row"><span class="alarm-rank">4.</span><span class="alarm-dot" style="background:var(--faint)"></span><span class="alarm-email">mmail@mail.com</span><span class="alarm-count">1</span></div>
+    </div>
+
+    <!-- Breach Timeline (NEW - from inspiration) -->
+    <div class="pn">
+      <div class="section-label">BREACH TIMELINE</div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">When data was exposed</div>
+      <div class="breach-row">
+        <span class="breach-date">Aug 2025</span>
+        <span class="breach-dot" style="background:var(--red)"></span>
+        <div class="breach-tags">
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">Email addresses</span>
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">Passwords</span>
+        </div>
+      </div>
+      <div class="breach-row">
+        <span class="breach-date">Jul 2025</span>
+        <span class="breach-dot" style="background:var(--red)"></span>
+        <div class="breach-tags">
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">Email addresses</span>
+          <span class="breach-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">Passwords</span>
+          <span class="breach-tag" style="background:rgba(168,85,247,0.1);color:var(--purple)">Employer</span>
+        </div>
+      </div>
+      <div class="breach-row">
+        <span class="breach-date">Mar 2025</span>
+        <span class="breach-dot" style="background:var(--amber)"></span>
+        <div class="breach-tags">
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">Email addresses</span>
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">National IDs</span>
+        </div>
+      </div>
+      <div class="breach-row">
+        <span class="breach-date">Dec 2024</span>
+        <span class="breach-dot" style="background:var(--amber)"></span>
+        <div class="breach-tags">
+          <span class="breach-tag" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Email addresses</span>
+          <span class="breach-tag" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Phone numbers</span>
+        </div>
+      </div>
+      <div class="breach-row">
+        <span class="breach-date">Sep 2024</span>
+        <span class="breach-dot" style="background:var(--red)"></span>
+        <div class="breach-tags">
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">Email addresses</span>
+          <span class="breach-tag" style="background:rgba(255,69,98,0.1);color:var(--red)">Passwords</span>
+          <span class="breach-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">Security Qs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intelligence Sources (NEW - from inspiration) -->
+    <div class="pn">
+      <div class="section-label">INTELLIGENCE SOURCES</div>
+      <div class="intel-row"><span class="intel-name">Credential Databases</span><span class="intel-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="intel-row"><span class="intel-name">Paste Sites</span><span class="intel-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">HIGH</span></div>
+      <div class="intel-row"><span class="intel-name">Breach Databases</span><span class="intel-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="intel-row"><span class="intel-name">Dark Web Forums</span><span class="intel-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span></div>
+      <div class="intel-row"><span class="intel-name">Telegram Channels</span><span class="intel-sev" style="background:rgba(245,158,11,0.12);color:var(--amber)">HIGH</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ POTENTIAL ATTACK VECTORS ═══════════ -->
+<!-- CLAUDE CODE: Attack vectors are dynamically generated based on the
+     exposed data for selected VIP(s). Each vector should explain:
+     1. What the attack is
+     2. Why it's possible (which exposed data enables it)
+     3. Which breaches/sources provided the data
+     Severity is calculated from the combination of data types exposed. -->
+<div class="section-label">POTENTIAL ATTACK VECTORS <span style="color:var(--red);font-size:8px;margin-left:4px">8 identified</span></div>
+<div style="font-size:9px;color:var(--dim);margin-bottom:8px">Based on exposed data &middot; What attackers could do with this information</div>
+<div class="attack-grid">
+  <div class="attack-card">
+    <div class="attack-icon">&#128274;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Credential Stuffing</div>
+    <div class="attack-desc">115 breaches exposed passwords or password hints. Attackers use these in automated login attacks across banking, email, and SaaS platforms.</div>
+    <div class="attack-data">Data: Adobe, Stratfor, Bitcoin Security Forum, Gmail, 000webhost, KGames +110 more</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#127380;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Identity Theft</div>
+    <div class="attack-desc">5 PII categories (names, gender, gov IDs) exposed across 110 breaches. Sufficient for fraudulent credit applications and identity forgery.</div>
+    <div class="attack-data">Data: Stratfor, Money Bookers, Dungeons &amp; Dragons Online, VK +105 more</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#128179;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Financial Fraud</div>
+    <div class="attack-desc">Financial data (credit cards, bank accounts, payment history) found in 2 breaches. Enables card verification bypass and unauthorized transactions.</div>
+    <div class="attack-data">Data: Stratfor, Unverified Data Source</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#128241;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">SIM Swap Attack</div>
+    <div class="attack-desc">Phone numbers exposed in 67 breaches with supporting PII. Enables telecom social engineering to hijack phone number and intercept 2FA codes.</div>
+    <div class="attack-data">Data: Stratfor, Money Bookers, VK, ViewFines, Gaadi +62 more</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#127919;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Spear Phishing</div>
+    <div class="attack-desc">168 total breaches provide rich context for highly targeted phishing. Professional role data enables impersonation of colleagues or HR.</div>
+    <div class="attack-data">Data: Adobe, Stratfor, Bitcoin Security Forum, Gmail +163 more</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#128205;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Physical Targeting</div>
+    <div class="attack-desc">Physical addresses or geographic locations exposed in 78 breaches. Enables physical surveillance, mail fraud, and geo-targeting.</div>
+    <div class="attack-data">Data: Spam List, River City Media, Special K Data Feed +72 more</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#128260;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Account Recovery Abuse</div>
+    <div class="attack-desc">DOB exposed in 43 breaches. Can answer common security questions to gain unauthorized access to email, banking, and government portals.</div>
+    <div class="attack-data">Data: Money Bookers, D&amp;D Online, Trillian, Special K +38 more</div>
+  </div>
+  <div class="attack-card">
+    <div class="attack-icon">&#128188;</div>
+    <span class="attack-sev" style="background:rgba(255,69,98,0.12);color:var(--red)">VERY HIGH</span>
+    <div class="attack-name">Business Email Compromise</div>
+    <div class="attack-desc">Employer/job title data found in 7 breaches. Enables targeted BEC attacks impersonating the subject to defraud their organization.</div>
+    <div class="attack-data">Data: Apollo, You've Been Scraped, Verifications.io +4 more</div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.25)"></span>Executive Risk Profiles (hero, selectable)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Exposure Categories + Alarms + Table</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.15)"></span>Statuses + Timeline + Sources</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.06)"></span>Attack Vectors (full-width)</span>
+  </div>
+</div>
+
+</body>
+</html>

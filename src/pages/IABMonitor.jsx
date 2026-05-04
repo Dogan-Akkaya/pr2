@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { SortHeader, useSort, usePagination, Pagination, ExportButton, exportCSV, CopyCell, Checkbox, useSelection, BulkActionBar, stickyHeaderStyle } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
+import DemoNotice from "../components/DemoNotice";
 
 // ── Top Stealer Countries ──
 const TOP_COUNTRIES = [
@@ -33,7 +34,7 @@ const STEALER_FAMILIES = [
 
 // ── Summary stats ──
 const SUMMARY_STATS = [
-  { label: "Compromised Employee", value: "262K", color: "#E8463A", searchQuery: "socradar.com" },
+  { label: "Compromised Employee", value: "262K", color: "#FF4562", searchQuery: "socradar.com" },
   { label: "Compromised Users", value: "49.9K", color: "#A855F7", searchQuery: "socradar" },
   { label: "Compromised 3rd Party", value: "3.1K", color: "#3B82F6", searchQuery: "gateway" },
 ];
@@ -119,7 +120,7 @@ function MiniDonut({ segments, size = 140, t }) {
 }
 
 // ═══════════════════════════════════════
-export default function IAIntelligence() {
+export default function IABMonitor() {
   const { t } = useTheme();
   const [loaded, setLoaded] = useState(false);
   const [query, setQuery] = useState("");
@@ -210,7 +211,7 @@ export default function IAIntelligence() {
 
   // Dynamic tab data with live counts
   const DATA_TABS = [
-    { key: "stealer", label: "InfoStealer Logs", count: String(getTabCount("stealer")), color: "#E8463A" },
+    { key: "stealer", label: "InfoStealer Logs", count: String(getTabCount("stealer")), color: "#FF4562" },
     { key: "breach", label: "Data Breaches", count: String(getTabCount("breach")), color: "#A855F7" },
     { key: "sale", label: "Stealer Logs on Sale", count: String(getTabCount("sale")), color: "#F59E0B" },
     { key: "insights", label: "Insights", count: null, color: "#10B981" },
@@ -243,6 +244,14 @@ export default function IAIntelligence() {
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
+      <DemoNotice />
+
+      {/* ═══ PAGE HEADER ═══ */}
+      <div className="glass" style={{ padding: "18px 22px", animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+        <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Threat Intelligence</div>
+        <div className="hfont" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>Initial Access Broker Monitor</div>
+        <div style={{ fontSize: 13, color: t.text50, marginTop: 6 }}>Monitor IAB activity, infostealer logs, and credentials sold by initial access brokers worldwide.</div>
+      </div>
 
       {/* ═══ TOP ROW: Timeline + Stealer Donut ═══ */}
       <div style={{
@@ -298,7 +307,7 @@ export default function IAIntelligence() {
         {SUMMARY_STATS.map((s, i) => (
           <div key={i} className="glass" style={{ padding: "18px 20px" }}>
             <div style={{ fontSize: 12, color: t.text40, marginBottom: 6 }}>{s.label}</div>
-            <span className="hfont" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em" }}>{s.value}</span>
+            <span className="hfont" style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.02em" }}>{s.value}</span>
             <div style={{ marginTop: 6 }}>
               <span
                 onClick={() => handleViewDetails(s.searchQuery)}
@@ -335,14 +344,14 @@ export default function IAIntelligence() {
               value={query} onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === "Enter" && doSearch()}
               placeholder="Search..."
-              style={{ width: "100%", padding: "9px 14px 9px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }}
+              style={{ width: "100%", padding: "9px 14px 9px 36px", fontSize: 12, fontFamily: "'Inter', sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }}
             />
           </div>
           {FILTERS.map((f, i) => (
             <button key={i} style={{
               padding: "7px 14px", borderRadius: 8, border: `1px solid ${t.borderLight}`,
               background: t.bgCard, color: t.text40,
-              fontSize: 11, cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+              fontSize: 11, cursor: "pointer", fontFamily: "'Inter', sans-serif",
               display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
             }}>
               {f.icon && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d={f.icon} /></svg>}
@@ -355,16 +364,16 @@ export default function IAIntelligence() {
             onClick={cycleCountryFilter}
             style={{
               padding: "7px 14px", borderRadius: 8,
-              border: countryFilter !== "all" ? "1px solid rgba(232,70,58,0.3)" : `1px solid ${t.borderLight}`,
-              background: countryFilter !== "all" ? "rgba(232,70,58,0.06)" : t.bgCard,
+              border: countryFilter !== "all" ? "1px solid rgba(255,69,98,0.3)" : `1px solid ${t.borderLight}`,
+              background: countryFilter !== "all" ? "rgba(255,69,98,0.06)" : t.bgCard,
               color: countryFilter !== "all" ? t.text60 : t.text40,
-              fontSize: 11, cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+              fontSize: 11, cursor: "pointer", fontFamily: "'Inter', sans-serif",
               display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
             }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" /></svg>
             {countryFilter !== "all" ? `Country: ${countryFilter}` : "Other Filters"}
-            <span className="mono" style={{ fontSize: 9, color: countryFilter !== "all" ? "#E8463A" : t.text25 }}>({activeCountryCount})</span>
+            <span className="mono" style={{ fontSize: 9, color: countryFilter !== "all" ? "#FF4562" : t.text25 }}>({activeCountryCount})</span>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
           </button>
         </div>
@@ -380,7 +389,7 @@ export default function IAIntelligence() {
                 background: activeTab === tab.key ? `${tab.color}18` : t.bgInput,
                 color: activeTab === tab.key ? tab.color : t.text35,
                 fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400,
-                fontFamily: "'Satoshi',sans-serif", display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 6,
                 border: activeTab === tab.key ? `1px solid ${tab.color}30` : `1px solid ${t.borderSection}`,
               }}
             >
@@ -393,10 +402,10 @@ export default function IAIntelligence() {
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div onClick={() => setShowMachineInfo(!showMachineInfo)} style={{
                 width: 32, height: 18, borderRadius: 9, padding: 2, cursor: "pointer",
-                background: showMachineInfo ? "rgba(232,70,58,0.35)" : t.borderMed,
+                background: showMachineInfo ? "rgba(255,69,98,0.35)" : t.borderMed,
                 transition: "all 0.2s", position: "relative",
               }}>
-                <div style={{ width: 14, height: 14, borderRadius: "50%", background: showMachineInfo ? "#E8463A" : "rgba(255,255,255,0.3)", transform: showMachineInfo ? "translateX(14px)" : "translateX(0)", transition: "all 0.2s" }} />
+                <div style={{ width: 14, height: 14, borderRadius: "50%", background: showMachineInfo ? "#FF4562" : t.text40, transform: showMachineInfo ? "translateX(14px)" : "translateX(0)", transition: "all 0.2s" }} />
               </div>
               <span style={{ fontSize: 10, color: t.text30 }}>Show only credentials with machine info</span>
             </div>
@@ -404,14 +413,14 @@ export default function IAIntelligence() {
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div onClick={() => setIncludeSubdomains(!includeSubdomains)} style={{
                 width: 32, height: 18, borderRadius: 9, padding: 2, cursor: "pointer",
-                background: includeSubdomains ? "rgba(232,70,58,0.35)" : t.borderMed,
+                background: includeSubdomains ? "rgba(255,69,98,0.35)" : t.borderMed,
                 transition: "all 0.2s", position: "relative",
               }}>
-                <div style={{ width: 14, height: 14, borderRadius: "50%", background: includeSubdomains ? "#E8463A" : "rgba(255,255,255,0.3)", transform: includeSubdomains ? "translateX(14px)" : "translateX(0)", transition: "all 0.2s" }} />
+                <div style={{ width: 14, height: 14, borderRadius: "50%", background: includeSubdomains ? "#FF4562" : t.text40, transform: includeSubdomains ? "translateX(14px)" : "translateX(0)", transition: "all 0.2s" }} />
               </div>
               <span style={{ fontSize: 10, color: t.text30 }}>Include subdomains</span>
             </div>
-            <ExportButton onClick={() => exportCSV(filtered, CSV_COLS, "ia-intelligence-export.csv")} />
+            <ExportButton onClick={() => exportCSV(filtered, CSV_COLS, "iab-monitor-export.csv")} />
           </div>
         </div>
 
@@ -426,7 +435,7 @@ export default function IAIntelligence() {
             <button onClick={() => { setQuery("socradar.io"); setSearched(true); }} style={{
               marginTop: 8, padding: "10px 24px", borderRadius: 8, border: `1px solid ${t.borderStrong}`,
               background: t.bgHover, color: t.text, fontSize: 12, fontWeight: 600,
-              cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+              cursor: "pointer", fontFamily: "'Inter', sans-serif",
             }}>Search for socradar.io</button>
           </div>
         ) : activeTab === "insights" ? (
@@ -481,8 +490,8 @@ export default function IAIntelligence() {
                 <div key={r.id} onClick={() => setSelectedId(r.id)} className="trow" style={{
                   display: "grid", gridTemplateColumns: "28px 1fr 1fr 90px 110px 60px 110px 110px 40px",
                   gap: 8, alignItems: "center", padding: "10px 20px", cursor: "pointer",
-                  background: sel.isSelected(r.id) ? "rgba(232,70,58,0.04)" : selectedId === r.id ? "rgba(232,70,58,0.04)" : undefined,
-                  borderLeft: selectedId === r.id ? "3px solid #E8463A" : "3px solid transparent",
+                  background: sel.isSelected(r.id) ? "rgba(255,69,98,0.04)" : selectedId === r.id ? "rgba(255,69,98,0.04)" : undefined,
+                  borderLeft: selectedId === r.id ? "3px solid #FF4562" : "3px solid transparent",
                 }}>
                   <Checkbox checked={sel.isSelected(r.id)} onChange={() => sel.toggle(r.id)} />
                   <CopyCell value={r.url} style={{ fontSize: 11, color: t.text55, fontFamily: "'JetBrains Mono',monospace", overflow: "hidden" }}>
@@ -581,8 +590,8 @@ export default function IAIntelligence() {
               {/* Identity & Access Artifact promo */}
               <div style={{ marginTop: 24, padding: "20px", borderRadius: 14, background: t.bgCard, border: `1px solid ${t.border}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(232,70,58,0.1)", border: "1px solid rgba(232,70,58,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8m-4-4v4" /></svg>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,69,98,0.1)", border: "1px solid rgba(255,69,98,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8m-4-4v4" /></svg>
                   </div>
                   <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>Identity & Access Artifact</span>
                 </div>
@@ -591,10 +600,10 @@ export default function IAIntelligence() {
                 </p>
                 <button style={{
                   width: "100%", padding: "12px", borderRadius: 10, border: "none",
-                  background: "linear-gradient(135deg, #E8463A 0%, #A855F7 100%)",
+                  background: "linear-gradient(135deg, #FF4562 0%, #A855F7 100%)",
                   color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
-                  fontFamily: "'Plus Jakarta Sans',sans-serif",
-                  boxShadow: "0 4px 16px rgba(232,70,58,0.3)",
+                  fontFamily: "'Red Hat Display', sans-serif",
+                  boxShadow: "0 4px 16px rgba(255,69,98,0.3)",
                 }}>Explore Insights</button>
               </div>
 

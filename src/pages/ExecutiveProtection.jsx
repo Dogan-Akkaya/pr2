@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, stickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
+import { tooltipStyles } from "../components/chartTheme";
 
 // ── VIP Profiles ──
 const VIP_PROFILES = {
@@ -250,13 +251,13 @@ const TREND_DATA = Array.from({ length: 13 }, (_, i) => {
 });
 
 const RECORD_STATUS = [
-  { label: "Open", count: 440, color: "#E8463A" },
+  { label: "Open", count: 440, color: "#FF4562" },
   { label: "On Hold", count: 0, color: "#F59E0B" },
   { label: "Closed", count: 0, color: "#3B82F6" },
 ];
 
 const TOP_ACCOUNTS = [
-  { label: "gabriel@gmail.com", count: 336, color: "#E8463A" },
+  { label: "gabriel@gmail.com", count: 336, color: "#FF4562" },
   { label: "mail@mail.com", count: 102, color: "#A855F7" },
   { label: "tanya.southey@gmail.c...", count: 1, color: "#3B82F6" },
   { label: "mmail@mail.com", count: 1, color: "#F59E0B" },
@@ -268,19 +269,19 @@ const SEV_BG = { "VERY HIGH": "rgba(220,38,38,0.12)", "HIGH": "rgba(234,88,12,0.
 // ── 3 featured VIP profiles for cards section ──
 const FEATURED_EMAILS = ["gabriel@gmail.com", "simon.johnsson@greenanimals.com", "dogan.akkaya@socradar.io"];
 
-function MiniDonut({ segments, size = 110 }) {
+function MiniDonut({ segments, size = 110, t }) {
   const total = segments.reduce((s, seg) => s + seg.count, 0);
   let cumulative = 0;
   const r = 40, circ = 2 * Math.PI * r;
   return (
     <svg width={size} height={size} viewBox="0 0 110 110">
-      <circle cx="55" cy="55" r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="14" />
+      <circle cx="55" cy="55" r={r} fill="none" stroke={t?.borderSection || "rgba(255,255,255,0.04)"} strokeWidth="14" />
       {segments.map((seg, i) => {
         const pct = total > 0 ? seg.count / total : 0;
         const offset = cumulative; cumulative += pct;
         return <circle key={i} cx="55" cy="55" r={r} fill="none" stroke={seg.color} strokeWidth="14" strokeDasharray={`${pct * circ} ${circ}`} strokeDashoffset={-offset * circ} transform="rotate(-90 55 55)" />;
       })}
-      <text x="55" y="53" textAnchor="middle" dominantBaseline="central" fill="#E8ECF1" fontSize="16" fontWeight="800" fontFamily="'Plus Jakarta Sans'">{total}</text>
+      <text x="55" y="53" textAnchor="middle" dominantBaseline="central" fill={t?.text || "#E8ECF1"} fontSize="16" fontWeight="800" fontFamily="'Red Hat Display'">{total}</text>
     </svg>
   );
 }
@@ -288,10 +289,7 @@ function MiniDonut({ segments, size = 110 }) {
 // ═══════════════════════════════════════
 export default function ExecutiveProtection() {
   const { t } = useTheme();
-  const ttS = {
-    contentStyle: { background: "rgba(12,16,28,0.96)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 11, fontFamily: "'JetBrains Mono',monospace", backdropFilter: "blur(20px)", boxShadow: "0 12px 48px rgba(0,0,0,0.5)", padding: "10px 14px" },
-    itemStyle: { color: t.text, padding: "2px 0" }, labelStyle: { color: t.text50, marginBottom: 4, fontWeight: 600 },
-  };
+  const ttS = tooltipStyles(t);
   const [loaded, setLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
@@ -333,7 +331,7 @@ export default function ExecutiveProtection() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#A855F7", textTransform: "uppercase", fontWeight: 600 }}>Executive Protection</span>
-                <span style={{ padding: "2px 8px", borderRadius: 5, fontSize: 9, fontWeight: 700, background: "rgba(232,70,58,0.1)", color: "#E8463A", fontFamily: "'JetBrains Mono',monospace" }}>440 open</span>
+                <span style={{ padding: "2px 8px", borderRadius: 5, fontSize: 9, fontWeight: 700, background: "rgba(255,69,98,0.1)", color: "#FF4562", fontFamily: "'JetBrains Mono',monospace" }}>440 open</span>
               </div>
               <div style={{ fontSize: 12, color: t.text40, marginTop: 3 }}>VIP threat monitoring and executive profile protection</div>
             </div>
@@ -341,12 +339,12 @@ export default function ExecutiveProtection() {
           {/* Right: 3 inline stats */}
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div style={{ textAlign: "center" }}>
-              <div className="hfont" style={{ fontSize: 22, fontWeight: 800 }}>440</div>
+              <div className="hfont" style={{ fontSize: 22, fontWeight: 700 }}>440</div>
               <div style={{ fontSize: 9, color: t.text30, marginTop: 2 }}>Total Alarms</div>
             </div>
             <div style={{ width: 1, height: 28, background: t.borderSection }} />
             <div style={{ textAlign: "center" }}>
-              <div className="hfont" style={{ fontSize: 22, fontWeight: 800 }}>3</div>
+              <div className="hfont" style={{ fontSize: 22, fontWeight: 700 }}>3</div>
               <div style={{ fontSize: 9, color: t.text30, marginTop: 2 }}>VIP Accounts</div>
             </div>
             <div style={{ width: 1, height: 28, background: t.borderSection }} />
@@ -368,17 +366,17 @@ export default function ExecutiveProtection() {
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={TREND_DATA}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={t.gridLine} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} interval={2} tick={{ fontSize: 9, fill: t.text30 }} />
               <YAxis axisLine={false} tickLine={false} width={30} tick={{ fontSize: 9, fill: t.text30 }} />
               <Tooltip {...ttS} />
               <Area type="monotone" dataKey="breachData" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.08} strokeWidth={2} dot={false} name="Breach Data" />
-              <Area type="monotone" dataKey="vipMentions" stroke="#E8463A" fill="#E8463A" fillOpacity={0.05} strokeWidth={1.5} dot={false} name="VIP Mentions" />
+              <Area type="monotone" dataKey="vipMentions" stroke="#FF4562" fill="#FF4562" fillOpacity={0.05} strokeWidth={1.5} dot={false} name="VIP Mentions" />
               <Area type="monotone" dataKey="infoStealer" stroke="#16A34A" fill="#16A34A" fillOpacity={0.05} strokeWidth={1.5} dot={false} name="Info Stealer" />
             </AreaChart>
           </ResponsiveContainer>
           <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
-            {[{ l: "Breach Data", c: "#3B82F6", v: 336 }, { l: "VIP Mentions", c: "#E8463A", v: 0 }, { l: "Info Stealer", c: "#16A34A", v: 0 }].map(i => (
+            {[{ l: "Breach Data", c: "#3B82F6", v: 336 }, { l: "VIP Mentions", c: "#FF4562", v: 0 }, { l: "Info Stealer", c: "#16A34A", v: 0 }].map(i => (
               <div key={i.l} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 3, background: i.c, opacity: 0.7 }} />
                 <span className="mono" style={{ fontSize: 9, color: t.text30 }}>{i.l}</span>
@@ -394,7 +392,7 @@ export default function ExecutiveProtection() {
           <div className="glass" style={{ padding: "20px", flex: 1 }}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 12 }}>Record Statuses</div>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <MiniDonut segments={RECORD_STATUS} size={90} />
+              <MiniDonut segments={RECORD_STATUS} size={90} t={t} />
               <div style={{ flex: 1 }}>
                 {RECORD_STATUS.map((s, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -433,7 +431,7 @@ export default function ExecutiveProtection() {
           </div>
           <div style={{ position: "relative", flex: 1 }}>
             <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search by VIP name or email..." style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search by VIP name or email..." style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Inter', sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
           </div>
           <TimeRangeFilter range={range} onRangeChange={setRange} />
           <ExportButton onClick={() => exportCSV(filtered, CSV_COLS, "vip-alarms.csv")} />
@@ -450,7 +448,7 @@ export default function ExecutiveProtection() {
         </div>
 
         {pageData.map(a => (
-          <div key={a.id} onClick={() => { setSelectedId(a.id); setDetailEmail(null); }} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 1fr 70px 100px 100px", gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer", background: sel.isSelected(a.id) ? "rgba(168,85,247,0.04)" : selectedId === a.id ? "rgba(232,70,58,0.04)" : undefined, borderLeft: selectedId === a.id ? "3px solid #E8463A" : "3px solid transparent" }}>
+          <div key={a.id} onClick={() => { setSelectedId(a.id); setDetailEmail(null); }} className="trow" style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 1fr 70px 100px 100px", gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer", background: sel.isSelected(a.id) ? "rgba(168,85,247,0.04)" : selectedId === a.id ? "rgba(255,69,98,0.04)" : undefined, borderLeft: selectedId === a.id ? "3px solid #FF4562" : "3px solid transparent" }}>
             <Checkbox checked={sel.isSelected(a.id)} onChange={() => sel.toggle(a.id)} />
             <span style={{ fontSize: 12, fontWeight: 500, color: t.text70 }}>{a.vipName}</span>
             <CopyCell value={a.keyword} style={{ fontSize: 11, color: t.text45, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} />
@@ -509,7 +507,7 @@ export default function ExecutiveProtection() {
                       border: `2px solid ${SEV_COLOR[p.riskLevel]}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       color: SEV_COLOR[p.riskLevel],
-                      fontWeight: 700, fontSize: 13, fontFamily: "'Plus Jakarta Sans'"
+                      fontWeight: 700, fontSize: 13, fontFamily: "'Red Hat Display'"
                     }}>
                       {initials}
                     </div>
@@ -528,7 +526,7 @@ export default function ExecutiveProtection() {
                   {/* Quick stats row */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6, marginBottom: 14 }}>
                     {[
-                      { label: "Breaches", val: p.breaches, color: "#E8463A" },
+                      { label: "Breaches", val: p.breaches, color: "#FF4562" },
                       { label: "Passwords", val: p.passwords, color: "#A855F7" },
                       { label: "Data Classes", val: p.dataClasses, color: "#3B82F6" },
                       { label: "Pastes", val: p.pastes, color: "#F59E0B" },
@@ -569,7 +567,7 @@ export default function ExecutiveProtection() {
                       width: "100%", padding: "10px", borderRadius: 8,
                       border: `1px solid ${t.borderSection}`, background: "transparent",
                       color: t.text50, fontSize: 11, fontWeight: 600, cursor: "pointer",
-                      fontFamily: "'Satoshi',sans-serif", transition: "all 0.15s ease",
+                      fontFamily: "'Inter', sans-serif", transition: "all 0.15s ease",
                     }}
                     onMouseEnter={e => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.color = t.text70; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = t.text50; }}
@@ -617,13 +615,13 @@ export default function ExecutiveProtection() {
                 {/* Quick stats */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 20 }}>
                   {[
-                    { label: "Data Breaches", value: profile.breaches, color: "#E8463A" },
+                    { label: "Data Breaches", value: profile.breaches, color: "#FF4562" },
                     { label: "Passwords", value: profile.passwords, color: "#A855F7" },
                     { label: "Data Classes", value: profile.dataClasses, color: "#3B82F6" },
                     { label: "Paste Exposures", value: profile.pastes, color: "#F59E0B" },
                   ].map((s, i) => (
                     <div key={i} style={{ padding: "12px", borderRadius: 10, background: t.bgCard, border: `1px solid ${t.borderSection}`, textAlign: "center" }}>
-                      <div className="hfont" style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
+                      <div className="hfont" style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}</div>
                       <div style={{ fontSize: 9, color: t.text30, marginTop: 4 }}>{s.label}</div>
                     </div>
                   ))}
@@ -707,7 +705,7 @@ export default function ExecutiveProtection() {
                     <span style={{ fontSize: 12, color: t.text60 }}>{row.value}</span>
                   </div>
                 ))}
-                <button style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "#151B2E", color: t.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Satoshi',sans-serif", marginTop: 20 }}>Go to Alarm</button>
+                <button style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: t.bgElevated, color: t.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif", marginTop: 20 }}>Go to Alarm</button>
               </div>
             )}
           </div>

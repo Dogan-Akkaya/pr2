@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+GLOBAL THREATS PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+PROJECT CONTEXT:
+- Product: SOCRadar Advanced Dark Web Monitoring
+- Stack: React + Vite + Supabase + Chart.js (Recharts for some charts)
+- This page lives at /dashboard/global-threats in the sidebar navigation
+- It sits below the main Dashboard page (/dashboard) which has its own wireframe
+- Design system: Plus Jakarta Sans (primary), Satoshi (headings), JetBrains Mono (data)
+- Brand accent: #FF4562
+- Theme: Dark only (no light mode)
+
+VISUAL REFERENCES:
+- See "map-correlation-preview.html" for the visual direction on:
+  * Layer 3 (Threat Map): animated heatmap blobs, pulsing attack dots, 
+    hover tooltips with country stats, click-to-filter, LIVE indicator
+  * Layer 6 (Correlation Sankey): three-column flow diagram showing
+    Threat Actor → CVE → Industry connections with animated highlight on hover
+- These previews show the exact visual language to replicate, not just wireframes
+
+═══════════════════════════════════════════════════════════════════════════════
+DESIGN SYSTEM (shared with Dashboard wireframe):
+═══════════════════════════════════════════════════════════════════════════════
+
+CSS Variables (do NOT reinvent, import from shared theme):
+  --bg: #080C15          (page background)
+  --card: #111827        (card/panel background)
+  --border: rgba(51,65,85,0.5)
+  --red: #FF4562         (critical/danger, brand accent)
+  --amber: #F59E0B       (warning/medium)
+  --green: #22C55E       (good/safe)
+  --indigo: #818CF8      (info/links/global intel accent)
+  --purple: #A855F7      (AI/insights accent)
+  --cyan: #22D3EE        (Telegram/search accent)
+  --text: #E2E8F0        (primary text)
+  --muted: #64748B       (secondary text)
+  --dim: #475569         (labels/captions)
+  --faint: #334155       (borders/dividers)
+
+Card Pattern:
+  background: var(--card)
+  border: 1px solid var(--border)
+  border-radius: 8px (panels) or 12px (hero sections)
+  padding: 12-18px
+
+Typography Scale:
+  Section labels: 8px, uppercase, letter-spacing 2px, var(--dim), font-weight 700
+  Section titles: 13px, font-weight 700
+  Data values: 16-22px, font-weight 800
+  Body/rows: 9px
+  Micro labels: 7px
+
+═══════════════════════════════════════════════════════════════════════════════
+COMPONENT HIERARCHY (React):
+═══════════════════════════════════════════════════════════════════════════════
+
+GlobalThreatsPage (page-level container)
+├── GlobalFilterBar (sticky, position:fixed)
+│   ├── ContextPills (All | My Country | My Industry | My Region)
+│   ├── TimeRangePicker (date pickers + preset pills)
+│   └── SavedFilters (Save 1, Save 2, +Save, Save Options dropdown)
+│
+├── AdvancedSearchBar
+│   ├── SearchChips (removable filter tags)
+│   ├── SearchInput (with debounced type-ahead)
+│   └── CategoryHints (Country | Industry | Actor | CVE | Source)
+│
+├── ThreatMapSection (full-width hero)
+│   ├── GeographicTargeting (left flank card)
+│   ├── ThreatMap (center, mapbox-gl or deck.gl)
+│   └── RansomwareGroups (right flank card)
+│
+├── IntelligenceGrid (three columns)
+│   ├── ThreatActorsColumn
+│   ├── VulnerabilitiesColumn
+│   └── RecentVictimsColumn
+│
+├── TelegramIntelligence (full-width container)
+│   ├── TelegramFilters (left panel)
+│   ├── TelegramMessageFlow (center, virtual scroll)
+│   └── TrendingTopics (right panel)
+│
+├── AnalyticsRow (side by side)
+│   ├── IndustryHeatmap (d3 or custom canvas)
+│   └── CorrelationSankey (d3-sankey)
+│
+├── DataInsights (three columns)
+│   ├── IABMonitor
+│   ├── StealerLogTrends
+│   └── InsiderThreatActivity
+│
+└── LatestActivity (master-detail)
+    ├── NewsList (left, with tabs)
+    └── NewsDetail (right, with AI Insights)
+
+═══════════════════════════════════════════════════════════════════════════════
+FILTER STATE ARCHITECTURE:
+═══════════════════════════════════════════════════════════════════════════════
+
+Use a global filter context (React Context + useReducer) at the page level.
+All child components consume this context and re-fetch/re-filter when it changes.
+
+FilterState shape:
+{
+  context: 'all' | 'my_country' | 'my_industry' | 'my_region',
+  timeRange: {
+    preset: 'ytd' | 'last_quarter' | 'last_month' | 'last_year' | 'custom',
+    startDate: '2026-01-01',   // ISO string, always visible
+    endDate: '2026-04-29'      // ISO string, always visible
+  },
+  searchChips: [
+    { type: 'country', value: 'Turkey', label: 'Turkey' },
+    { type: 'industry', value: 'finance', label: 'Finance' },
+    { type: 'actor', value: 'apt_41', label: 'APT 41' },
+    { type: 'cve', value: 'CVE-2026-34159', label: 'CVE-2026-34159' },
+    { type: 'keyword', value: 'ransomware', label: 'ransomware' },
+    { type: 'source', value: 'telegram', label: 'Telegram' }
+  ],
+  savedSlots: [
+    { id: 1, name: 'Save 1', state: { ...snapshot of context+timeRange+searchChips } },
+    { id: 2, name: 'Save 2', state: null },  // empty slot
+  ]
+}
+
+- When context pill changes → resolve from user profile (API: /user/profile)
+  'my_country' → user.country (e.g., 'TR')
+  'my_industry' → user.industry (e.g., 'finance')
+  'my_region' → user.region (e.g., 'europe')
+  These should add corresponding searchChips automatically
+
+- When a row is clicked in any data section (e.g., clicking "APT 41" in
+  ThreatActorsColumn), dispatch addChip({ type: 'actor', value: 'apt_41' })
+
+- URL sync: serialize FilterState to URL query params so pages are shareable
+  e.g., /global-threats?context=all&from=2026-01-01&to=2026-04-29&actor=apt_41&country=TR
+
+- Saved slots persist to localStorage (or Supabase user_preferences table)
+
+═══════════════════════════════════════════════════════════════════════════════
+DATA MODEL HINTS (expected API response shapes):
+═══════════════════════════════════════════════════════════════════════════════
+
+GET /api/global-threats/overview?from=...&to=...&country=...&industry=...
+
+Threat Actors:
+[{
+  id: string,
+  name: 'APT 41',
+  country_code: 'CN',
+  rank: 2,
+  attack_count: 76,
+  last_seen: '2026-04-28T14:00:00Z',
+  targeted_industries: ['finance', 'manufacturing'],
+  associated_cves: ['CVE-2026-29014', 'CVE-2026-4370']
+}]
+
+Vulnerabilities:
+[{
+  cve_id: 'CVE-2026-34159',
+  cvss_score: 9.8,
+  svrs_score: 84,
+  exploited_by: ['lockbit_4', 'fancy_bear'],
+  targeted_industries: ['finance', 'healthcare'],
+  first_seen: '2026-03-15',
+  trend: 'rising' | 'stable' | 'declining'
+}]
+
+Recent Victims:
+[{
+  company_name: 'Axions',
+  country_code: 'US',
+  country_name: 'United States',
+  date: '2026-04-01',
+  attacker: 'lockbit_4',
+  industry: 'finance'
+}]
+
+Geographic Data (for map):
+[{
+  country_code: 'US',
+  country_name: 'United States',
+  lat: 39.8283,
+  lng: -98.5795,
+  attack_count: 1893,
+  percentage: 19.91,
+  top_actor: 'LockBit 4.0',
+  top_industry: 'Finance',
+  active_iabs: 45,
+  trend: '+3.2%'
+}]
+
+Ransomware Groups:
+[{
+  name: 'Akira',
+  percentage: 8.35,
+  attack_count: 127,
+  last_attack: '12h ago',
+  status: 'active',
+  country_codes: ['RU']
+}]
+
+Telegram Messages:
+[{
+  id: string,
+  channel_name: 'DarkForums_chat',
+  timestamp: '2026-04-29T12:00:00Z',
+  text: 'New batch of banking sector SSO credentials...',
+  language: 'en',
+  auto_tags: [
+    { label: 'Banking', type: 'industry' },
+    { label: 'Credentials', type: 'threat_type' },
+    { label: 'SSO', type: 'keyword' }
+  ],
+  highlighted_terms: ['banking sector SSO credentials'],
+  relevance_score: 0.92
+}]
+
+Trending Topics:
+[{
+  keyword: 'Iran-Israel War',
+  mention_count: 342,
+  trend_percentage: 67,
+  sparkline: [12, 18, 15, 24, 21, 35, 48],  // last 7 data points
+  is_preset: true,    // false for auto-detected topics
+  is_active: false    // true if currently selected as filter
+}]
+
+IAB Listings:
+[{
+  id: string,
+  access_type: 'RDP' | 'VPN' | 'Citrix' | 'WebShell' | 'SSH',
+  target_industry: 'finance',
+  target_country: 'TR',
+  price_usd: 800,
+  posted_date: '2026-04-27',
+  source_forum: 'XSS Forum',
+  verified: true
+}]
+
+Stealer Logs:
+[{
+  family: 'RedLine',
+  infection_count: 12400,
+  market_share_pct: 34,
+  trend: 'rising',
+  top_targeted_platforms: ['Google', 'Facebook', 'Amazon'],
+  top_geos: ['IN', 'BR', 'US']
+}]
+
+Insider Threats:
+[{
+  title: 'Admin access to F500 manufacturer',
+  source: 'BreachForums',
+  posted_date: '2026-04-27',
+  asking_price_usd: 5000,
+  target_industry: 'manufacturing',
+  access_level: 'admin',
+  payment_method: 'Monero'
+}]
+
+Industry Heatmap:
+{
+  industries: ['Finance', 'Healthcare', 'Manufacturing', 'Government', 'Retail', 'Education'],
+  attack_types: ['Ransomware', 'Data Breach', 'Access Sale', 'DDoS', 'Phishing'],
+  matrix: [
+    [287, 312, 243, 198, 145, 89],   // Ransomware row
+    [345, 189, 156, 134, 201, 67],   // Data Breach row
+    [198, 112, 187, 78, 56, 23],     // Access Sale row
+    [134, 45, 67, 178, 34, 112],     // DDoS row
+    [412, 234, 123, 89, 267, 156]    // Phishing row
+  ]
+}
+
+Correlation (for Sankey):
+{
+  nodes: [
+    { id: 'lockbit', type: 'actor', label: 'LockBit 4.0' },
+    { id: 'cve-34159', type: 'cve', label: 'CVE-2026-34159' },
+    { id: 'finance', type: 'industry', label: 'Finance' },
+    ...
+  ],
+  links: [
+    { source: 'lockbit', target: 'cve-34159', value: 45 },
+    { source: 'cve-34159', target: 'finance', value: 38 },
+    ...
+  ]
+}
+
+News Items:
+[{
+  id: string,
+  title: 'The Alleged Database of JPMorgan Securities is on Sale',
+  date: '2026-04-03',
+  source_type: 'dark_web_news' | 'ransomware_news',
+  tags: ['Thailand', 'South-eastern Asia', 'Finance', 'Banking'],
+  ai_summary: 'In a hacker forum monitored by SOCRadar...',
+  thumbnail_url: string | null,
+  url: string
+}]
+
+═══════════════════════════════════════════════════════════════════════════════
+IMPLEMENTATION NOTES:
+═══════════════════════════════════════════════════════════════════════════════
+
+- Map: Use mapbox-gl-js (or deck.gl for WebGL heatmap layer).
+  See map-correlation-preview.html for the exact visual style:
+  heatmap blobs, pulsing dots with ring animation, country hover tooltips.
+  Mapbox style: dark base map (mapbox://styles/mapbox/dark-v11)
+  
+- Correlation Sankey: Use d3-sankey. Three columns: actors → cves → industries.
+  See map-correlation-preview.html for flow thickness, colors, hover highlight.
+  On hover: highlight full chain, dim everything else (opacity transition).
+  On click: add the clicked node as a search chip.
+
+- Industry Heatmap: Use d3 or HTML canvas. Color scale:
+  0-50 → var(--faint), 50-100 → var(--indigo) low opacity,
+  100-200 → var(--amber) low opacity, 200+ → var(--red) with opacity scale.
+  Cells should be clickable (adds industry+attack_type as filters).
+
+- Telegram Message Flow: Use react-window or react-virtualized for
+  virtual scrolling performance. Messages should render as cards, not a table.
+  Highlighted terms in message text should be wrapped in <em> tags
+  with color var(--red).
+
+- Filter Bar: position:fixed, top:0, z-index:100.
+  Backdrop-filter:blur(12px) for glass effect.
+  Page body needs padding-top equal to filter bar height (58px).
+
+- All data sections should show loading skeletons while fetching.
+  Use consistent skeleton pattern: pulsing rectangles with border-radius
+  matching the card pattern.
+
+- Error states: show inline error message within each section,
+  not a page-level error. Each section fetches independently.
+
+- Empty states: when filters return no data, show contextual message
+  like "No threat actors match your current filters" with a
+  "Clear filters" action.
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Global Threats — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;--teal:#2DD4BF;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.4;padding-top:58px}
+
+/* ═══ UTILITY ═══ */
+.badge{font-size:8px;font-weight:700;padding:3px 10px;border-radius:8px;letter-spacing:1.2px;display:inline-block}
+.badge-red{background:rgba(255,69,98,0.15);color:var(--red)}
+.badge-indigo{background:rgba(99,102,241,0.12);color:var(--indigo)}
+.link{color:var(--indigo);font-size:9px;cursor:pointer;font-weight:500}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0}
+.trend-g{color:var(--green);font-size:9px;font-weight:600;margin-left:4px}
+.trend-r{color:#EF4444;font-size:9px;font-weight:600;margin-left:4px}
+.st{font-size:12px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.st .c{color:var(--red);font-size:10px;font-weight:600}
+.st .lk{color:var(--indigo);font-size:9px;margin-left:auto}
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.drow{display:flex;justify-content:space-between;padding:4px 0;font-size:9px;color:#94A3B8;border-bottom:1px solid rgba(51,65,85,0.15)}
+.drow:last-child{border-bottom:none}
+.section{padding:0 20px;margin-bottom:20px}
+.section-label{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:700;margin-bottom:8px}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600;padding-top:8px}
+
+/* ═══ LAYER 1: STICKY FILTER BAR ═══ */
+.filter-bar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(8,12,21,0.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(51,65,85,0.3);
+  padding:10px 20px;display:flex;align-items:center;justify-content:space-between;
+  height:58px;
+}
+.filter-left{display:flex;align-items:center;gap:6px}
+.filter-right{display:flex;align-items:center;gap:6px}
+.fpill{
+  font-size:9px;font-weight:600;padding:5px 14px;border-radius:7px;cursor:pointer;
+  border:1px solid rgba(51,65,85,0.4);background:transparent;color:var(--muted);
+  transition:all .15s;
+}
+.fpill:hover{border-color:rgba(99,102,241,0.3);color:var(--text)}
+.fpill.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:var(--indigo)}
+.fpill.active-red{background:rgba(255,69,98,0.12);border-color:rgba(255,69,98,0.3);color:var(--red)}
+.date-display{
+  font-size:9px;color:var(--muted);background:rgba(15,23,42,0.6);
+  border:1px solid rgba(51,65,85,0.3);border-radius:6px;padding:5px 12px;
+  display:flex;align-items:center;gap:6px;
+}
+.date-display strong{color:var(--text);font-weight:600}
+.save-btn{
+  font-size:8px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;
+  border:1px dashed rgba(51,65,85,0.5);background:transparent;color:var(--dim);
+}
+.save-btn.filled{border-style:solid;border-color:rgba(99,102,241,0.3);color:var(--indigo);background:rgba(99,102,241,0.06)}
+.filter-divider{width:1px;height:24px;background:rgba(51,65,85,0.4);margin:0 8px}
+
+/* ═══ LAYER 2: SEARCH BAR ═══ */
+.search-container{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:10px 16px;display:flex;align-items:center;gap:10px;margin-bottom:18px;
+}
+.search-icon{color:var(--dim);font-size:14px;flex-shrink:0}
+.search-chips{display:flex;gap:4px;flex-shrink:0}
+.search-chip{
+  font-size:8px;font-weight:600;padding:3px 10px;border-radius:5px;display:flex;align-items:center;gap:4px;
+}
+.chip-country{background:rgba(34,211,238,0.1);color:var(--cyan)}
+.chip-industry{background:rgba(168,85,247,0.1);color:var(--purple)}
+.chip-actor{background:rgba(255,69,98,0.1);color:var(--red)}
+.chip-x{cursor:pointer;opacity:0.6;font-size:10px}
+.search-input{
+  flex:1;background:none;border:none;color:var(--text);font-size:11px;
+  font-family:inherit;outline:none;
+}
+.search-input::placeholder{color:var(--dim)}
+.search-cats{display:flex;gap:4px;flex-shrink:0}
+.search-cat{font-size:7px;color:var(--dim);padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);cursor:pointer}
+.search-cat:hover{border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ LAYER 3: MAP HERO ═══ */
+.map-section{display:flex;gap:12px;margin-bottom:18px}
+.map-left{width:200px;flex-shrink:0}
+.map-center{flex:1;min-width:0}
+.map-right{width:220px;flex-shrink:0}
+.map-placeholder{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  height:280px;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.map-placeholder::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(99,102,241,0.06) 0%,transparent 70%);
+}
+.map-label{color:var(--faint);font-size:10px;text-align:center;z-index:1;position:relative}
+.map-label span{display:block;font-size:8px;margin-top:4px;color:var(--dim)}
+.geo-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;height:280px;overflow:hidden}
+.geo-title{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.geo-subtitle{font-size:12px;font-weight:700;margin-bottom:10px}
+.geo-row{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.geo-row:last-child{border-bottom:none}
+.geo-rank{color:var(--dim);font-size:8px;width:18px;flex-shrink:0}
+.geo-flag{font-size:11px;width:18px;flex-shrink:0}
+.geo-name{flex:1;font-weight:600}
+.geo-pct{font-weight:700;font-size:10px}
+.geo-bar{width:50px;height:4px;border-radius:2px;flex-shrink:0}
+.rg-row{padding:6px 0;border-bottom:1px solid rgba(51,65,85,0.1);font-size:9px}
+.rg-row:last-child{border-bottom:none}
+.rg-name{font-weight:600}
+.rg-attacks{color:var(--dim);font-size:8px}
+.rg-pct{float:right;font-weight:700}
+
+/* ═══ LAYER 4: INTELLIGENCE GRID ═══ */
+.intel-grid{display:flex;gap:10px;margin-bottom:18px}
+.intel-col{flex:1;min-width:0}
+.intel-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.intel-label{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.intel-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.intel-row{display:flex;align-items:center;padding:6px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1);cursor:pointer}
+.intel-row:hover{background:rgba(99,102,241,0.03);margin:0 -12px;padding:6px 12px}
+.intel-row:last-child{border-bottom:none}
+.rank-badge{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px;min-width:48px;text-align:center}
+.rank-hot{background:rgba(255,69,98,0.12);color:var(--red)}
+.rank-warm{background:rgba(245,158,11,0.12);color:var(--amber)}
+.rank-cool{background:rgba(99,102,241,0.12);color:var(--indigo)}
+.cvss{font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px}
+.cvss-crit{background:rgba(255,69,98,0.15);color:var(--red)}
+.cvss-high{background:rgba(245,158,11,0.15);color:var(--amber)}
+.svrs{font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(99,102,241,0.12);color:var(--indigo)}
+.victim-company{color:var(--indigo);font-weight:500;cursor:pointer}
+.victim-country{font-size:8px;color:var(--dim)}
+.victim-date{font-size:8px;color:var(--dim);margin-left:auto}
+
+/* ═══ LAYER 5: TELEGRAM CONTAINER ═══ */
+.telegram-container{
+  background:var(--card);border:1px solid rgba(0,136,204,0.15);border-radius:12px;
+  display:flex;overflow:hidden;height:340px;margin-bottom:18px;
+}
+.tg-left{width:240px;flex-shrink:0;padding:14px;border-right:1px solid rgba(51,65,85,0.3);display:flex;flex-direction:column}
+.tg-middle{flex:1;padding:14px;overflow-y:auto;border-right:1px solid rgba(51,65,85,0.3)}
+.tg-right{width:240px;flex-shrink:0;padding:14px}
+.tg-section-title{font-size:10px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.tg-search{
+  width:100%;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.4);
+  border-radius:6px;padding:7px 10px;font-size:9px;color:var(--text);
+  font-family:inherit;outline:none;margin-bottom:8px;
+}
+.tg-search::placeholder{color:var(--dim)}
+.tg-filter-chips{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px}
+.tg-filter-chip{font-size:7px;padding:2px 7px;border-radius:3px;background:rgba(0,136,204,0.08);color:#38BDF8;border:1px solid rgba(0,136,204,0.15)}
+.tg-mini-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-bottom:4px;margin-top:8px}
+.tg-select{
+  width:100%;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.4);
+  border-radius:5px;padding:5px 8px;font-size:8px;color:var(--text);font-family:inherit;
+  -webkit-appearance:none;outline:none;
+}
+.tg-msg-count{font-size:8px;color:var(--dim);margin-top:auto;padding-top:8px;border-top:1px solid rgba(51,65,85,0.2)}
+.tg-msg-count strong{color:var(--text)}
+
+/* Telegram messages */
+.tg-msg{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.2);
+  border-radius:8px;padding:10px 12px;margin-bottom:6px;
+}
+.tg-msg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.tg-msg-channel{font-size:8px;font-weight:700;color:#38BDF8}
+.tg-msg-time{font-size:7px;color:var(--dim)}
+.tg-msg-text{font-size:9px;color:#94A3B8;line-height:1.4}
+.tg-msg-text em{color:var(--red);font-style:normal;font-weight:600}
+.tg-msg-tags{display:flex;gap:3px;margin-top:5px}
+.tg-msg-tag{font-size:6px;padding:2px 6px;border-radius:3px}
+.tag-red{background:rgba(255,69,98,0.08);color:var(--red)}
+.tag-amber{background:rgba(245,158,11,0.08);color:var(--amber)}
+.tag-indigo{background:rgba(99,102,241,0.08);color:var(--indigo)}
+.tag-cyan{background:rgba(0,136,204,0.08);color:#38BDF8}
+.tag-green{background:rgba(34,197,94,0.08);color:var(--green)}
+
+/* Trending topics */
+.trend-card{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);
+  border-radius:6px;padding:8px 10px;margin-bottom:5px;cursor:pointer;
+  transition:border-color .15s;
+}
+.trend-card:hover{border-color:rgba(0,136,204,0.3)}
+.trend-card.active{border-color:rgba(0,136,204,0.5);background:rgba(0,136,204,0.04)}
+.trend-name{font-size:9px;font-weight:700;margin-bottom:2px}
+.trend-meta{display:flex;justify-content:space-between;align-items:center}
+.trend-count{font-size:8px;color:var(--dim)}
+.trend-spark{display:flex;align-items:flex-end;gap:1px;height:14px}
+.trend-spark span{width:3px;border-radius:1px;background:rgba(0,136,204,0.4)}
+
+/* ═══ LAYER 6: HEATMAP + CORRELATION ═══ */
+.analytics-row{display:flex;gap:10px;margin-bottom:18px}
+.analytics-row .pn{flex:1;margin-bottom:0}
+.heatmap-grid{display:grid;grid-template-columns:80px repeat(6,1fr);gap:2px;margin-top:8px}
+.hm-header{font-size:6px;color:var(--dim);text-align:center;padding:4px 2px;letter-spacing:0.5px;font-weight:700}
+.hm-label{font-size:7px;color:#94A3B8;display:flex;align-items:center;padding:4px 0}
+.hm-cell{border-radius:3px;height:24px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:600;color:rgba(255,255,255,0.7)}
+.hm-hot{background:rgba(255,69,98,0.5)}
+.hm-warm{background:rgba(255,69,98,0.3)}
+.hm-med{background:rgba(245,158,11,0.25)}
+.hm-cool{background:rgba(99,102,241,0.15);color:rgba(255,255,255,0.4)}
+.hm-cold{background:rgba(51,65,85,0.15);color:rgba(255,255,255,0.2)}
+
+.corr-placeholder{
+  height:180px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);
+  border-radius:6px;margin-top:8px;text-align:center;
+}
+
+/* ═══ LAYER 7: DATA SECTIONS ═══ */
+.data-trio{display:flex;gap:10px;margin-bottom:18px}
+.data-trio .pn{flex:1;margin-bottom:0}
+.data-stat{display:flex;justify-content:space-between;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.12)}
+.data-stat:last-child{border-bottom:none}
+.data-stat-l{color:#94A3B8}
+.data-stat-v{font-weight:700}
+.data-list-row{display:flex;align-items:center;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.data-list-row:last-child{border-bottom:none}
+
+/* ═══ LAYER 8: NEWS ═══ */
+.news-section{display:flex;gap:12px}
+.news-list{width:380px;flex-shrink:0}
+.news-detail{flex:1;min-width:0}
+.news-tabs{display:flex;gap:4px;margin-bottom:10px}
+.news-tab{font-size:9px;font-weight:600;padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(51,65,85,0.3);color:var(--dim)}
+.news-tab.active{background:rgba(255,69,98,0.12);border-color:rgba(255,69,98,0.3);color:var(--red)}
+.news-item{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:4px;cursor:pointer}
+.news-item.active{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
+.news-item-tag{font-size:7px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(255,69,98,0.12);color:var(--red)}
+.news-item-date{font-size:7px;color:var(--dim);margin-left:5px}
+.news-item-title{font-size:10px;font-weight:600;margin-top:4px;line-height:1.3}
+.news-detail-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+.news-detail-title{font-size:16px;font-weight:800;margin-bottom:6px}
+.news-detail-date{font-size:9px;color:var(--dim);margin-bottom:10px}
+.news-detail-tags{display:flex;gap:4px;margin-bottom:12px}
+.news-detail-tag{font-size:8px;padding:3px 10px;border-radius:5px;background:rgba(99,102,241,0.1);color:var(--indigo)}
+.news-ai{display:flex;align-items:flex-start;gap:8px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.12);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.news-ai-icon{width:24px;height:24px;background:rgba(168,85,247,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--purple);font-size:12px;flex-shrink:0}
+.news-ai-text{font-size:9px;color:#94A3B8;line-height:1.5}
+
+/* ═══ LEGEND ═══ */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin:18px 20px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 1: STICKY FILTER BAR
+     DEFAULT STATE: "All" selected + "This Year (YTD)" selected
+     
+     CLAUDE CODE COMMENTS:
+     - Filters should persist across page scroll (position:fixed)
+     - When user selects "My Country", resolve country from user profile
+     - "My Industry" and "My Region" resolve similarly from profile
+     - Save slots store full filter state (context + time range + search query)
+     - Save Options dropdown: Save Current, Rename, Clear Slot
+     - Max 5 save slots, expandable
+     - Switching context pills should re-fetch all page data
+     - Time range date pickers should use a date library (date-fns)
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="filter-bar">
+  <div class="filter-left">
+    <span style="font-size:8px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-right:4px">CONTEXT</span>
+    <button class="fpill active">All</button>
+    <button class="fpill">My Country</button>
+    <button class="fpill">My Industry</button>
+    <button class="fpill">My Region</button>
+  </div>
+  <div class="filter-right">
+    <div class="date-display">
+      <strong>Jan 1, 2026</strong> <span style="color:var(--faint)">&mdash;</span> <strong>Apr 29, 2026</strong>
+    </div>
+    <button class="fpill active-red">YTD</button>
+    <button class="fpill">Last Quarter</button>
+    <button class="fpill">Last Month</button>
+    <button class="fpill">Last Year</button>
+    <div class="filter-divider"></div>
+    <button class="save-btn filled">Save 1</button>
+    <button class="save-btn filled">Save 2</button>
+    <button class="save-btn">+ Save</button>
+  </div>
+</div>
+
+<div class="pagetitle">GLOBAL THREATS &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 2: ADVANCED SEARCH BAR
+     
+     CLAUDE CODE COMMENTS:
+     - Search bar supports multi-facet queries
+     - Each selected filter appears as a removable chip/tag inside bar
+     - Categories: Country, Industry, Region, Threat Actor Group, CVE ID,
+       Keyword (free text), Source Type (Forum/Telegram/Marketplace/Paste)
+     - Backend should AND these filters together
+     - Results update ALL page sections dynamically
+     - Debounce 300ms on keystroke
+     - Type-ahead dropdown should group suggestions by category
+     - When user clicks a row in intel grid, add it as a chip here
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="search-container">
+    <span class="search-icon">&#128269;</span>
+    <div class="search-chips">
+      <!-- Example active chips shown for wireframe -->
+      <span class="search-chip chip-country">Turkey <span class="chip-x">&times;</span></span>
+      <span class="search-chip chip-industry">Finance <span class="chip-x">&times;</span></span>
+    </div>
+    <input class="search-input" type="text" placeholder="Search by country, industry, threat actor, CVE, keyword...">
+    <div class="search-cats">
+      <span class="search-cat">Country</span>
+      <span class="search-cat">Industry</span>
+      <span class="search-cat">Actor</span>
+      <span class="search-cat">CVE</span>
+      <span class="search-cat">Source</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 3: THREAT MAP HERO
+     
+     CLAUDE CODE COMMENTS:
+     - Map should use deck.gl or mapbox-gl for WebGL performance
+     - Heatmap layer showing attack density by country
+     - Animated pulsing dots for recent events (last 24h)
+     - Click on country = apply as country filter in search bar
+     - Tooltip on hover: country name, attack count, top threat actor,
+       most targeted industry
+     - Map respects ALL active filters from Layer 1 and Layer 2
+     - When "My Country" selected, map zooms/highlights that region
+     - Geographic Targeting list (left) and Ransomware Groups (right)
+       should also respond to active filters
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="map-section">
+    <!-- Geographic Targeting (left flank) -->
+    <div class="map-left">
+      <div class="geo-card">
+        <div class="geo-title">GEOGRAPHIC TARGETING</div>
+        <div class="geo-subtitle">Top targeted countries</div>
+        <div class="geo-row">
+          <span class="geo-rank">01</span>
+          <span class="geo-flag">&#127482;&#127480;</span>
+          <span class="geo-name">United States</span>
+          <span class="geo-pct">19.91%</span>
+          <span class="geo-bar" style="background:var(--red);width:50px"></span>
+        </div>
+        <div class="geo-row">
+          <span class="geo-rank">02</span>
+          <span class="geo-flag">&#127467;&#127479;</span>
+          <span class="geo-name">France</span>
+          <span class="geo-pct">8.45%</span>
+          <span class="geo-bar" style="background:var(--amber);width:30px"></span>
+        </div>
+        <div class="geo-row">
+          <span class="geo-rank">03</span>
+          <span class="geo-flag">&#127470;&#127475;</span>
+          <span class="geo-name">India</span>
+          <span class="geo-pct">7.82%</span>
+          <span class="geo-bar" style="background:var(--amber);width:26px"></span>
+        </div>
+        <div class="geo-row">
+          <span class="geo-rank">04</span>
+          <span class="geo-flag">&#127465;&#127466;</span>
+          <span class="geo-name">Germany</span>
+          <span class="geo-pct">6.33%</span>
+          <span class="geo-bar" style="background:var(--indigo);width:20px"></span>
+        </div>
+        <div class="geo-row">
+          <span class="geo-rank">05</span>
+          <span class="geo-flag">&#127468;&#127463;</span>
+          <span class="geo-name">United Kingdom</span>
+          <span class="geo-pct">5.98%</span>
+          <span class="geo-bar" style="background:var(--indigo);width:18px"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map (center) -->
+    <div class="map-center">
+      <div class="map-placeholder">
+        <div class="map-label">
+          [Interactive Threat Map]
+          <span>deck.gl / mapbox &middot; Heatmap overlay &middot; Click to filter &middot; Hover tooltips</span>
+          <span>Responds to all active filters</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ransomware Groups (right flank) -->
+    <div class="map-right">
+      <div class="geo-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <div class="geo-title">RANSOMWARE GROUPS</div>
+            <div style="font-size:11px;font-weight:700">Active threat actors</div>
+          </div>
+          <span style="font-size:8px;color:var(--green);background:rgba(34,197,94,0.1);padding:2px 8px;border-radius:4px;font-weight:600">7 active</span>
+        </div>
+        <div class="rg-row">
+          <span class="dot" style="background:var(--red)"></span>
+          <span class="rg-name">Akira</span>
+          <span class="rg-pct" style="color:var(--red)">8.35%</span>
+          <div class="rg-attacks">127 attacks &middot; 12h ago</div>
+        </div>
+        <div class="rg-row">
+          <span class="dot" style="background:var(--amber)"></span>
+          <span class="rg-name">LockBit 4.0</span>
+          <span class="rg-pct" style="color:var(--amber)">7.91%</span>
+          <div class="rg-attacks">112 attacks &middot; 3h ago</div>
+        </div>
+        <div class="rg-row">
+          <span class="dot" style="background:var(--amber)"></span>
+          <span class="rg-name">BlackCat/ALPHV</span>
+          <span class="rg-pct" style="color:var(--amber)">6.44%</span>
+          <div class="rg-attacks">98 attacks &middot; 1h ago</div>
+        </div>
+        <div class="rg-row">
+          <span class="dot" style="background:var(--green)"></span>
+          <span class="rg-name">Cl0p</span>
+          <span class="rg-pct">5.88%</span>
+          <div class="rg-attacks">89 attacks &middot; 2d ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 4: THREE-COLUMN INTELLIGENCE GRID
+     
+     CLAUDE CODE COMMENTS:
+     - All three columns respond to active filters
+     - Clicking any row in any column should add it as a filter chip
+       in the search bar (e.g., click "APT 41" → adds actor:APT 41 chip)
+     - Rows should have hover states indicating clickability
+     - Each column should show a "View All →" link
+     - Data should paginate or "Load More" for long lists
+     - Sort controls (by rank, by date, by severity) per column
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="intel-grid">
+    <!-- Threat Actors -->
+    <div class="intel-col">
+      <div class="pn">
+        <div class="intel-label">TOP THREAT ACTORS</div>
+        <div class="intel-title">Active Groups</div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">CN</span>
+          <span style="flex:1;font-weight:600">APT 41</span>
+          <span class="rank-badge rank-hot">Rank: 2</span>
+        </div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">CN</span>
+          <span style="flex:1;font-weight:600">Stone Panda</span>
+          <span class="rank-badge rank-hot">Rank: 3</span>
+        </div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">KP</span>
+          <span style="flex:1;font-weight:600">Lazarus Group</span>
+          <span class="rank-badge rank-warm">Rank: 5</span>
+        </div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">IR</span>
+          <span style="flex:1;font-weight:600">Cleaver</span>
+          <span class="rank-badge rank-warm">Rank: 8</span>
+        </div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">IR</span>
+          <span style="flex:1;font-weight:600">MuddyWater</span>
+          <span class="rank-badge rank-cool">Rank: 11</span>
+        </div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">RU</span>
+          <span style="flex:1;font-weight:600">Fancy Bear</span>
+          <span class="rank-badge rank-warm">Rank: 4</span>
+        </div>
+        <div class="intel-row">
+          <span style="color:var(--dim);font-size:8px;width:20px">RU</span>
+          <span style="flex:1;font-weight:600">Cozy Bear</span>
+          <span class="rank-badge rank-warm">Rank: 6</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vulnerabilities -->
+    <div class="intel-col">
+      <div class="pn">
+        <div class="intel-label">MOST POPULAR VULNERABILITY</div>
+        <div class="intel-title">TA/Ransomware Used</div>
+        <div class="intel-row">
+          <span style="flex:1;font-weight:500">CVE-2026-34159</span>
+          <span class="cvss cvss-crit" style="margin-right:4px">CVSS: 9.8</span>
+          <span class="svrs">SVRS: 84</span>
+        </div>
+        <div class="intel-row">
+          <span style="flex:1;font-weight:500">CVE-2026-28693</span>
+          <span class="cvss cvss-crit" style="margin-right:4px">CVSS: 9.8</span>
+          <span class="svrs">SVRS: 87</span>
+        </div>
+        <div class="intel-row">
+          <span style="flex:1;font-weight:500">CVE-2026-29014</span>
+          <span class="cvss cvss-crit" style="margin-right:4px">CVSS: 9.5</span>
+          <span class="svrs">SVRS: 86</span>
+        </div>
+        <div class="intel-row">
+          <span style="flex:1;font-weight:500">CVE-2026-4370</span>
+          <span class="cvss cvss-high" style="margin-right:4px">CVSS: 10</span>
+          <span class="svrs">SVRS: 87</span>
+        </div>
+        <div class="intel-row">
+          <span style="flex:1;font-weight:500">CVE-2026-5281</span>
+          <span class="cvss cvss-high" style="margin-right:4px">CVSS: 8.8</span>
+          <span class="svrs">SVRS: 82</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Victims -->
+    <div class="intel-col">
+      <div class="pn">
+        <div class="intel-label">RECENT VICTIMS</div>
+        <div class="intel-title">Ransomware Targets</div>
+        <div class="intel-row">
+          <span class="victim-company" style="flex:1">Axions</span>
+          <span class="victim-country">&#127482;&#127480; US</span>
+          <span class="victim-date">01 Apr 2026</span>
+        </div>
+        <div class="intel-row">
+          <span class="victim-company" style="flex:1">AstraZeneca</span>
+          <span class="victim-country">&#127468;&#127463; GB</span>
+          <span class="victim-date">31 Mar 2026</span>
+        </div>
+        <div class="intel-row">
+          <span class="victim-company" style="flex:1">Microsoft</span>
+          <span class="victim-country">&#127482;&#127480; US</span>
+          <span class="victim-date">31 Mar 2026</span>
+        </div>
+        <div class="intel-row">
+          <span class="victim-company" style="flex:1">The Co-operative</span>
+          <span class="victim-country">&#127468;&#127463; GB</span>
+          <span class="victim-date">31 Mar 2026</span>
+        </div>
+        <div class="intel-row">
+          <span class="victim-company" style="flex:1">Aqua Security</span>
+          <span class="victim-country">&#127482;&#127480; US</span>
+          <span class="victim-date">27 Mar 2026</span>
+        </div>
+        <div class="intel-row">
+          <span class="victim-company" style="flex:1">Berning GmbH</span>
+          <span class="victim-country">&#127465;&#127466; DE</span>
+          <span class="victim-date">03 Apr 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 5: TELEGRAM INTELLIGENCE CONTAINER
+     
+     CLAUDE CODE COMMENTS:
+     - Container operates semi-independently but respects main time filter
+     - Left panel: keyword search supports boolean (AND, OR, NOT)
+     - Middle panel: virtual scrolling list for performance (react-window)
+     - Messages: text preview (truncated 2 lines), channel name, timestamp,
+       auto-detected tags (threat type, sector, region)
+     - Right panel trending topics: combine preset keywords with dynamically
+       detected trending terms from last 7d
+     - Clicking trending topic = applies as keyword filter in left panel,
+       updates middle flow
+     - Channel source dropdown should list all monitored Telegram groups
+     - Language filter: All, English, Russian, Chinese, Arabic, Farsi
+     - Message count updates live as filters change
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">TELEGRAM INTELLIGENCE</div>
+  <div class="telegram-container">
+    
+    <!-- Left: Filters & Controls -->
+    <div class="tg-left">
+      <div class="tg-section-title"><span style="color:#38BDF8">&#9992;</span> Filters</div>
+      <input class="tg-search" type="text" placeholder="Search keywords (AND, OR, NOT)...">
+      
+      <div class="tg-filter-chips">
+        <span class="tg-filter-chip">Banking &times;</span>
+        <span class="tg-filter-chip">Credentials &times;</span>
+      </div>
+
+      <div class="tg-mini-label">CHANNEL</div>
+      <select class="tg-select">
+        <option>All Channels</option>
+        <option>DarkForums_chat</option>
+        <option>RansomWatch</option>
+        <option>IntelBroker_Feed</option>
+        <option>CyberUnderground</option>
+      </select>
+
+      <div class="tg-mini-label">LANGUAGE</div>
+      <select class="tg-select">
+        <option>All Languages</option>
+        <option>English</option>
+        <option>Russian</option>
+        <option>Chinese</option>
+        <option>Arabic</option>
+        <option>Farsi</option>
+      </select>
+
+      <div class="tg-mini-label">TIME RANGE</div>
+      <select class="tg-select">
+        <option>Sync with page filter</option>
+        <option>Last 24 hours</option>
+        <option>Last 7 days</option>
+        <option>Last 30 days</option>
+      </select>
+
+      <div class="tg-msg-count">Showing <strong>1,247</strong> messages matching filters</div>
+    </div>
+
+    <!-- Middle: Message Flow -->
+    <div class="tg-middle">
+      <div class="tg-msg">
+        <div class="tg-msg-header"><span class="tg-msg-channel">DarkForums_chat</span><span class="tg-msg-time">2h ago</span></div>
+        <div class="tg-msg-text">"New batch of <em>banking sector SSO credentials</em> ready &mdash; 12K records, fresh from stealer campaign targeting European financial institutions..."</div>
+        <div class="tg-msg-tags"><span class="tg-msg-tag tag-red">Banking</span><span class="tg-msg-tag tag-amber">Credentials</span><span class="tg-msg-tag tag-indigo">SSO</span><span class="tg-msg-tag tag-cyan">Europe</span></div>
+      </div>
+      <div class="tg-msg">
+        <div class="tg-msg-header"><span class="tg-msg-channel">RansomWatch</span><span class="tg-msg-time">3h ago</span></div>
+        <div class="tg-msg-text">"ALPHV/BlackCat has posted proof-of-data for the US healthcare breach. Sample includes <em>patient records</em>, insurance details, SSNs. Deadline set for 72h..."</div>
+        <div class="tg-msg-tags"><span class="tg-msg-tag tag-red">Ransomware</span><span class="tg-msg-tag tag-amber">Healthcare</span><span class="tg-msg-tag tag-green">PII</span></div>
+      </div>
+      <div class="tg-msg">
+        <div class="tg-msg-header"><span class="tg-msg-channel">IntelBroker_Feed</span><span class="tg-msg-time">5h ago</span></div>
+        <div class="tg-msg-text">"Selling <em>RDP access to Turkish bank</em> infrastructure. Verified yesterday. Citrix + VPN combo. Starting at $800..."</div>
+        <div class="tg-msg-tags"><span class="tg-msg-tag tag-red">IAB</span><span class="tg-msg-tag tag-cyan">Turkey</span><span class="tg-msg-tag tag-amber">Banking</span></div>
+      </div>
+      <div class="tg-msg">
+        <div class="tg-msg-header"><span class="tg-msg-channel">CyberUnderground</span><span class="tg-msg-time">6h ago</span></div>
+        <div class="tg-msg-text">"Iran-linked group claiming new <em>zero-day in Fortinet</em> products. PoC demo shared in private channel. Asking 15 BTC..."</div>
+        <div class="tg-msg-tags"><span class="tg-msg-tag tag-red">Zero-Day</span><span class="tg-msg-tag tag-indigo">Iran</span><span class="tg-msg-tag tag-amber">Vulnerability</span></div>
+      </div>
+      <div class="tg-msg">
+        <div class="tg-msg-header"><span class="tg-msg-channel">DarkForums_chat</span><span class="tg-msg-time">8h ago</span></div>
+        <div class="tg-msg-text">"<em>Insider offering access</em> to Fortune 500 manufacturing company. Claims admin-level credentials. Payment in Monero only..."</div>
+        <div class="tg-msg-tags"><span class="tg-msg-tag tag-red">Insider Threat</span><span class="tg-msg-tag tag-amber">Manufacturing</span></div>
+      </div>
+      <div style="text-align:center;padding:8px;color:var(--dim);font-size:8px">Load more messages &darr;</div>
+    </div>
+
+    <!-- Right: Trending Topics -->
+    <div class="tg-right">
+      <div class="tg-section-title">&#128293; Trending Topics</div>
+      
+      <div class="trend-card active">
+        <div class="trend-name">Iran-Israel War</div>
+        <div class="trend-meta">
+          <span class="trend-count">342 mentions &middot; &#9650; 67%</span>
+          <div class="trend-spark"><span style="height:4px"></span><span style="height:6px"></span><span style="height:5px"></span><span style="height:8px"></span><span style="height:7px"></span><span style="height:11px"></span><span style="height:14px"></span></div>
+        </div>
+      </div>
+      <div class="trend-card">
+        <div class="trend-name">Operation: EpicFury</div>
+        <div class="trend-meta">
+          <span class="trend-count">128 mentions &middot; &#9650; 340%</span>
+          <div class="trend-spark"><span style="height:2px"></span><span style="height:2px"></span><span style="height:3px"></span><span style="height:4px"></span><span style="height:8px"></span><span style="height:12px"></span><span style="height:14px"></span></div>
+        </div>
+      </div>
+      <div class="trend-card">
+        <div class="trend-name">Ransomware</div>
+        <div class="trend-meta">
+          <span class="trend-count">2,891 mentions &middot; &#9650; 12%</span>
+          <div class="trend-spark"><span style="height:10px"></span><span style="height:11px"></span><span style="height:9px"></span><span style="height:12px"></span><span style="height:11px"></span><span style="height:12px"></span><span style="height:13px"></span></div>
+        </div>
+      </div>
+      <div class="trend-card">
+        <div class="trend-name">Insider Threat</div>
+        <div class="trend-meta">
+          <span class="trend-count">87 mentions &middot; &#9650; 23%</span>
+          <div class="trend-spark"><span style="height:6px"></span><span style="height:5px"></span><span style="height:7px"></span><span style="height:6px"></span><span style="height:8px"></span><span style="height:9px"></span><span style="height:10px"></span></div>
+        </div>
+      </div>
+      <div class="trend-card">
+        <div class="trend-name">Zero-Day Market</div>
+        <div class="trend-meta">
+          <span class="trend-count">56 mentions &middot; &#9650; 8%</span>
+          <div class="trend-spark"><span style="height:8px"></span><span style="height:7px"></span><span style="height:9px"></span><span style="height:8px"></span><span style="height:8px"></span><span style="height:9px"></span><span style="height:9px"></span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(51,65,85,0.2)">
+        <div style="font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-bottom:4px">AUTO-DETECTED</div>
+        <div class="trend-card">
+          <div class="trend-name" style="color:var(--amber)">Fortinet CVE</div>
+          <div class="trend-meta"><span class="trend-count">34 mentions &middot; &#9650; 890%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 6: INDUSTRY HEATMAP + CORRELATION MATRIX
+     
+     CLAUDE CODE COMMENTS:
+     - Heatmap: X-axis = industries, Y-axis = attack types
+     - Cell color intensity = attack volume, clickable to filter
+     - Use a proper heatmap library (d3.js or custom Canvas)
+     - Correlation: Sankey or chord diagram
+     - Shows: Threat Actor → CVE → Industry connections
+     - Both respect all active page filters
+     - On hover, show tooltip with exact counts
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="analytics-row">
+    <div class="pn">
+      <div class="section-label">INDUSTRY ATTACK HEATMAP</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">Attack Distribution by Sector &amp; Type</div>
+      <div class="heatmap-grid">
+        <div></div>
+        <div class="hm-header">FINANCE</div>
+        <div class="hm-header">HEALTH</div>
+        <div class="hm-header">MANUFACT.</div>
+        <div class="hm-header">GOV</div>
+        <div class="hm-header">RETAIL</div>
+        <div class="hm-header">EDUCATION</div>
+
+        <div class="hm-label">Ransomware</div>
+        <div class="hm-cell hm-hot">287</div>
+        <div class="hm-cell hm-hot">312</div>
+        <div class="hm-cell hm-warm">243</div>
+        <div class="hm-cell hm-warm">198</div>
+        <div class="hm-cell hm-med">145</div>
+        <div class="hm-cell hm-cool">89</div>
+
+        <div class="hm-label">Data Breach</div>
+        <div class="hm-cell hm-hot">345</div>
+        <div class="hm-cell hm-warm">189</div>
+        <div class="hm-cell hm-med">156</div>
+        <div class="hm-cell hm-med">134</div>
+        <div class="hm-cell hm-warm">201</div>
+        <div class="hm-cell hm-cool">67</div>
+
+        <div class="hm-label">Access Sale</div>
+        <div class="hm-cell hm-warm">198</div>
+        <div class="hm-cell hm-med">112</div>
+        <div class="hm-cell hm-warm">187</div>
+        <div class="hm-cell hm-cool">78</div>
+        <div class="hm-cell hm-cool">56</div>
+        <div class="hm-cell hm-cold">23</div>
+
+        <div class="hm-label">DDoS</div>
+        <div class="hm-cell hm-med">134</div>
+        <div class="hm-cell hm-cool">45</div>
+        <div class="hm-cell hm-cool">67</div>
+        <div class="hm-cell hm-warm">178</div>
+        <div class="hm-cell hm-cool">34</div>
+        <div class="hm-cell hm-med">112</div>
+
+        <div class="hm-label">Phishing</div>
+        <div class="hm-cell hm-hot">412</div>
+        <div class="hm-cell hm-warm">234</div>
+        <div class="hm-cell hm-med">123</div>
+        <div class="hm-cell hm-cool">89</div>
+        <div class="hm-cell hm-warm">267</div>
+        <div class="hm-cell hm-med">156</div>
+      </div>
+    </div>
+
+    <div class="pn">
+      <div class="section-label">THREAT-VULNERABILITY CORRELATION</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">Actor &rarr; CVE &rarr; Industry</div>
+      <div class="corr-placeholder">
+        [Sankey / Chord Diagram]<br><br>
+        Visualizes connections between:<br>
+        Threat Actors &rarr; CVEs exploited &rarr; Industries targeted<br><br>
+        <span style="font-size:8px;color:var(--dim)">Use d3-sankey or d3-chord &middot; Interactive &middot; Click to filter</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 7: IAB MONITOR + STEALER LOGS + INSIDER THREAT
+     
+     CLAUDE CODE COMMENTS:
+     - All three sections respond to active page filters
+     - IAB: filterable by industry, access type, price range
+     - Stealer Logs: show infection trends by malware family
+     - Insider Threat: posts offering insider access by industry/region
+     - Each section has "View All →" linking to dedicated page
+     - Data should refresh when filters change
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="data-trio">
+    <!-- IAB Monitor -->
+    <div class="pn">
+      <div class="section-label">INITIAL ACCESS BROKER MONITOR</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">IAB Listings <span style="color:var(--red);font-size:10px;font-weight:600">247 active</span></div>
+      <div class="data-stat"><span class="data-stat-l">RDP Access</span><span class="data-stat-v" style="color:var(--red)">89</span></div>
+      <div class="data-stat"><span class="data-stat-l">VPN Access</span><span class="data-stat-v" style="color:var(--amber)">67</span></div>
+      <div class="data-stat"><span class="data-stat-l">Citrix / RD Gateway</span><span class="data-stat-v" style="color:var(--amber)">43</span></div>
+      <div class="data-stat"><span class="data-stat-l">Web Shell</span><span class="data-stat-v">28</span></div>
+      <div class="data-stat"><span class="data-stat-l">SSH Access</span><span class="data-stat-v">20</span></div>
+      <div style="height:8px"></div>
+      <div class="data-stat" style="border-top:1px solid rgba(51,65,85,0.2);padding-top:6px"><span class="data-stat-l">Avg. listing price</span><span class="data-stat-v" style="color:var(--amber)">$1,328</span></div>
+      <div class="data-stat"><span class="data-stat-l">Highest price (Finance)</span><span class="data-stat-v" style="color:var(--red)">$15,000</span></div>
+      <div class="data-stat"><span class="data-stat-l">Most targeted industry</span><span class="data-stat-v" style="color:var(--indigo)">Finance</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="link">View All Listings &rarr;</span></div>
+    </div>
+
+    <!-- Stealer Log Trends -->
+    <div class="pn">
+      <div class="section-label">STEALER LOG TRENDS</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">Infections by Family <span style="color:var(--red);font-size:10px;font-weight:600">+18% this month</span></div>
+      <div class="data-list-row">
+        <span class="dot" style="background:var(--red)"></span>
+        <span style="flex:1;font-weight:600">RedLine</span>
+        <span style="font-size:8px;color:var(--dim);margin-right:8px">34% share</span>
+        <span style="font-weight:700;color:var(--red)">12.4K</span>
+      </div>
+      <div class="data-list-row">
+        <span class="dot" style="background:var(--amber)"></span>
+        <span style="flex:1;font-weight:600">Raccoon v2</span>
+        <span style="font-size:8px;color:var(--dim);margin-right:8px">21% share</span>
+        <span style="font-weight:700;color:var(--amber)">7.8K</span>
+      </div>
+      <div class="data-list-row">
+        <span class="dot" style="background:var(--amber)"></span>
+        <span style="flex:1;font-weight:600">Vidar</span>
+        <span style="font-size:8px;color:var(--dim);margin-right:8px">18% share</span>
+        <span style="font-weight:700;color:var(--amber)">6.5K</span>
+      </div>
+      <div class="data-list-row">
+        <span class="dot" style="background:var(--indigo)"></span>
+        <span style="flex:1;font-weight:600">Lumma</span>
+        <span style="font-size:8px;color:var(--dim);margin-right:8px">12% share</span>
+        <span style="font-weight:700">4.3K</span>
+      </div>
+      <div class="data-list-row">
+        <span class="dot" style="background:var(--green)"></span>
+        <span style="flex:1;font-weight:600">Stealc</span>
+        <span style="font-size:8px;color:var(--dim);margin-right:8px">8% share</span>
+        <span style="font-weight:700">2.9K</span>
+      </div>
+      <div style="height:8px"></div>
+      <div class="data-stat" style="border-top:1px solid rgba(51,65,85,0.2);padding-top:6px"><span class="data-stat-l">Top targeted platform</span><span class="data-stat-v">Google (OAuth)</span></div>
+      <div class="data-stat"><span class="data-stat-l">Top geo (infections)</span><span class="data-stat-v">India, Brazil, US</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="link">Full Report &rarr;</span></div>
+    </div>
+
+    <!-- Insider Threat -->
+    <div class="pn">
+      <div class="section-label">INSIDER THREAT ACTIVITY</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">Access Offers <span style="color:var(--amber);font-size:10px;font-weight:600">34 this month</span></div>
+      <div class="data-list-row">
+        <span style="flex:1">
+          <div style="font-weight:600;font-size:9px">"Admin access to F500 manufacturer"</div>
+          <div style="font-size:7px;color:var(--dim);margin-top:1px">BreachForums &middot; 2d ago &middot; $5,000</div>
+        </span>
+        <span style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(255,69,98,0.1);color:var(--red)">Manufacturing</span>
+      </div>
+      <div class="data-list-row">
+        <span style="flex:1">
+          <div style="font-weight:600;font-size:9px">"Bank employee selling customer DB"</div>
+          <div style="font-size:7px;color:var(--dim);margin-top:1px">Telegram &middot; 3d ago &middot; $12,000</div>
+        </span>
+        <span style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,0.1);color:var(--amber)">Finance</span>
+      </div>
+      <div class="data-list-row">
+        <span style="flex:1">
+          <div style="font-weight:600;font-size:9px">"Healthcare system creds, admin level"</div>
+          <div style="font-size:7px;color:var(--dim);margin-top:1px">XSS Forum &middot; 5d ago &middot; $3,500</div>
+        </span>
+        <span style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(99,102,241,0.1);color:var(--indigo)">Healthcare</span>
+      </div>
+      <div class="data-list-row">
+        <span style="flex:1">
+          <div style="font-weight:600;font-size:9px">"Gov contractor offering classified docs"</div>
+          <div style="font-size:7px;color:var(--dim);margin-top:1px">DarkForums &middot; 1w ago &middot; $25,000</div>
+        </span>
+        <span style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(255,69,98,0.1);color:var(--red)">Government</span>
+      </div>
+      <div style="height:8px"></div>
+      <div class="data-stat" style="border-top:1px solid rgba(51,65,85,0.2);padding-top:6px"><span class="data-stat-l">Avg. asking price</span><span class="data-stat-v" style="color:var(--amber)">$8,200</span></div>
+      <div class="data-stat"><span class="data-stat-l">Most targeted sector</span><span class="data-stat-v" style="color:var(--red)">Finance</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="link">View All Threats &rarr;</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYER 8: LATEST ACTIVITY / NEWS FEED
+     
+     CLAUDE CODE COMMENTS:
+     - Master-detail layout: list on left, detail on right
+     - Tabs: Dark Web News, Ransomware News (extensible)
+     - News items should respect active page filters
+     - Detail panel shows: title, date, tags, AI Insights, full summary
+     - AI Insights box uses SOCRadar AI Assessment styling
+     - "Read More" should link to the full article/alert page
+     - Infinite scroll or pagination on the list
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">LATEST ACTIVITY</div>
+  <div class="news-section">
+    <!-- News List -->
+    <div class="news-list">
+      <div class="news-tabs">
+        <button class="news-tab active">Dark Web News</button>
+        <button class="news-tab">Ransomware News</button>
+      </div>
+      <div class="news-item active">
+        <div><span class="news-item-tag">Dark Web News</span><span class="news-item-date">03 Apr 2026</span></div>
+        <div class="news-item-title">The Alleged Database of JPMorgan Securities is on Sale</div>
+      </div>
+      <div class="news-item">
+        <div><span class="news-item-tag">Dark Web News</span><span class="news-item-date">03 Apr 2026</span></div>
+        <div class="news-item-title">The Alleged Database of the Provincial Department of Education is on Sale</div>
+      </div>
+      <div class="news-item">
+        <div><span class="news-item-tag">Dark Web News</span><span class="news-item-date">03 Apr 2026</span></div>
+        <div class="news-item-title">Alleged Unauthorized Access Sale for a Dutch Software Company</div>
+      </div>
+      <div class="news-item">
+        <div><span class="news-item-tag">Dark Web News</span><span class="news-item-date">02 Apr 2026</span></div>
+        <div class="news-item-title">Massive Credential Dump Targeting European Banking Sector</div>
+      </div>
+    </div>
+
+    <!-- News Detail -->
+    <div class="news-detail">
+      <div class="news-detail-card">
+        <div class="news-detail-title">The Alleged Database of JPMorgan Securities is on Sale</div>
+        <div class="news-detail-date">&#128197; 03 Apr 2026</div>
+        <div class="news-detail-tags">
+          <span class="news-detail-tag">Thailand</span>
+          <span class="news-detail-tag">South-eastern Asia</span>
+          <span class="news-detail-tag">Finance</span>
+          <span class="news-detail-tag">Banking</span>
+        </div>
+        <div class="news-ai">
+          <div class="news-ai-icon">&#10022;</div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:var(--purple);margin-bottom:3px">SOCRadar AI Insights</div>
+            <div class="news-ai-text">In a hacker forum monitored by SOCRadar, a new alleged database sale is detected for JPMorgan Securities. Key implications: Direct exposure of sensitive PII including mobile numbers, ID numbers, gender, and financial holdings.</div>
+          </div>
+          <span style="font-size:8px;color:var(--indigo);white-space:nowrap;margin-left:8px;cursor:pointer">+ Read More</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3)"></span>L1: Sticky Filter Bar</span>
+    <span><span class="lsw" style="background:rgba(34,211,238,0.15)"></span>L2: Advanced Search</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.1)"></span>L3: Threat Map Hero</span>
+    <span><span class="lsw" style="background:rgba(245,158,11,0.1)"></span>L4: Intel Grid (3-col)</span>
+    <span><span class="lsw" style="background:rgba(0,136,204,0.15)"></span>L5: Telegram Intel</span>
+    <span><span class="lsw" style="background:rgba(168,85,247,0.15)"></span>L6: Heatmap + Correlation</span>
+    <span><span class="lsw" style="background:rgba(34,197,94,0.1)"></span>L7: IAB / Stealer / Insider</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>L8: News Feed</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -18,8 +18,8 @@ export function SortHeader({ label, field, sortField, sortDir, onSort, style }) 
     >
       {label}
       <svg width="8" height="8" viewBox="0 0 10 10" fill="none" style={{ opacity: isActive ? 1 : 0.3 }}>
-        <path d="M5 1L8 4H2L5 1Z" fill={isActive && sortDir === "asc" ? "#E8463A" : (t.text20)} />
-        <path d="M5 9L2 6H8L5 9Z" fill={isActive && sortDir === "desc" ? "#E8463A" : (t.text20)} />
+        <path d="M5 1L8 4H2L5 1Z" fill={isActive && sortDir === "asc" ? "#FF4562" : (t.text20)} />
+        <path d="M5 9L2 6H8L5 9Z" fill={isActive && sortDir === "desc" ? "#FF4562" : (t.text20)} />
       </svg>
     </span>
   );
@@ -132,15 +132,15 @@ function PaginationBtn({ children, active, disabled, onClick, t }) {
       onClick={disabled ? undefined : onClick}
       style={{
         minWidth: 28, height: 28, borderRadius: 6, border: "none",
-        background: active ? "rgba(232,70,58,0.12)" : "transparent",
-        color: active ? "#E8463A" : disabled ? (t.text15) : (t.text35),
+        background: active ? "rgba(255,69,98,0.12)" : "transparent",
+        color: active ? "#FF4562" : disabled ? (t.text15) : (t.text35),
         fontSize: 11, fontWeight: active ? 600 : 400, cursor: disabled ? "default" : "pointer",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: "'JetBrains Mono',monospace", transition: "all 0.15s",
         padding: "0 4px",
       }}
       onMouseEnter={e => { if (!disabled && !active) e.currentTarget.style.background = t.bgHover; }}
-      onMouseLeave={e => { if (!active) e.currentTarget.style.background = active ? "rgba(232,70,58,0.12)" : "transparent"; }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.background = active ? "rgba(255,69,98,0.12)" : "transparent"; }}
     >
       {children}
     </button>
@@ -325,19 +325,19 @@ export function Checkbox({ checked, indeterminate, onChange }) {
       onClick={e => { e.stopPropagation(); onChange(); }}
       style={{
         width: 16, height: 16, borderRadius: 4, cursor: "pointer", flexShrink: 0,
-        border: checked || indeterminate ? "1.5px solid #E8463A" : `1.5px solid ${t.borderStrong}`,
-        background: checked ? "rgba(232,70,58,0.15)" : indeterminate ? "rgba(232,70,58,0.08)" : "transparent",
+        border: checked || indeterminate ? "1.5px solid #FF4562" : `1.5px solid ${t.borderStrong}`,
+        background: checked ? "rgba(255,69,98,0.15)" : indeterminate ? "rgba(255,69,98,0.08)" : "transparent",
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         transition: "all 0.15s",
       }}
     >
       {checked && (
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="3">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="3">
           <path d="M20 6L9 17l-5-5" />
         </svg>
       )}
       {indeterminate && !checked && (
-        <div style={{ width: 8, height: 2, borderRadius: 1, background: "#E8463A" }} />
+        <div style={{ width: 8, height: 2, borderRadius: 1, background: "#FF4562" }} />
       )}
     </span>
   );
@@ -352,13 +352,13 @@ export function BulkActionBar({ count, onClear, actions }) {
       position: "sticky", bottom: 0, zIndex: 10,
       padding: "10px 20px",
       background: t.bgPanel, backdropFilter: "blur(16px)",
-      borderTop: "1px solid rgba(232,70,58,0.15)",
+      borderTop: "1px solid rgba(255,69,98,0.15)",
       display: "flex", alignItems: "center", gap: 12,
       animation: "fadeUp 0.25s cubic-bezier(0.16,1,0.3,1) both",
     }}>
       <span style={{
         padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600,
-        background: "rgba(232,70,58,0.12)", color: "#E8463A",
+        background: "rgba(255,69,98,0.12)", color: "#FF4562",
         fontFamily: "'JetBrains Mono',monospace",
       }}>
         {count} selected
@@ -369,10 +369,10 @@ export function BulkActionBar({ count, onClear, actions }) {
           onClick={a.onClick}
           style={{
             padding: "6px 14px", borderRadius: 7, border: "none",
-            background: a.primary ? "#E8463A" : (t.bgElevated),
+            background: a.primary ? "#FF4562" : (t.bgElevated),
             color: a.primary ? "#fff" : (t.text60),
             fontSize: 11, fontWeight: 600, cursor: "pointer",
-            fontFamily: "'Satoshi',sans-serif", transition: "all 0.15s",
+            fontFamily: "'Inter', sans-serif", transition: "all 0.15s",
             display: "flex", alignItems: "center", gap: 5,
           }}
           onMouseEnter={e => { if (!a.primary) e.currentTarget.style.background = t.borderStrong; }}
@@ -387,7 +387,7 @@ export function BulkActionBar({ count, onClear, actions }) {
         style={{
           marginLeft: "auto", padding: "6px 12px", borderRadius: 7, border: "none",
           background: "transparent", color: t.text35,
-          fontSize: 11, cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+          fontSize: 11, cursor: "pointer", fontFamily: "'Inter', sans-serif",
         }}
       >
         Clear
@@ -433,8 +433,8 @@ export function TimeRangeFilter({ range, onRangeChange, ranges = TIME_RANGES }) 
           onClick={() => onRangeChange(r.label)}
           style={{
             padding: "5px 10px", borderRadius: 6, border: "none",
-            background: range === r.label ? "rgba(232,70,58,0.12)" : "transparent",
-            color: range === r.label ? "#E8463A" : (t.text30),
+            background: range === r.label ? "rgba(255,69,98,0.12)" : "transparent",
+            color: range === r.label ? "#FF4562" : (t.text30),
             fontSize: 10, fontWeight: range === r.label ? 600 : 400,
             cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
             transition: "all 0.15s",
@@ -484,7 +484,7 @@ export function FilterDropdown({ label, options, selected, onSelectionChange, ac
           border: count > 0 ? `1px solid ${accentColor}30` : `1px solid ${t.borderLight}`,
           background: count > 0 ? `${accentColor}0C` : (t.bgCard),
           color: count > 0 ? accentColor : (t.text40),
-          fontSize: 11, fontFamily: "'Satoshi',sans-serif",
+          fontSize: 11, fontFamily: "'Inter', sans-serif",
           display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
           transition: "all 0.15s",
         }}
@@ -520,7 +520,7 @@ export function FilterDropdown({ label, options, selected, onSelectionChange, ac
                 autoFocus
                 style={{
                   width: "100%", padding: "7px 10px 7px 28px", fontSize: 11,
-                  fontFamily: "'Satoshi',sans-serif", background: t.bgInput,
+                  fontFamily: "'Inter', sans-serif", background: t.bgInput,
                   border: `1px solid ${t.borderLight}`, borderRadius: 8,
                   color: t.text, outline: "none",
                 }}

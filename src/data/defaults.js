@@ -27,7 +27,7 @@ export const DEFAULT_LOWER_ALARMS = [
 ];
 
 export const DEFAULT_COVERAGE_BARS = [
-  { label: "Domains", used: 2, total: 3, color: "#E8463A" },
+  { label: "Domains", used: 2, total: 3, color: "#FF4562" },
   { label: "Keywords", used: 5, total: 10, color: "#F59E0B" },
   { label: "VIP Accounts", used: 1, total: 5, color: "#A855F7" },
   { label: "Financial Assets", used: 0, total: 2, color: "#3B82F6" },

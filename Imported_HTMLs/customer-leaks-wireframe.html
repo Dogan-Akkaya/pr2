@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Customer Leaks — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section{margin-bottom:20px}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ HERO BANNER ═══ */
+.hero{
+  background:linear-gradient(135deg,rgba(255,69,98,0.12) 0%,rgba(168,85,247,0.08) 50%,rgba(11,15,26,0) 100%);
+  border:1px solid rgba(255,69,98,0.18);border-radius:14px;padding:24px 28px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--red),var(--purple));border-radius:14px 0 0 14px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.hero-left{flex:1}
+.hero-badge{background:rgba(255,69,98,0.15);color:var(--red);font-size:9px;font-weight:700;padding:4px 14px;border-radius:10px;letter-spacing:1px;display:inline-block}
+.hero h1{font-size:28px;font-weight:800;margin:10px 0 6px;letter-spacing:-0.5px;line-height:1.2}
+.hero h1 span{color:var(--red)}
+.hero-sub{color:var(--muted);font-size:12px;line-height:1.5;max-width:600px}
+.hero-stats{display:flex;gap:16px;margin-top:16px}
+.hero-stat{background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.3);border-radius:10px;padding:12px 18px;text-align:center;min-width:120px}
+.hero-stat-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.hero-stat-val{font-size:24px;font-weight:800;margin-top:3px}
+.hero-stat-sub{font-size:8px;color:var(--dim);margin-top:1px}
+
+.hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.hero-cost-box{background:rgba(255,69,98,0.08);border:1px solid rgba(255,69,98,0.2);border-radius:12px;padding:16px 22px;text-align:center}
+.hero-cost-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.hero-cost-val{font-size:36px;font-weight:800;color:var(--red);margin-top:4px}
+.hero-cost-sub{font-size:9px;color:var(--muted);margin-top:2px}
+
+/* ═══ ATTACKER VIEW ═══ */
+.attacker-section{
+  background:linear-gradient(135deg,rgba(15,23,42,0.8),rgba(15,23,42,0.4));
+  border:1px solid rgba(255,69,98,0.12);border-radius:12px;padding:20px;margin-bottom:20px;
+}
+.attacker-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.attacker-title{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.attacker-title .eye{font-size:16px}
+.attacker-subtitle{font-size:9px;color:var(--dim);margin-top:2px}
+.attacker-total{text-align:right}
+.attacker-total-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700}
+.attacker-total-val{font-size:20px;font-weight:800;color:var(--amber)}
+
+.shopping-grid{display:flex;gap:10px}
+.shopping-card{
+  flex:1;background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.3);
+  border-radius:8px;padding:14px;position:relative;overflow:hidden;
+}
+.shopping-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;border-radius:8px 8px 0 0}
+.sc-cred::before{background:var(--red)}
+.sc-pii::before{background:var(--amber)}
+.sc-fin::before{background:var(--purple)}
+.sc-session::before{background:var(--cyan)}
+.shopping-type{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:6px}
+.shopping-count{font-size:22px;font-weight:800}
+.shopping-label{font-size:9px;color:var(--muted);margin-top:2px}
+.shopping-price{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(51,65,85,0.2)}
+.shopping-price-label{font-size:8px;color:var(--dim)}
+.shopping-price-val{font-size:12px;font-weight:800;color:var(--amber)}
+.shopping-detail{font-size:8px;color:var(--dim);margin-top:4px;line-height:1.4}
+
+/* ═══ COMPLIANCE ESTIMATOR ═══ */
+.compliance{
+  background:var(--card);border:1px solid rgba(168,85,247,0.15);
+  border-radius:12px;padding:20px;margin-bottom:20px;
+}
+.compliance-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.compliance-title{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.compliance-title .icon{color:var(--purple);font-size:16px}
+.compliance-controls{display:flex;gap:6px;align-items:center}
+.comp-pill{
+  font-size:8px;font-weight:600;padding:4px 12px;border-radius:6px;cursor:pointer;
+  border:1px solid rgba(51,65,85,0.3);background:transparent;color:var(--dim);
+}
+.comp-pill.active{background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.3);color:var(--purple)}
+
+.compliance-grid{display:flex;gap:12px}
+.comp-card{
+  flex:1;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);
+  border-radius:8px;padding:14px;position:relative;
+}
+.comp-card.active-region{border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.04)}
+.comp-flag{font-size:18px;margin-bottom:6px}
+.comp-name{font-size:11px;font-weight:700;margin-bottom:2px}
+.comp-regulation{font-size:8px;color:var(--purple);font-weight:600;margin-bottom:8px}
+.comp-fine-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700}
+.comp-fine-val{font-size:20px;font-weight:800;margin-top:2px}
+.comp-fine-detail{font-size:8px;color:var(--dim);margin-top:4px;line-height:1.4}
+.comp-fine-formula{font-size:7px;color:var(--dim);margin-top:6px;padding-top:6px;border-top:1px solid rgba(51,65,85,0.2);font-family:'JetBrains Mono',monospace}
+.comp-source{font-size:7px;color:var(--dim);margin-top:12px;text-align:center}
+
+/* ═══ TWO COLUMN: BREAKDOWN + RISK ═══ */
+.two-col{display:flex;gap:12px;margin-bottom:20px}
+.two-col .col{flex:1;min-width:0}
+
+/* Exposure breakdown */
+.exp-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.exp-row:last-child{border-bottom:none}
+.exp-color{width:4px;height:28px;border-radius:2px;flex-shrink:0}
+.exp-info{flex:1}
+.exp-name{font-weight:600}
+.exp-desc{font-size:7px;color:var(--dim);margin-top:1px}
+.exp-count{font-weight:800;font-size:14px}
+.exp-pct{font-size:8px;color:var(--dim);width:40px;text-align:right}
+
+/* Source breakdown */
+.src-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.src-row:last-child{border-bottom:none}
+.src-icon{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.src-name{flex:1;font-weight:600}
+.src-bar{width:80px;height:5px;background:rgba(51,65,85,0.2);border-radius:3px;overflow:hidden}
+.src-bar-fill{height:100%;border-radius:3px}
+.src-count{font-weight:700;width:40px;text-align:right}
+
+/* Risk segments */
+.risk-card{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);
+  border-radius:7px;padding:12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;
+}
+.risk-icon{
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;
+}
+.risk-info{flex:1}
+.risk-title{font-size:10px;font-weight:700}
+.risk-desc{font-size:8px;color:var(--dim);margin-top:2px;line-height:1.3}
+.risk-count{font-size:18px;font-weight:800;text-align:right}
+.risk-trend{font-size:8px;text-align:right}
+
+/* Trend chart */
+.chart-ph{
+  height:100px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);
+  border-radius:6px;text-align:center;
+}
+
+/* IBM data callout */
+.ibm-callout{
+  background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.12);
+  border-radius:8px;padding:12px 16px;margin-bottom:12px;
+  display:flex;align-items:center;gap:12px;
+}
+.ibm-callout-icon{font-size:20px;flex-shrink:0}
+.ibm-callout-text{font-size:10px;line-height:1.5}
+.ibm-callout-text strong{color:var(--red)}
+.ibm-callout-source{font-size:7px;color:var(--dim);margin-top:2px}
+
+/* Bottom actions */
+.actions-row{display:flex;gap:10px}
+.action-card{
+  flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:14px;cursor:pointer;transition:border-color 0.15s;
+}
+.action-card:hover{border-color:rgba(99,102,241,0.3)}
+.action-icon{font-size:18px;margin-bottom:6px}
+.action-title{font-size:11px;font-weight:700;margin-bottom:2px}
+.action-desc{font-size:8px;color:var(--dim);line-height:1.4}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+CUSTOMER LEAKS PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+PAGE PURPOSE:
+Show enterprises (banks, airlines, e-commerce) the scale of their customer
+data exposure on the dark web. NOT to make them buy data back, but to:
+1. Quantify the threat ("X customers' data is available for $Y")
+2. Show compliance risk ("This exposure could cost you $Z in fines")
+3. Drive action ("Here's what to do about it")
+
+TARGET USERS: CISOs, DPOs, compliance officers at large enterprises
+
+KEY DESIGN PRINCIPLE:
+This page should make a CISO uncomfortable in the right way. The data
+should feel urgent but actionable. The compliance estimator should be
+dynamic based on the user's region (resolved from profile).
+
+DATA MODELS:
+
+CustomerExposure: {
+  total_exposed_customers: number,
+  total_records: number,
+  breakdown: {
+    credentials: { count: number, avg_price: number, sources: string[] },
+    pii: { count: number, avg_price: number, types: string[] },
+    financial: { count: number, avg_price: number, types: string[] },
+    sessions: { count: number, avg_price: number, types: string[] }
+  },
+  attacker_total_cost: number,  // what it would cost to buy all this data
+  sources: [{
+    name: 'Russian Market' | 'Genesis Market' | 'Stealer Logs' | etc,
+    record_count: number,
+    percentage: number
+  }],
+  trend_30d: number,  // percentage change
+  trend_90d: number
+}
+
+ComplianceEstimate: {
+  region: 'eu' | 'us' | 'uk' | 'turkey' | 'apac',
+  regulation: 'GDPR' | 'CCPA/CPRA' | 'UK GDPR' | 'KVKK' | 'PDPA',
+  max_fine_formula: string,
+  estimated_fine_range: { min: number, max: number },
+  avg_cost_per_record: number,
+  avg_breach_cost: number,
+  notification_deadline_hours: number,
+  source: string  // 'IBM Cost of Data Breach 2025' etc
+}
+
+RiskSegment: {
+  name: string,
+  description: string,
+  count: number,
+  trend: string,
+  severity: 'critical' | 'high' | 'medium'
+}
+
+COMPONENT HIERARCHY:
+CustomerLeaksPage
+├── HeroBanner (exposure summary + estimated breach cost)
+├── AttackerView ("What a threat actor sees")
+│   └── ShoppingCards (credentials, PII, financial, sessions)
+├── ComplianceEstimator (dynamic by region)
+│   ├── RegionPills (EU, US, UK, Turkey, APAC)
+│   └── ComplianceCards (per-region fine estimates)
+├── TwoColumnSection
+│   ├── ExposureBreakdown (by data type)
+│   └── SourceBreakdown (where data was found)
+├── RiskSegments (high-value accounts, multi-exposure, financial)
+├── ExposureTrend (timeline chart)
+├── IBMCallout (data breach cost reference)
+└── ActionCards (what to do next)
+
+COMPLIANCE ESTIMATOR NOTES:
+- Default region should be resolved from user profile
+  (e.g., Turkey user → KVKK selected by default)
+- Formulas sourced from:
+  * GDPR: up to €20M or 4% global annual revenue (Art 83(5))
+  * CCPA/CPRA: $2,500-$7,500 per violation
+  * UK GDPR: up to £17.5M or 4% global annual revenue
+  * KVKK (Turkey): up to TRY 9,834,998 (~$300K)
+  * IBM Cost of Data Breach 2025: $4.44M global avg,
+    $10.22M US, $173/record global, $429/record healthcare
+- Include a disclaimer: "Estimates for informational purposes only"
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">CUSTOMER LEAKS &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════════════════════════════════════
+     HERO BANNER
+     ═══════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-top">
+    <div class="hero-left">
+      <span class="hero-badge">&#9888; CUSTOMER DATA EXPOSED</span>
+      <h1><span>47,832</span> of your customers<br>are exposed on the dark web</h1>
+      <div class="hero-sub">Their credentials, personal information, and session data are available for purchase across 14 dark web marketplaces and stealer log repositories. A threat actor could compile a targeted attack list for under $2,400.</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-label">EXPOSED RECORDS</div>
+          <div class="hero-stat-val" style="color:var(--red)">124,891</div>
+          <div class="hero-stat-sub">across all sources</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label">UNIQUE CUSTOMERS</div>
+          <div class="hero-stat-val">47,832</div>
+          <div class="hero-stat-sub">with account on your platform</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label">NEW THIS MONTH</div>
+          <div class="hero-stat-val" style="color:var(--amber)">+3,241</div>
+          <div class="hero-stat-sub">&#9650; 12% vs last month</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label">SOURCES</div>
+          <div class="hero-stat-val">14</div>
+          <div class="hero-stat-sub">marketplaces &amp; repositories</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-cost-box">
+        <div class="hero-cost-label">ESTIMATED BREACH COST</div>
+        <div class="hero-cost-val">$8.27M</div>
+        <div class="hero-cost-sub">if this data is weaponized</div>
+        <div style="font-size:7px;color:var(--dim);margin-top:4px">Based on IBM 2025 &middot; $173/record</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     THE ATTACKER'S VIEW
+     ═══════════════════════════════════════════ -->
+<div class="attacker-section">
+  <div class="attacker-header">
+    <div>
+      <div class="attacker-title"><span class="eye">&#128065;</span> What a Threat Actor Sees</div>
+      <div class="attacker-subtitle">If someone wanted to target your customers, here's what's available right now</div>
+    </div>
+    <div class="attacker-total">
+      <div class="attacker-total-label">TOTAL ACQUISITION COST</div>
+      <div class="attacker-total-val">$2,384</div>
+    </div>
+  </div>
+  <div class="shopping-grid">
+    <div class="shopping-card sc-cred">
+      <div class="shopping-type">STOLEN CREDENTIALS</div>
+      <div class="shopping-count" style="color:var(--red)">31,205</div>
+      <div class="shopping-label">email + password combos</div>
+      <div class="shopping-detail">Including 4,821 with plaintext passwords, 12,340 from stealer logs with cookies &amp; autofill data</div>
+      <div class="shopping-price">
+        <span class="shopping-price-label">Avg. price per log</span>
+        <span class="shopping-price-val">$0.05</span>
+      </div>
+    </div>
+    <div class="shopping-card sc-pii">
+      <div class="shopping-type">PERSONAL INFORMATION (PII)</div>
+      <div class="shopping-count" style="color:var(--amber)">18,442</div>
+      <div class="shopping-label">records with identity data</div>
+      <div class="shopping-detail">Full names, phone numbers, physical addresses, national IDs. 2,100 records include passport or driver's license numbers</div>
+      <div class="shopping-price">
+        <span class="shopping-price-label">Avg. price per record</span>
+        <span class="shopping-price-val">$0.10</span>
+      </div>
+    </div>
+    <div class="shopping-card sc-fin">
+      <div class="shopping-type">FINANCIAL DATA</div>
+      <div class="shopping-count" style="color:var(--purple)">8,891</div>
+      <div class="shopping-label">payment &amp; banking records</div>
+      <div class="shopping-detail">Credit card numbers, bank account details, transaction history. 1,203 cards are verified active (tested within 48h)</div>
+      <div class="shopping-price">
+        <span class="shopping-price-label">Avg. price per card</span>
+        <span class="shopping-price-val">$0.50 &ndash; $15</span>
+      </div>
+    </div>
+    <div class="shopping-card sc-session">
+      <div class="shopping-type">ACTIVE SESSIONS</div>
+      <div class="shopping-count" style="color:var(--cyan)">4,127</div>
+      <div class="shopping-label">live session tokens &amp; cookies</div>
+      <div class="shopping-detail">Bypass 2FA entirely. Attacker gains instant access to customer accounts without needing credentials</div>
+      <div class="shopping-price">
+        <span class="shopping-price-label">Avg. price per session</span>
+        <span class="shopping-price-val">$0.30</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     COMPLIANCE COST ESTIMATOR
+     ═══════════════════════════════════════════ -->
+<!-- CLAUDE CODE: Default region from user profile. For Turkey → KVKK selected.
+     The estimator should dynamically recalculate when region changes.
+     Fine ranges should use the actual exposed record count × cost-per-record.
+     Include disclaimer text. Sources: IBM Cost of Data Breach 2025,
+     GDPR Art 83, CCPA §1798.155, UK Data Protection Act 2018, KVKK Art 18 -->
+<div class="compliance">
+  <div class="compliance-header">
+    <div>
+      <div class="compliance-title"><span class="icon">&#9878;</span> Compliance Cost Estimator</div>
+      <div style="font-size:9px;color:var(--dim);margin-top:2px">What this exposure could cost you under data protection regulations</div>
+    </div>
+    <div class="compliance-controls">
+      <span class="comp-pill">EU</span>
+      <span class="comp-pill active">Turkey</span>
+      <span class="comp-pill">US</span>
+      <span class="comp-pill">UK</span>
+      <span class="comp-pill">APAC</span>
+    </div>
+  </div>
+
+  <div class="compliance-grid">
+    <div class="comp-card active-region">
+      <div class="comp-flag">&#127481;&#127479;</div>
+      <div class="comp-name">Turkey (KVKK)</div>
+      <div class="comp-regulation">Kişisel Verilerin Korunması Kanunu</div>
+      <div class="comp-fine-label">ESTIMATED FINE EXPOSURE</div>
+      <div class="comp-fine-val" style="color:var(--amber)">~$300K</div>
+      <div class="comp-fine-detail">Max: TRY 9,834,998 per violation. KVKK Board can also order data deletion and processing suspension.</div>
+      <div class="comp-fine-formula">47,832 records × notification + remediation</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-flag">&#127466;&#127482;</div>
+      <div class="comp-name">EU (GDPR)</div>
+      <div class="comp-regulation">General Data Protection Regulation</div>
+      <div class="comp-fine-label">ESTIMATED FINE EXPOSURE</div>
+      <div class="comp-fine-val" style="color:var(--red)">$2.1M &ndash; $20M</div>
+      <div class="comp-fine-detail">Up to &euro;20M or 4% of global annual revenue. 72h mandatory breach notification. Avg. fine: &euro;2.8M (2024).</div>
+      <div class="comp-fine-formula">Art 83(5) · €1.2B issued in 2025 alone</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-flag">&#127482;&#127480;</div>
+      <div class="comp-name">United States</div>
+      <div class="comp-regulation">CCPA / CPRA + State Laws</div>
+      <div class="comp-fine-label">ESTIMATED FINE EXPOSURE</div>
+      <div class="comp-fine-val" style="color:var(--red)">$4.4M &ndash; $10.2M</div>
+      <div class="comp-fine-detail">$2,500&ndash;$7,500 per violation under CCPA. US avg breach cost: $10.22M (highest globally). 19 states with privacy laws.</div>
+      <div class="comp-fine-formula">IBM 2025: $10.22M avg US breach cost</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-flag">&#127468;&#127463;</div>
+      <div class="comp-name">United Kingdom</div>
+      <div class="comp-regulation">UK GDPR + Data Protection Act 2018</div>
+      <div class="comp-fine-label">ESTIMATED FINE EXPOSURE</div>
+      <div class="comp-fine-val" style="color:var(--amber)">$1.8M &ndash; $17.5M</div>
+      <div class="comp-fine-detail">Up to &pound;17.5M or 4% global annual turnover. ICO enforcement increasing. UK avg: &pound;3.29M per breach.</div>
+      <div class="comp-fine-formula">UK Data Protection Act 2018 · s.157</div>
+    </div>
+  </div>
+  <div class="comp-source">Estimates for informational purposes only. Based on IBM Cost of Data Breach Report 2025, GDPR enforcement data (DLA Piper 2026), and regional regulatory frameworks. Actual fines depend on specifics of each incident.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TWO COLUMNS: EXPOSURE + SOURCES
+     ═══════════════════════════════════════════ -->
+<div class="two-col">
+  <!-- Exposure by Data Type -->
+  <div class="col">
+    <div class="pn">
+      <div class="section-label">EXPOSURE BY DATA TYPE</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">What data is compromised</div>
+      <div class="exp-row">
+        <div class="exp-color" style="background:var(--red)"></div>
+        <div class="exp-info"><div class="exp-name">Login Credentials</div><div class="exp-desc">Email + password combinations from breaches &amp; stealer logs</div></div>
+        <div class="exp-count" style="color:var(--red)">31,205</div>
+        <div class="exp-pct">42%</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-color" style="background:var(--amber)"></div>
+        <div class="exp-info"><div class="exp-name">Email Addresses</div><div class="exp-desc">Customer emails found in paste sites &amp; combo lists</div></div>
+        <div class="exp-count" style="color:var(--amber)">28,103</div>
+        <div class="exp-pct">38%</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-color" style="background:var(--purple)"></div>
+        <div class="exp-info"><div class="exp-name">Phone Numbers</div><div class="exp-desc">Mobile/landline numbers linked to customer accounts</div></div>
+        <div class="exp-count">12,847</div>
+        <div class="exp-pct">17%</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-color" style="background:var(--cyan)"></div>
+        <div class="exp-info"><div class="exp-name">National IDs / Passport</div><div class="exp-desc">Government-issued identification documents</div></div>
+        <div class="exp-count" style="color:var(--red)">2,100</div>
+        <div class="exp-pct">3%</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-color" style="background:var(--green)"></div>
+        <div class="exp-info"><div class="exp-name">Physical Addresses</div><div class="exp-desc">Home/billing addresses from breach databases</div></div>
+        <div class="exp-count">8,234</div>
+        <div class="exp-pct">11%</div>
+      </div>
+    </div>
+
+    <!-- Exposure Trend -->
+    <div class="pn">
+      <div class="section-label">EXPOSURE TREND</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">Customer records exposed over time</div>
+      <div class="chart-ph">[Area Chart]<br>Monthly exposed record count &middot; Last 12 months<br>Stacked by data type (credentials, PII, financial, sessions)</div>
+    </div>
+  </div>
+
+  <!-- Sources + Risk Segments -->
+  <div class="col">
+    <div class="pn">
+      <div class="section-label">EXPOSURE BY SOURCE</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Where the data was found</div>
+      <div class="src-row">
+        <div class="src-icon" style="background:rgba(255,69,98,0.1);color:var(--red)">&#9632;</div>
+        <span class="src-name">Stealer Logs</span>
+        <div class="src-bar"><div class="src-bar-fill" style="width:80%;background:var(--red)"></div></div>
+        <span class="src-count" style="color:var(--red)">52,340</span>
+      </div>
+      <div class="src-row">
+        <div class="src-icon" style="background:rgba(245,158,11,0.1);color:var(--amber)">&#9670;</div>
+        <span class="src-name">Breach Databases</span>
+        <div class="src-bar"><div class="src-bar-fill" style="width:55%;background:var(--amber)"></div></div>
+        <span class="src-count" style="color:var(--amber)">34,201</span>
+      </div>
+      <div class="src-row">
+        <div class="src-icon" style="background:rgba(99,102,241,0.1);color:var(--indigo)">&#9830;</div>
+        <span class="src-name">Combo Lists</span>
+        <div class="src-bar"><div class="src-bar-fill" style="width:30%;background:var(--indigo)"></div></div>
+        <span class="src-count">18,923</span>
+      </div>
+      <div class="src-row">
+        <div class="src-icon" style="background:rgba(34,211,238,0.1);color:var(--cyan)">&#9992;</div>
+        <span class="src-name">Telegram Channels</span>
+        <div class="src-bar"><div class="src-bar-fill" style="width:18%;background:var(--cyan)"></div></div>
+        <span class="src-count">11,204</span>
+      </div>
+      <div class="src-row">
+        <div class="src-icon" style="background:rgba(168,85,247,0.1);color:var(--purple)">&#9733;</div>
+        <span class="src-name">Dark Web Marketplaces</span>
+        <div class="src-bar"><div class="src-bar-fill" style="width:10%;background:var(--purple)"></div></div>
+        <span class="src-count">6,102</span>
+      </div>
+      <div class="src-row">
+        <div class="src-icon" style="background:rgba(51,65,85,0.2);color:var(--muted)">&#9998;</div>
+        <span class="src-name">Paste Sites</span>
+        <div class="src-bar"><div class="src-bar-fill" style="width:5%;background:var(--faint)"></div></div>
+        <span class="src-count">2,121</span>
+      </div>
+    </div>
+
+    <!-- Customer Risk Segments -->
+    <div class="pn">
+      <div class="section-label">CUSTOMER RISK SEGMENTS</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Highest-risk customer groups</div>
+      <div class="risk-card">
+        <div class="risk-icon" style="background:rgba(255,69,98,0.1)">&#128274;</div>
+        <div class="risk-info">
+          <div class="risk-title" style="color:var(--red)">Multi-Exposure Customers</div>
+          <div class="risk-desc">Customers found in 3+ separate sources. Highest risk of targeted account takeover.</div>
+        </div>
+        <div>
+          <div class="risk-count" style="color:var(--red)">4,218</div>
+          <div class="risk-trend" style="color:var(--red)">&#9650; +18%</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon" style="background:rgba(245,158,11,0.1)">&#128179;</div>
+        <div class="risk-info">
+          <div class="risk-title" style="color:var(--amber)">Financial Data Exposed</div>
+          <div class="risk-desc">Customers with payment cards or bank details in dark web listings.</div>
+        </div>
+        <div>
+          <div class="risk-count" style="color:var(--amber)">8,891</div>
+          <div class="risk-trend" style="color:var(--amber)">&#9650; +7%</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon" style="background:rgba(168,85,247,0.1)">&#128100;</div>
+        <div class="risk-info">
+          <div class="risk-title" style="color:var(--purple)">Active Session Hijack Risk</div>
+          <div class="risk-desc">Customers with live session tokens/cookies for sale. 2FA bypass possible.</div>
+        </div>
+        <div>
+          <div class="risk-count" style="color:var(--purple)">4,127</div>
+          <div class="risk-trend" style="color:var(--red)">&#9650; +34%</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon" style="background:rgba(34,197,94,0.1)">&#9733;</div>
+        <div class="risk-info">
+          <div class="risk-title">High-Value Accounts</div>
+          <div class="risk-desc">Premium/VIP customers or accounts with high transaction history exposed.</div>
+        </div>
+        <div>
+          <div class="risk-count">1,203</div>
+          <div class="risk-trend" style="color:var(--amber)">&#9650; +5%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     IBM DATA CALLOUT
+     ═══════════════════════════════════════════ -->
+<div class="ibm-callout">
+  <span class="ibm-callout-icon">&#128200;</span>
+  <div>
+    <div class="ibm-callout-text">According to IBM's 2025 Cost of a Data Breach Report, customer PII was compromised in <strong>53% of all breaches</strong> studied. The global average breach cost is <strong>$4.44 million</strong>, with healthcare at $7.42M and the US alone averaging <strong>$10.22 million</strong>. Organizations with exposed credentials took an average of <strong>292 days</strong> to resolve breaches.</div>
+    <div class="ibm-callout-source">Source: IBM / Ponemon Institute — Cost of a Data Breach Report 2025 &middot; 600 organizations across 16 countries</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ACTION CARDS
+     ═══════════════════════════════════════════ -->
+<div class="section-label">RECOMMENDED ACTIONS</div>
+<div class="actions-row">
+  <div class="action-card">
+    <div class="action-icon">&#128272;</div>
+    <div class="action-title">Force Password Reset</div>
+    <div class="action-desc">Export the list of 31,205 compromised credentials and trigger mandatory password resets for affected customer accounts.</div>
+  </div>
+  <div class="action-card">
+    <div class="action-icon">&#128227;</div>
+    <div class="action-title">Notify Affected Customers</div>
+    <div class="action-desc">Generate a compliance-ready notification template for the 47,832 exposed customers, customized to your regulatory region.</div>
+  </div>
+  <div class="action-card">
+    <div class="action-icon">&#128202;</div>
+    <div class="action-title">Generate Board Report</div>
+    <div class="action-desc">Export a presentation-ready executive summary with exposure stats, compliance estimates, and trend analysis for board briefing.</div>
+  </div>
+  <div class="action-card">
+    <div class="action-icon">&#128274;</div>
+    <div class="action-title">Invalidate Sessions</div>
+    <div class="action-desc">Identify and revoke the 4,127 active session tokens currently for sale to prevent immediate account takeover attacks.</div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(255,69,98,0.15);border:1px solid rgba(255,69,98,0.25)"></span>Hero Banner</span>
+    <span><span class="lsw" style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,69,98,0.12)"></span>Attacker's View</span>
+    <span><span class="lsw" style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.15)"></span>Compliance Estimator</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Exposure + Sources</span>
+    <span><span class="lsw" style="background:rgba(34,197,94,0.06)"></span>Risk Segments</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.12)"></span>IBM Reference</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.2)"></span>Action Cards</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Black Market — Direction C: Threat Dossier</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+
+/* ═══ TOP BANNER ═══ */
+.banner{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 20px;margin-bottom:16px;
+}
+.banner-icon{
+  width:40px;height:40px;border-radius:10px;background:rgba(255,69,98,0.1);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:8px}
+.banner-title .crit-badge{background:rgba(255,69,98,0.15);color:var(--red);font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:20px;flex-shrink:0}
+.bstat{text-align:center;min-width:60px}
+.bstat-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.bstat-val{font-size:18px;font-weight:800;margin-top:1px}
+.bstat-val.danger{color:var(--red)}
+.bstat-val.warn{color:var(--amber)}
+.bstat-val.ok{color:var(--green)}
+.export-btn{
+  width:36px;height:36px;border-radius:8px;background:rgba(51,65,85,0.3);
+  border:1px solid rgba(51,65,85,0.4);display:flex;align-items:center;
+  justify-content:center;color:var(--muted);cursor:pointer;font-size:14px;
+}
+
+/* ═══ MASTER-DETAIL LAYOUT ═══ */
+.master-detail{display:flex;gap:0;height:calc(100vh - 160px);min-height:600px}
+
+/* LEFT: LISTING PANEL */
+.listing-panel{
+  width:440px;flex-shrink:0;display:flex;flex-direction:column;
+  border:1px solid var(--border);border-radius:12px 0 0 12px;
+  background:var(--card);overflow:hidden;
+}
+.listing-header{padding:12px 14px;border-bottom:1px solid rgba(51,65,85,0.3)}
+.listing-count{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.listing-title{font-size:14px;font-weight:700;margin-top:2px}
+
+/* Time filter */
+.time-pills{display:flex;gap:4px;margin-top:8px}
+.tpill{
+  font-size:8px;font-weight:600;padding:4px 10px;border-radius:5px;
+  border:1px solid rgba(51,65,85,0.3);background:transparent;color:var(--dim);cursor:pointer;
+}
+.tpill.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* Severity + Status filters */
+.filter-row{display:flex;gap:4px;padding:8px 14px;border-bottom:1px solid rgba(51,65,85,0.2);flex-wrap:wrap}
+.fpill{
+  font-size:8px;font-weight:600;padding:3px 10px;border-radius:5px;
+  border:1px solid rgba(51,65,85,0.3);background:transparent;color:var(--dim);cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+}
+.fpill.active{background:rgba(255,69,98,0.1);border-color:rgba(255,69,98,0.25);color:var(--red)}
+.fpill .fdot{width:5px;height:5px;border-radius:50%}
+.fpill-status{margin-left:8px}
+.fpill-status.active{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.25);color:var(--green)}
+
+/* Search */
+.listing-search{
+  margin:8px 14px;padding:7px 10px;border-radius:6px;
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  font-size:9px;color:var(--text);font-family:inherit;outline:none;width:calc(100% - 28px);
+}
+.listing-search::placeholder{color:var(--dim)}
+
+/* Listing items */
+.listing-scroll{flex:1;overflow-y:auto;padding:4px 0}
+.listing-item{
+  display:flex;align-items:stretch;padding:10px 14px;cursor:pointer;
+  border-bottom:1px solid rgba(51,65,85,0.1);position:relative;
+  transition:background 0.15s;
+}
+.listing-item:hover{background:rgba(99,102,241,0.03)}
+.listing-item.selected{background:rgba(99,102,241,0.06)}
+.listing-item.selected::after{
+  content:'';position:absolute;right:0;top:8px;bottom:8px;width:3px;
+  background:var(--indigo);border-radius:3px 0 0 3px;
+}
+
+/* Severity accent bar */
+.severity-bar{width:4px;border-radius:2px;flex-shrink:0;margin-right:10px}
+.sev-critical{background:var(--red)}
+.sev-high{background:var(--amber)}
+.sev-medium{background:#FB923C}
+.sev-low{background:var(--indigo)}
+
+/* Listing thumbnail */
+.listing-thumb{
+  width:48px;height:48px;border-radius:6px;background:rgba(15,23,42,0.6);
+  border:1px solid rgba(51,65,85,0.3);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;margin-right:10px;
+  font-size:8px;color:var(--dim);text-align:center;overflow:hidden;
+}
+
+/* Listing content */
+.listing-content{flex:1;min-width:0}
+.listing-asset{font-size:11px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.listing-asset .sev-tag{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag-crit{background:rgba(255,69,98,0.15);color:var(--red)}
+.tag-high{background:rgba(245,158,11,0.15);color:var(--amber)}
+.tag-med{background:rgba(251,146,60,0.15);color:#FB923C}
+.tag-low{background:rgba(99,102,241,0.12);color:var(--indigo)}
+.listing-meta{font-size:8px;color:var(--dim);margin-top:1px;display:flex;align-items:center;gap:4px}
+.listing-meta .source-badge{background:rgba(51,65,85,0.3);padding:1px 6px;border-radius:3px;font-weight:600;color:#94A3B8}
+.listing-status{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px;margin-top:3px;display:inline-block}
+.status-open{background:rgba(34,197,94,0.1);color:var(--green)}
+.status-closed{background:rgba(99,102,241,0.1);color:var(--indigo)}
+
+/* Price column */
+.listing-price{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;flex-shrink:0;margin-left:8px}
+.price-val{font-size:14px;font-weight:800;color:var(--amber)}
+.price-date{font-size:7px;color:var(--dim);margin-top:2px}
+
+/* Pagination */
+.listing-footer{padding:8px 14px;border-top:1px solid rgba(51,65,85,0.2);display:flex;align-items:center;justify-content:space-between;font-size:8px;color:var(--dim)}
+.page-dots{display:flex;gap:3px}
+.page-dot{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;cursor:pointer;border:1px solid rgba(51,65,85,0.3)}
+.page-dot.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ RIGHT: DETAIL DOSSIER ═══ */
+.dossier{
+  flex:1;min-width:0;display:flex;flex-direction:column;
+  border:1px solid var(--border);border-left:none;border-radius:0 12px 12px 0;
+  background:#0d1321;overflow:hidden;
+}
+.dossier-header{
+  padding:14px 18px;border-bottom:1px solid rgba(51,65,85,0.3);
+  display:flex;justify-content:space-between;align-items:flex-start;
+}
+.dossier-id{font-size:8px;color:var(--dim);letter-spacing:1px;font-weight:700}
+.dossier-title{font-size:18px;font-weight:800;margin-top:2px}
+.dossier-subtitle{font-size:9px;color:var(--muted);margin-top:2px}
+.dossier-sev{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.dossier-sev-badge{font-size:9px;font-weight:700;padding:4px 12px;border-radius:6px}
+.dossier-price-big{font-size:24px;font-weight:800;color:var(--amber)}
+
+/* Tabs */
+.dossier-tabs{display:flex;border-bottom:1px solid rgba(51,65,85,0.3);padding:0 18px}
+.dtab{
+  font-size:9px;font-weight:600;padding:10px 16px;cursor:pointer;
+  color:var(--dim);border-bottom:2px solid transparent;transition:all 0.15s;
+}
+.dtab:hover{color:var(--text)}
+.dtab.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+
+/* Dossier content scroll area */
+.dossier-body{flex:1;overflow-y:auto;padding:18px}
+
+/* Evidence section */
+.evidence-grid{display:flex;gap:10px;margin-bottom:16px}
+.evidence-card{
+  flex:1;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  border-radius:8px;overflow:hidden;
+}
+.evidence-img{
+  height:140px;display:flex;align-items:center;justify-content:center;
+  background:rgba(15,23,42,0.8);color:var(--dim);font-size:9px;text-align:center;
+  border-bottom:1px solid rgba(51,65,85,0.2);
+}
+.evidence-footer{padding:8px 10px;font-size:8px;display:flex;justify-content:space-between;align-items:center}
+.evidence-name{font-weight:600;color:#94A3B8}
+.evidence-size{color:var(--dim)}
+.evidence-dl{color:var(--indigo);font-weight:600;cursor:pointer}
+
+/* Overview grid */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.ov-item{
+  background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);
+  border-radius:7px;padding:10px 12px;
+}
+.ov-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-bottom:3px}
+.ov-value{font-size:11px;font-weight:600}
+.ov-value .mono{font-size:10px}
+.ov-value a{color:var(--indigo);text-decoration:none}
+.ov-value .related-badge{
+  display:inline-block;background:rgba(255,69,98,0.1);color:var(--red);
+  font-size:8px;padding:2px 8px;border-radius:4px;font-weight:600;
+}
+.ov-value .alarm-link{color:var(--red);font-size:9px;display:flex;align-items:center;gap:4px}
+
+/* Related alarms section */
+.related-section{margin-bottom:16px}
+.related-title{font-size:10px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.related-row{
+  display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:9px;
+  background:rgba(15,23,42,0.4);border:1px solid rgba(51,65,85,0.2);
+  border-radius:6px;margin-bottom:4px;
+}
+.related-sev{width:4px;height:24px;border-radius:2px;flex-shrink:0}
+.related-info{flex:1}
+.related-info-title{font-weight:600}
+.related-info-meta{font-size:7px;color:var(--dim);margin-top:1px}
+.related-action{color:var(--indigo);font-size:8px;font-weight:500;cursor:pointer;flex-shrink:0}
+
+/* Listing history */
+.history-row{
+  display:flex;align-items:center;gap:8px;padding:6px 0;font-size:9px;
+  border-bottom:1px solid rgba(51,65,85,0.1);
+}
+.history-row:last-child{border-bottom:none}
+.history-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.history-info{flex:1}
+.history-time{font-size:7px;color:var(--dim);flex-shrink:0}
+
+/* Analytics tab content */
+.analytics-section{margin-bottom:16px}
+.analytics-title{font-size:10px;font-weight:700;margin-bottom:8px}
+.duration-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:8px}
+.duration-name{width:120px;color:#94A3B8;flex-shrink:0}
+.duration-bar{flex:1;height:6px;background:rgba(51,65,85,0.2);border-radius:3px;overflow:hidden}
+.duration-bar-fill{height:100%;border-radius:3px}
+.duration-days{width:30px;text-align:right;font-weight:600;color:var(--muted)}
+.marketplace-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.marketplace-row:last-child{border-bottom:none}
+.marketplace-name{flex:1;font-weight:600}
+.marketplace-bar{width:80px;height:5px;border-radius:3px}
+.marketplace-count{width:20px;text-align:right;font-weight:700}
+.chart-placeholder{
+  height:120px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);
+  border-radius:6px;text-align:center;
+}
+
+/* ═══ LEGEND ═══ */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:24px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+BLACK MARKET PAGE — DIRECTION C: THREAT DOSSIER
+═══════════════════════════════════════════════════════════════════════════════
+
+CONCEPT: Master-detail intelligence workstation.
+- Left: compact but visually rich listing panel with severity accents,
+  thumbnails, inline badges. Stays narrow to give detail pane more room.
+- Right: permanent dossier pane (NOT a slide-out). Always shows the
+  selected listing's full intel: evidence images, metadata, related alarms,
+  listing history, and analytics (via tabs).
+- Analytics (Duration, Timeline, Marketplace) move INTO the dossier
+  as a tab, not separate right-side panels.
+
+INTERACTION MODEL:
+- Click a listing on left → right pane updates to show that listing's dossier
+- Default state: first listing selected
+- Keyboard: arrow up/down to navigate listings, Enter to select
+- The detail pane has tabs: Overview | Evidence | Analytics | History
+
+DATA MODEL:
+BlackMarketListing: {
+  id: string,              // '#31162210'
+  asset_domain: string,    // 'platform.socradar.com'
+  severity: 'critical' | 'high' | 'medium' | 'low',
+  status: 'open' | 'closed',
+  source_marketplace: 'Russian Market' | '2easy Shop' | 'Genesis Market',
+  vendor: string,          // 'd0####ey [platinum]'
+  stealer: string,         // 'rhamadanthys'
+  price_usd: number,
+  date: string,            // ISO date
+  country: string,
+  province: string,
+  isp: string,
+  proof_image_url: string | null,
+  archive_url: string | null,
+  archive_size_mb: number,
+  related_assets: string[],   // monitored assets that match
+  related_alarm_id: string,
+  listing_duration_days: number,
+  history: [{
+    event: 'listed' | 'price_changed' | 'status_changed' | 'relisted',
+    timestamp: string,
+    details: string
+  }]
+}
+
+COMPONENT HIERARCHY:
+BlackMarketPage
+├── TopBanner (KPIs)
+├── MasterDetailLayout
+│   ├── ListingPanel (left, ~35%)
+│   │   ├── ListingHeader (count + title)
+│   │   ├── TimeFilter (pills)
+│   │   ├── SeverityStatusFilter (pills)
+│   │   ├── SearchBar
+│   │   ├── ListingList (scrollable, virtual if >50 items)
+│   │   │   └── ListingItem (severity bar + thumb + content + price)
+│   │   └── Pagination
+│   └── DossierPanel (right, ~65%)
+│       ├── DossierHeader (ID, title, severity, price)
+│       ├── DossierTabs (Overview | Evidence | Analytics | History)
+│       └── DossierBody (tab content)
+│           ├── OverviewTab
+│           │   ├── EvidencePreview (proof image + download)
+│           │   ├── OverviewGrid (metadata key-values)
+│           │   └── RelatedAlarms
+│           ├── EvidenceTab (full proof images, archives)
+│           ├── AnalyticsTab
+│           │   ├── ListingDuration (bar chart)
+│           │   ├── ActiveListingsTimeline (line chart)
+│           │   └── ByMarketplace (breakdown)
+│           └── HistoryTab (timeline of listing events)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">BLACK MARKET &middot; DIRECTION C: THREAT DOSSIER</div>
+
+<!-- ═══════════ TOP BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#128722;</div>
+  <div class="banner-info">
+    <div class="banner-title">BLACK MARKET MONITOR <span class="crit-badge">2 critical listings</span></div>
+    <div class="banner-desc">Tracking your assets across dark web marketplaces and forums</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bstat"><div class="bstat-label">ACTIVE LISTINGS</div><div class="bstat-val">5</div></div>
+    <div class="bstat"><div class="bstat-label">TOTAL VALUE</div><div class="bstat-val warn">$80</div></div>
+    <div class="bstat"><div class="bstat-label">CRITICAL</div><div class="bstat-val danger">2</div></div>
+    <div class="bstat"><div class="bstat-label">UNIQUE ASSETS</div><div class="bstat-val">4</div></div>
+  </div>
+  <div class="export-btn">&#8615;</div>
+</div>
+
+<!-- ═══════════ MASTER-DETAIL ═══════════ -->
+<div class="master-detail">
+
+  <!-- ═══ LEFT: LISTING PANEL ═══ -->
+  <div class="listing-panel">
+    <div class="listing-header">
+      <div class="listing-count">DETECTED LISTINGS</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="listing-title">6 Results</div>
+        <div class="time-pills">
+          <span class="tpill">24h</span>
+          <span class="tpill">7d</span>
+          <span class="tpill">30d</span>
+          <span class="tpill">90d</span>
+          <span class="tpill active">ALL</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <span class="fpill active"><span class="fdot" style="background:var(--text)"></span>All Severity</span>
+      <span class="fpill"><span class="fdot" style="background:var(--red)"></span>Critical</span>
+      <span class="fpill"><span class="fdot" style="background:var(--amber)"></span>High</span>
+      <span class="fpill"><span class="fdot" style="background:#FB923C"></span>Medium</span>
+      <span class="fpill"><span class="fdot" style="background:var(--indigo)"></span>Low</span>
+      <span class="fpill-status fpill active" style="margin-left:6px">All Status</span>
+      <span class="fpill-status fpill">Open</span>
+      <span class="fpill-status fpill">Closed</span>
+    </div>
+
+    <input class="listing-search" type="text" placeholder="Search by asset, source, vendor, or listing ID...">
+
+    <div class="listing-scroll">
+      <!-- Item 1: SELECTED -->
+      <div class="listing-item selected">
+        <div class="severity-bar sev-high"></div>
+        <div class="listing-thumb">
+          <div style="font-size:7px;line-height:1.2">Stealer<br>Preview</div>
+        </div>
+        <div class="listing-content">
+          <div class="listing-asset">
+            platform.socradar.com
+            <span class="sev-tag tag-high">HIGH</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Russian Market</span>
+            <span>&middot;</span>
+            <span>d0####ey [platinum]</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$10</span>
+          <span class="price-date">2025-10-24</span>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="listing-item">
+        <div class="severity-bar sev-medium"></div>
+        <div class="listing-thumb">
+          <div style="font-size:7px;line-height:1.2">Stealer<br>Preview</div>
+        </div>
+        <div class="listing-content">
+          <div class="listing-asset">
+            academy.socradar.io
+            <span class="sev-tag tag-med">MEDIUM</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Russian Market</span>
+            <span>&middot;</span>
+            <span>acreed [Diamond]</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$10</span>
+          <span class="price-date">2025-10-07</span>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="listing-item">
+        <div class="severity-bar sev-critical"></div>
+        <div class="listing-thumb">
+          <div style="font-size:7px;line-height:1.2">Stealer<br>Preview</div>
+        </div>
+        <div class="listing-content">
+          <div class="listing-asset">
+            socradar.com
+            <span class="sev-tag tag-crit">CRITICAL</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Russian Market</span>
+            <span>&middot;</span>
+            <span>kr####ev [Gold]</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$10</span>
+          <span class="price-date">2025-10-03</span>
+        </div>
+      </div>
+
+      <!-- Item 4 -->
+      <div class="listing-item">
+        <div class="severity-bar sev-low"></div>
+        <div class="listing-thumb">
+          <div style="font-size:7px;line-height:1.2">Stealer<br>Preview</div>
+        </div>
+        <div class="listing-content">
+          <div class="listing-asset">
+            fastpay.co.id
+            <span class="sev-tag tag-low">LOW</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">2easy Shop</span>
+            <span>&middot;</span>
+            <span>auto_shop [Silver]</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$10</span>
+          <span class="price-date">2025-10-03</span>
+        </div>
+      </div>
+
+      <!-- Item 5 -->
+      <div class="listing-item">
+        <div class="severity-bar sev-high"></div>
+        <div class="listing-thumb">
+          <div style="font-size:7px;line-height:1.2">Stealer<br>Preview</div>
+        </div>
+        <div class="listing-content">
+          <div class="listing-asset">
+            platform.socradar.com
+            <span class="sev-tag tag-high">HIGH</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Russian Market</span>
+            <span>&middot;</span>
+            <span>t3####st [Diamond]</span>
+          </div>
+          <span class="listing-status status-closed" style="background:rgba(99,102,241,0.1);color:var(--indigo)">&#9679; CLOSED</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$15</span>
+          <span class="price-date">2025-09-28</span>
+        </div>
+      </div>
+
+      <!-- Item 6 -->
+      <div class="listing-item">
+        <div class="severity-bar sev-critical"></div>
+        <div class="listing-thumb">
+          <div style="font-size:7px;line-height:1.2">Stealer<br>Preview</div>
+        </div>
+        <div class="listing-content">
+          <div class="listing-asset">
+            socradar.com
+            <span class="sev-tag tag-crit">CRITICAL</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Genesis Market</span>
+            <span>&middot;</span>
+            <span>b1####ck [platinum]</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$25</span>
+          <span class="price-date">2025-09-22</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="listing-footer">
+      <span>Showing 1&ndash;6 of 6</span>
+      <div class="page-dots">
+        <span class="page-dot">&lsaquo;</span>
+        <span class="page-dot active">1</span>
+        <span class="page-dot">&rsaquo;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT: DOSSIER PANEL ═══ -->
+  <div class="dossier">
+    <div class="dossier-header">
+      <div>
+        <div class="dossier-id">#31162210 &middot; BLACK MARKET LISTING</div>
+        <div class="dossier-title">platform.socradar.com</div>
+        <div class="dossier-subtitle">Russian Market &middot; d0####ey [platinum] &middot; Listed 2025-10-24</div>
+      </div>
+      <div class="dossier-sev">
+        <span class="dossier-sev-badge" style="background:rgba(245,158,11,0.15);color:var(--amber)">&#9679; HIGH</span>
+        <span class="dossier-price-big">$10.00</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="dossier-tabs">
+      <span class="dtab active">Overview</span>
+      <span class="dtab">Evidence</span>
+      <span class="dtab">Analytics</span>
+      <span class="dtab">History</span>
+    </div>
+
+    <!-- ═══ OVERVIEW TAB ═══ -->
+    <div class="dossier-body">
+
+      <!-- Evidence preview -->
+      <div class="evidence-grid">
+        <div class="evidence-card">
+          <div class="evidence-img">
+            <div>Stealer log screenshot<br><span style="color:var(--faint);font-size:8px">archive.zip &mdash; 3.78Mb</span></div>
+          </div>
+          <div class="evidence-footer">
+            <span class="evidence-name">Proof Image</span>
+            <span class="evidence-dl">&#8615; Download</span>
+          </div>
+        </div>
+        <div class="evidence-card">
+          <div class="evidence-img">
+            <div>Raw data preview<br><span style="color:var(--faint);font-size:8px">Credentials &middot; cookies &middot; autofill</span></div>
+          </div>
+          <div class="evidence-footer">
+            <span class="evidence-name">archive.zip</span>
+            <span class="evidence-size">3.78Mb</span>
+            <span class="evidence-dl">&#8615; $10.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview metadata grid -->
+      <div class="overview-grid">
+        <div class="ov-item">
+          <div class="ov-label">SOURCE</div>
+          <div class="ov-value">Russian Market</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">RELATED ASSETS</div>
+          <div class="ov-value"><span class="related-badge">platform.socradar.com</span></div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">RELATED ALARM</div>
+          <div class="ov-value"><span class="alarm-link">&#9679; #77981809 &#8599;</span></div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">COUNTRY</div>
+          <div class="ov-value">Dominican Republic (DO)</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">PROVINCE</div>
+          <div class="ov-value">Santiago Province</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">DATE LISTED</div>
+          <div class="ov-value">2025-10-24</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">STEALER</div>
+          <div class="ov-value mono">rhamadanthys</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">VENDOR</div>
+          <div class="ov-value mono">d0####ey [platinum]</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">ISP</div>
+          <div class="ov-value" style="font-size:9px">Compania Dominicana de Telefonos S.A.</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-label">LISTING DURATION</div>
+          <div class="ov-value"><span style="color:var(--red);font-weight:800">33 days</span> active</div>
+        </div>
+      </div>
+
+      <!-- Related Alarms -->
+      <div class="related-section">
+        <div class="related-title">&#128276; Related Alarms <span style="font-size:8px;color:var(--dim);font-weight:400">for this asset</span></div>
+        <div class="related-row">
+          <div class="related-sev" style="background:var(--red)"></div>
+          <div class="related-info">
+            <div class="related-info-title">Credential found in stealer log</div>
+            <div class="related-info-meta">platform.socradar.com &middot; Russian Market &middot; 2h ago</div>
+          </div>
+          <span class="related-action">View &rarr;</span>
+        </div>
+        <div class="related-row">
+          <div class="related-sev" style="background:var(--amber)"></div>
+          <div class="related-info">
+            <div class="related-info-title">Domain mentioned in dark web forum</div>
+            <div class="related-info-meta">platform.socradar.com &middot; XSS Forum &middot; 1d ago</div>
+          </div>
+          <span class="related-action">View &rarr;</span>
+        </div>
+        <div class="related-row">
+          <div class="related-sev" style="background:var(--amber)"></div>
+          <div class="related-info">
+            <div class="related-info-title">VPN access listing detected</div>
+            <div class="related-info-meta">socradar.com network &middot; IAB Monitor &middot; 3d ago</div>
+          </div>
+          <span class="related-action">View &rarr;</span>
+        </div>
+      </div>
+
+      <!-- Listing History (inline preview) -->
+      <div class="related-section">
+        <div class="related-title">&#128337; Listing Activity</div>
+        <div class="history-row">
+          <div class="history-dot" style="background:var(--red)"></div>
+          <div class="history-info"><strong>Listed</strong> on Russian Market at $10.00</div>
+          <span class="history-time">Oct 24, 2025</span>
+        </div>
+        <div class="history-row">
+          <div class="history-dot" style="background:var(--amber)"></div>
+          <div class="history-info">Vendor <strong>verified</strong> as platinum seller</div>
+          <span class="history-time">Oct 25, 2025</span>
+        </div>
+        <div class="history-row">
+          <div class="history-dot" style="background:var(--indigo)"></div>
+          <div class="history-info">SOCRadar <strong>detected</strong> &amp; generated alarm #77981809</div>
+          <span class="history-time">Oct 25, 2025</span>
+        </div>
+        <div class="history-row">
+          <div class="history-dot" style="background:var(--dim)"></div>
+          <div class="history-info">Still <strong>active</strong> after 33 days</div>
+          <span class="history-time">Today</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE &middot; DIRECTION C: THREAT DOSSIER</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3)"></span>Top Banner (KPIs)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Left ~35%: Listing Panel</span>
+    <span><span class="lsw" style="background:rgba(13,19,33,1);border:1px solid rgba(51,65,85,0.4)"></span>Right ~65%: Dossier Panel</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.15)"></span>Tab: Overview (shown)</span>
+    <span><span class="lsw" style="background:rgba(168,85,247,0.15)"></span>Tab: Evidence | Analytics | History</span>
+  </div>
+</div>
+
+</body>
+</html>

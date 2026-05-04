@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import DemoNotice from "../components/DemoNotice";
 
 // ── Trending Insights (dummy) ──
 const TRENDING = [
@@ -124,7 +125,7 @@ const TAB_TYPE_MAP = {
 // ── Category tabs ──
 const TABS = [
   { key: "all", label: "All Results", count: null, icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" },
-  { key: "stealer", label: "Stealer Logs", count: null, color: "#E8463A" },
+  { key: "stealer", label: "Stealer Logs", count: null, color: "#FF4562" },
   { key: "breach", label: "Breach Datasets", count: null, color: "#A855F7" },
   { key: "exposed", label: "Exposed Raw Data", count: null, color: "#F59E0B" },
   { key: "buckets", label: "Public Buckets", count: null, color: "#3B82F6" },
@@ -133,7 +134,7 @@ const TABS = [
 
 // ── Source colors ──
 const SRC_DOT = {
-  "Github Gist": "#E8463A",
+  "Github Gist": "#FF4562",
   "Telegram": "#3B82F6",
   "Breach Dataset": "#A855F7",
   "Pastebin": "#F59E0B",
@@ -188,6 +189,7 @@ export default function DarkWebSearch() {
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative", minHeight: "calc(100vh - 60px)" }}>
+      <DemoNotice />
 
       {!searched ? (
         /* ═══ LANDING STATE ═══ */
@@ -203,10 +205,10 @@ export default function DarkWebSearch() {
               <ellipse cx="26" cy="26" rx="12" ry="22" stroke={t.text15} strokeWidth="1" />
               <line x1="4" y1="26" x2="48" y2="26" stroke={t.borderMed} strokeWidth="0.8" />
               <line x1="26" y1="4" x2="26" y2="48" stroke={t.borderMed} strokeWidth="0.8" />
-              <circle cx="26" cy="26" r="4" fill="none" stroke="#E8463A" strokeWidth="1.5" opacity="0.6" />
+              <circle cx="26" cy="26" r="4" fill="none" stroke="#FF4562" strokeWidth="1.5" opacity="0.6" />
             </svg>
-            <span className="hfont" style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>
-              Dark Web <span style={{ color: "#E8463A" }}>Search Engine</span>
+            <span className="hfont" style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.03em" }}>
+              Dark Web <span style={{ color: "#FF4562" }}>Search Engine</span>
             </span>
           </div>
 
@@ -227,7 +229,7 @@ export default function DarkWebSearch() {
               onKeyDown={e => e.key === "Enter" && doSearch()}
               placeholder="Search for Keywords, IP Addresses, Email Addresses, Domains, Hashes, URLs ..."
               style={{
-                flex: 1, padding: "12px 0", fontSize: 14, fontFamily: "'Satoshi',sans-serif",
+                flex: 1, padding: "12px 0", fontSize: 14, fontFamily: "'Inter', sans-serif",
                 background: "transparent", border: "none", color: t.textInverse, outline: "none",
               }}
             />
@@ -240,9 +242,9 @@ export default function DarkWebSearch() {
               onClick={doSearch}
               style={{
                 width: 44, height: 44, borderRadius: 12, border: "none",
-                background: "#E8463A", cursor: "pointer",
+                background: "#FF4562", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(232,70,58,0.3)", flexShrink: 0,
+                boxShadow: "0 2px 8px rgba(255,69,98,0.3)", flexShrink: 0,
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
@@ -267,14 +269,14 @@ export default function DarkWebSearch() {
                     background: t.bgInput, border: `1px solid ${t.border}`,
                     cursor: "pointer", transition: "all 0.2s",
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(232,70,58,0.15)"; e.currentTarget.style.background = t.border; }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,69,98,0.15)"; e.currentTarget.style.background = t.border; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.background = t.bgInput; }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                     <svg width="22" height="22" viewBox="0 0 28 28">
-                      <circle cx="14" cy="14" r="10" fill="none" stroke="#E8463A" strokeWidth="1.2" opacity="0.5" />
-                      <circle cx="14" cy="14" r="4.5" fill="#E8463A" opacity="0.7" />
-                      <circle cx="14" cy="14" r="1.5" fill="#0C1021" />
+                      <circle cx="14" cy="14" r="10" fill="none" stroke="#FF4562" strokeWidth="1.2" opacity="0.5" />
+                      <circle cx="14" cy="14" r="4.5" fill="#FF4562" opacity="0.7" />
+                      <circle cx="14" cy="14" r="1.5" fill={t.bgBase} />
                     </svg>
                     <span style={{ fontSize: 12, fontWeight: 600, color: t.text70 }}>{item.domain}</span>
                   </div>
@@ -338,7 +340,7 @@ export default function DarkWebSearch() {
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && doSearch()}
                 style={{
-                  flex: 1, padding: "8px 0", fontSize: 13, fontFamily: "'Satoshi',sans-serif",
+                  flex: 1, padding: "8px 0", fontSize: 13, fontFamily: "'Inter', sans-serif",
                   background: "transparent", border: "none", color: t.text, outline: "none",
                 }}
               />
@@ -349,7 +351,7 @@ export default function DarkWebSearch() {
               )}
               <button onClick={doSearch} style={{
                 width: 34, height: 34, borderRadius: 8, border: "none",
-                background: "#E8463A", cursor: "pointer",
+                background: "#FF4562", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
@@ -364,14 +366,14 @@ export default function DarkWebSearch() {
               <div style={{ padding: "8px 16px", borderRadius: 10, background: t.bgInput, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 10 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.text30} strokeWidth="1.5"><rect x="2" y="3" width="20" height="18" rx="2" /><path d="M2 8h20" /></svg>
                 <div>
-                  <div className="hfont" style={{ fontSize: 14, fontWeight: 800, color: t.text }}>8</div>
+                  <div className="hfont" style={{ fontSize: 14, fontWeight: 700, color: t.text }}>8</div>
                   <div style={{ fontSize: 9, color: t.text30 }}>Remaining Decks</div>
                 </div>
               </div>
               <div style={{ padding: "8px 16px", borderRadius: 10, background: t.bgInput, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 10 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="1.5"><path d="M18.178 8c5.096 0 5.096 8 0 8M5.822 8c-5.096 0-5.096 8 0 8" /><path d="M18 8c-5 0-5 8 0 8M6 8c5 0 5 8 0 8" /></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="1.5"><path d="M18.178 8c5.096 0 5.096 8 0 8M5.822 8c-5.096 0-5.096 8 0 8" /><path d="M18 8c-5 0-5 8 0 8M6 8c5 0 5 8 0 8" /></svg>
                 <div>
-                  <div className="hfont" style={{ fontSize: 14, fontWeight: 800, color: t.text }}>Remaining Credit</div>
+                  <div className="hfont" style={{ fontSize: 14, fontWeight: 700, color: t.text }}>Remaining Credit</div>
                 </div>
               </div>
             </div>
@@ -391,10 +393,10 @@ export default function DarkWebSearch() {
                   style={{
                     padding: "10px 16px", border: "none", cursor: "pointer",
                     background: "transparent",
-                    borderBottom: activeTab === tab.key ? "2px solid #E8463A" : "2px solid transparent",
+                    borderBottom: activeTab === tab.key ? "2px solid #FF4562" : "2px solid transparent",
                     color: activeTab === tab.key ? t.text : t.text35,
                     fontSize: 12, fontWeight: activeTab === tab.key ? 600 : 400,
-                    fontFamily: "'Satoshi',sans-serif", transition: "all 0.15s",
+                    fontFamily: "'Inter', sans-serif", transition: "all 0.15s",
                     display: "flex", alignItems: "center", gap: 6,
                   }}
                 >
@@ -403,8 +405,8 @@ export default function DarkWebSearch() {
                   {count > 0 && (
                     <span style={{
                       padding: "1px 6px", borderRadius: 4, fontSize: 9, fontWeight: 600,
-                      background: tab.color ? `${tab.color}18` : "rgba(232,70,58,0.12)",
-                      color: tab.color || "#E8463A",
+                      background: tab.color ? `${tab.color}18` : "rgba(255,69,98,0.12)",
+                      color: tab.color || "#FF4562",
                       fontFamily: "'JetBrains Mono',monospace",
                     }}>{count}</span>
                   )}
@@ -423,11 +425,11 @@ export default function DarkWebSearch() {
               onClick={cycleSource}
               style={{
                 padding: "7px 14px", borderRadius: 8,
-                border: activeSource !== "all" ? "1px solid rgba(232,70,58,0.25)" : `1px solid ${t.borderLight}`,
-                background: activeSource !== "all" ? "rgba(232,70,58,0.06)" : t.bgCard,
+                border: activeSource !== "all" ? "1px solid rgba(255,69,98,0.25)" : `1px solid ${t.borderLight}`,
+                background: activeSource !== "all" ? "rgba(255,69,98,0.06)" : t.bgCard,
                 color: activeSource !== "all" ? t.text70 : t.text40,
                 fontSize: 11, cursor: "pointer",
-                fontFamily: "'Satoshi',sans-serif", display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 6,
               }}
             >
               Source
@@ -446,7 +448,7 @@ export default function DarkWebSearch() {
                 padding: "7px 14px", borderRadius: 8,
                 border: `1px solid ${t.borderLight}`, background: t.bgCard,
                 color: t.text40, fontSize: 11, cursor: "pointer",
-                fontFamily: "'Satoshi',sans-serif", display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 6,
               }}>
                 {f.label}
                 {f.value && <span className="mono" style={{ fontSize: 9, color: t.text25 }}>({f.value})</span>}
@@ -481,10 +483,10 @@ export default function DarkWebSearch() {
                   className="glass"
                   style={{
                     padding: "18px 20px", cursor: "pointer", transition: "all 0.2s",
-                    borderLeft: selectedResult?.id === r.id ? "3px solid #E8463A" : "3px solid transparent",
-                    background: selectedResult?.id === r.id ? "rgba(232,70,58,0.03)" : undefined,
+                    borderLeft: selectedResult?.id === r.id ? "3px solid #FF4562" : "3px solid transparent",
+                    background: selectedResult?.id === r.id ? "rgba(255,69,98,0.03)" : undefined,
                   }}
-                  onMouseEnter={e => { if (selectedResult?.id !== r.id) e.currentTarget.style.borderColor = "rgba(232,70,58,0.15)"; }}
+                  onMouseEnter={e => { if (selectedResult?.id !== r.id) e.currentTarget.style.borderColor = "rgba(255,69,98,0.15)"; }}
                   onMouseLeave={e => { if (selectedResult?.id !== r.id) e.currentTarget.style.borderColor = "transparent"; }}
                 >
                   {/* Title */}
@@ -493,7 +495,7 @@ export default function DarkWebSearch() {
                   </div>
                   {/* Source + Date */}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: SRC_DOT[r.source] || "#E8463A" }} />
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: SRC_DOT[r.source] || "#FF4562" }} />
                     <span style={{ fontSize: 11, color: t.text40 }}>{r.source}</span>
                     <span style={{ fontSize: 11, color: t.text25 }}>-</span>
                     <span className="mono" style={{ fontSize: 10, color: t.text25 }}>{r.date}</span>
@@ -509,7 +511,7 @@ export default function DarkWebSearch() {
                     ))}
                   </div>
                   {/* Highlighted domain */}
-                  <div style={{ fontSize: 11, color: "#E8463A", marginBottom: 8 }}>{r.highlight}</div>
+                  <div style={{ fontSize: 11, color: "#FF4562", marginBottom: 8 }}>{r.highlight}</div>
                   {/* Snippet */}
                   <pre style={{
                     fontSize: 11, fontFamily: "'JetBrains Mono',monospace",
@@ -548,18 +550,18 @@ export default function DarkWebSearch() {
                   <div style={{ position: "relative", marginBottom: 10 }}>
                     <svg width="100" height="100" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="40" fill="none" stroke={t.borderSection} strokeWidth="8" />
-                      <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fill={t.text} fontSize="22" fontWeight="800" fontFamily="'Plus Jakarta Sans'">0</text>
+                      <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fill={t.text} fontSize="22" fontWeight="800" fontFamily="'Red Hat Display'">0</text>
                     </svg>
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <span style={{ fontSize: 13, color: "#E8463A", fontWeight: 600 }}>{query || "socradar.io"}</span>
+                    <span style={{ fontSize: 13, color: "#FF4562", fontWeight: 600 }}>{query || "socradar.io"}</span>
                     <span style={{ fontSize: 11, color: t.text30, marginLeft: 6 }}>(Whitelisted)</span>
                   </div>
                   <button style={{
                     marginTop: 12, padding: "8px 18px", borderRadius: 8, border: "none",
-                    background: "#E8463A", color: "#fff", fontSize: 11, fontWeight: 600,
-                    cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
-                    boxShadow: "0 2px 8px rgba(232,70,58,0.3)",
+                    background: "#FF4562", color: "#fff", fontSize: 11, fontWeight: 600,
+                    cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                    boxShadow: "0 2px 8px rgba(255,69,98,0.3)",
                   }}>Investigate on IoC Enrichment</button>
                 </div>
 

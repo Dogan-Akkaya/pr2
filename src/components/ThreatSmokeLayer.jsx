@@ -1,5 +1,20 @@
 import { useEffect, useRef } from "react";
 import { TL } from "../data/threat-levels";
+import { useTheme } from "../context/ThemeContext";
+
+// Parse "#RRGGBB" or "rgb(...)" to [r,g,b]
+function parseRGB(color) {
+  if (!color) return [12, 16, 33];
+  if (color.startsWith("#")) {
+    const h = color.slice(1);
+    const v = h.length === 3
+      ? h.split("").map((c) => parseInt(c + c, 16))
+      : [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+    return v;
+  }
+  const m = color.match(/\d+/g);
+  return m ? [+m[0], +m[1], +m[2]] : [12, 16, 33];
+}
 
 // HSL ranges per threat level for the smoke particles
 const THREAT_HSL = {
@@ -20,6 +35,7 @@ function noise(x, y, t) {
 }
 
 export default function ThreatSmokeLayer({ threatLevel = "critical", originY = 200 }) {
+  const { t, mode } = useTheme();
   const canvasRef = useRef(null);
   const animRef = useRef(null);
   const smokeRef = useRef([]);
@@ -28,6 +44,10 @@ export default function ThreatSmokeLayer({ threatLevel = "critical", originY = 2
   const waveRef = useRef(0);
   const threatRef = useRef(threatLevel);
   const prevThreatRef = useRef(threatLevel);
+  const bgRef = useRef(parseRGB(t.bgBase));
+
+  // Keep bgRef synced with theme so the running animation picks up toggles
+  useEffect(() => { bgRef.current = parseRGB(t.bgBase); }, [t.bgBase]);
 
   // When threat level changes, mark old particles for fast kill
   useEffect(() => {
@@ -202,21 +222,23 @@ export default function ThreatSmokeLayer({ threatLevel = "critical", originY = 2
       }
     }
 
-    // Initial fill
-    ctx.fillStyle = "#0C1021";
+    // Initial fill (theme-aware base)
+    const [br0, bg0, bb0] = bgRef.current;
+    ctx.fillStyle = `rgb(${br0},${bg0},${bb0})`;
     ctx.fillRect(0, 0, W, H);
 
     const draw = () => {
       frameRef.current++;
       const ft = frameRef.current;
 
-      // Trail rendering
-      ctx.fillStyle = "rgba(12,16,33,0.055)";
+      // Trail rendering — theme-aware: wash with current bgBase
+      const [br, bg, bb] = bgRef.current;
+      ctx.fillStyle = `rgba(${br},${bg},${bb},0.055)`;
       ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(12,16,33,0.02)";
+      ctx.fillStyle = `rgba(${br},${bg},${bb},0.02)`;
       ctx.fillRect(0, 0, W, H * 0.5);
-      if (ft % 90 === 0) { ctx.fillStyle = "rgba(12,16,33,0.05)"; ctx.fillRect(0, 0, W, H * 0.4); }
-      if (ft % 140 === 0) { ctx.fillStyle = "rgba(12,16,33,0.06)"; ctx.fillRect(0, 0, W, H); }
+      if (ft % 90 === 0) { ctx.fillStyle = `rgba(${br},${bg},${bb},0.05)`; ctx.fillRect(0, 0, W, H * 0.4); }
+      if (ft % 140 === 0) { ctx.fillStyle = `rgba(${br},${bg},${bb},0.06)`; ctx.fillRect(0, 0, W, H); }
 
       // Fog
       if (Math.random() < 0.06) spawnFog();
@@ -297,7 +319,7 @@ export default function ThreatSmokeLayer({ threatLevel = "critical", originY = 2
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [originY]);
+  }, [originY, mode]);
 
   return (
     <canvas

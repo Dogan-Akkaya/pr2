@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, stickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
 
@@ -27,14 +28,14 @@ const TOP_LEAKS_COUNTRY = [
 
 // ── Record Statuses ──
 const RECORD_STATUS = [
-  { label: "Open", count: 123, color: "#E8463A" },
+  { label: "Open", count: 123, color: "#FF4562" },
   { label: "On Hold", count: 0, color: "#F59E0B" },
   { label: "Closed", count: 0, color: "#3B82F6" },
 ];
 
 // ── Expiration Status ──
 const EXPIRY_STATUS = [
-  { label: "Expired", count: 64, color: "#E8463A" },
+  { label: "Expired", count: 64, color: "#FF4562" },
   { label: "Not Expired", count: 59, color: "#3B82F6" },
 ];
 
@@ -48,19 +49,19 @@ const CSV_COLS = [
 ];
 
 // ── Mini Donut ──
-function MiniDonut({ segments, size = 110 }) {
+function MiniDonut({ segments, size = 110, t }) {
   const total = segments.reduce((s, seg) => s + seg.count, 0);
   let cumulative = 0;
   const r = 40, circ = 2 * Math.PI * r;
   return (
     <svg width={size} height={size} viewBox="0 0 110 110">
-      <circle cx="55" cy="55" r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="14" />
+      <circle cx="55" cy="55" r={r} fill="none" stroke={t?.borderSection || "rgba(255,255,255,0.04)"} strokeWidth="14" />
       {segments.map((seg, i) => {
         const pct = total > 0 ? seg.count / total : 0;
         const offset = cumulative; cumulative += pct;
         return <circle key={i} cx="55" cy="55" r={r} fill="none" stroke={seg.color} strokeWidth="14" strokeDasharray={`${pct * circ} ${circ}`} strokeDashoffset={-offset * circ} transform="rotate(-90 55 55)" />;
       })}
-      <text x="55" y="53" textAnchor="middle" dominantBaseline="central" fill="#E8ECF1" fontSize="16" fontWeight="800" fontFamily="'Plus Jakarta Sans'">{total}</text>
+      <text x="55" y="53" textAnchor="middle" dominantBaseline="central" fill={t?.text || "#E8ECF1"} fontSize="16" fontWeight="800" fontFamily="'Red Hat Display'">{total}</text>
     </svg>
   );
 }
@@ -68,6 +69,7 @@ function MiniDonut({ segments, size = 110 }) {
 // ═══════════════════════════════════════
 export default function FinancialIntelligence() {
   const { t } = useTheme();
+  const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
@@ -97,6 +99,31 @@ export default function FinancialIntelligence() {
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
+      {/* ═══ DEEP-DIVE BREADCRUMB (entered from Fraud Intelligence) ═══ */}
+      <div style={{
+        padding: "10px 16px",
+        background: "rgba(245,158,11,0.06)",
+        border: "1px solid rgba(245,158,11,0.18)",
+        borderRadius: 8,
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+        animation: loaded ? "fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+          <span className="mono" style={{ fontSize: 9, color: "#F59E0B", letterSpacing: "0.10em", fontWeight: 700 }}>CARD DATABASE — DEEP DIVE</span>
+          <span style={{ fontSize: 11, color: t.text50 }}>Compromised-card operational view, drilled in from Fraud Intelligence's tracked BINs.</span>
+        </div>
+        <span
+          onClick={() => navigate("/fraud-intelligence")}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            fontSize: 10, color: "#F59E0B", cursor: "pointer", fontWeight: 700,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}>
+          ← Back to Fraud Intelligence
+        </span>
+      </div>
+
       {/* ═══ TOP STATS ═══ */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
         {/* Top Leaks by Country — horizontal bar chart */}
@@ -122,7 +149,7 @@ export default function FinancialIntelligence() {
         <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
           <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Record Statuses</div>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <MiniDonut segments={RECORD_STATUS} />
+            <MiniDonut segments={RECORD_STATUS} t={t} />
             <div style={{ flex: 1 }}>
               {RECORD_STATUS.map((s, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -139,7 +166,7 @@ export default function FinancialIntelligence() {
         <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
           <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Expiration Status</div>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <MiniDonut segments={EXPIRY_STATUS} />
+            <MiniDonut segments={EXPIRY_STATUS} t={t} />
             <div style={{ flex: 1 }}>
               {EXPIRY_STATUS.map((s, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -163,7 +190,7 @@ export default function FinancialIntelligence() {
           </div>
           <div style={{ position: "relative", flex: 1 }}>
             <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search by card number, country, or issuer..." style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Satoshi',sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search by card number, country, or issuer..." style={{ width: "100%", padding: "10px 14px 10px 36px", fontSize: 12, fontFamily: "'Inter', sans-serif", background: t.bgInput, border: `1px solid ${t.borderLight}`, borderRadius: 10, color: t.text, outline: "none" }} />
           </div>
           <div style={{ display: "flex", gap: 4 }}>
             {["all", "open", "closed"].map(s => (
@@ -195,17 +222,17 @@ export default function FinancialIntelligence() {
             style={{
               display: "grid", gridTemplateColumns: "28px 1fr 60px 80px 70px 100px 80px 40px",
               gap: 8, alignItems: "center", padding: "12px 20px", cursor: "pointer",
-              background: sel.isSelected(card.id) ? "rgba(232,70,58,0.06)" : selectedId === card.id ? "rgba(232,70,58,0.04)" : undefined,
-              borderLeft: selectedId === card.id ? "3px solid #E8463A" : "3px solid transparent",
+              background: sel.isSelected(card.id) ? "rgba(255,69,98,0.06)" : selectedId === card.id ? "rgba(255,69,98,0.04)" : undefined,
+              borderLeft: selectedId === card.id ? "3px solid #FF4562" : "3px solid transparent",
             }}
           >
             <Checkbox checked={sel.isSelected(card.id)} onChange={() => sel.toggle(card.id)} />
             <CopyCell value={card.cardNumber} style={{ fontSize: 12, color: t.text60, letterSpacing: "0.02em", fontFamily: "'JetBrains Mono',monospace" }} />
             <span className="mono" style={{ fontSize: 11, color: t.text35 }}>{card.cvv}</span>
             <span className="mono" style={{ fontSize: 11, color: t.text35 }}>{card.expireDate}</span>
-            <span className="tag" style={{ background: card.status === "Open" ? "rgba(22,163,74,0.08)" : "rgba(255,255,255,0.04)", color: card.status === "Open" ? "#16A34A" : "rgba(232,236,241,0.3)", fontSize: 9, display: "inline-flex", alignItems: "center", gap: 3 }}>{card.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
+            <span className="tag" style={{ background: card.status === "Open" ? "rgba(22,163,74,0.08)" : t.bgHover, color: card.status === "Open" ? "#16A34A" : t.text30, fontSize: 9, display: "inline-flex", alignItems: "center", gap: 3 }}>{card.status} <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
             <TimeCell date={card.discoveryDate} />
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#E8463A", fontSize: 9, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#FF4562", fontSize: 9, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
             <RowChevron />
           </div>
         ))}

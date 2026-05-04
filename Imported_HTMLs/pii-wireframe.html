@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PII Exposure — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section{margin-bottom:20px}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.pn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ BANNER ═══ */
+.banner{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 20px;margin-bottom:18px;
+}
+.banner-icon{width:40px;height:40px;border-radius:10px;background:rgba(255,69,98,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:8px}
+.banner-title .crit{background:rgba(255,69,98,0.15);color:var(--red);font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:20px;flex-shrink:0}
+.bs{text-align:center;min-width:60px}
+.bs-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.bs-val{font-size:18px;font-weight:800;margin-top:1px}
+
+/* ═══ PII CATEGORY CARDS ═══ */
+.pii-grid{display:flex;gap:8px;margin-bottom:18px}
+.pii-card{
+  flex:1;border-radius:10px;padding:14px;position:relative;overflow:hidden;cursor:pointer;
+  transition:all 0.15s;border:1px solid transparent;
+}
+.pii-card:hover{transform:translateY(-2px)}
+.pii-card.active{border-color:rgba(255,255,255,0.15)}
+.pii-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;border-radius:10px 10px 0 0}
+
+/* Severity tiers */
+.tier-critical{background:rgba(255,69,98,0.08)}.tier-critical::before{background:var(--red)}
+.tier-critical .pii-val{color:var(--red)}
+.tier-high{background:rgba(245,158,11,0.06)}.tier-high::before{background:var(--amber)}
+.tier-high .pii-val{color:var(--amber)}
+.tier-medium{background:rgba(99,102,241,0.06)}.tier-medium::before{background:var(--indigo)}
+.tier-medium .pii-val{color:var(--indigo)}
+.tier-low{background:rgba(51,65,85,0.15)}.tier-low::before{background:var(--faint)}
+
+.pii-tier{font-size:7px;font-weight:700;letter-spacing:1px;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.pii-tier .dot{width:5px;height:5px;border-radius:50%}
+.pii-icon{font-size:16px;margin-bottom:6px}
+.pii-val{font-size:22px;font-weight:800}
+.pii-name{font-size:9px;font-weight:700;margin-top:2px}
+.pii-desc{font-size:7px;color:var(--dim);margin-top:3px;line-height:1.3}
+.pii-price{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:1px solid rgba(51,65,85,0.2);font-size:8px}
+.pii-price-label{color:var(--dim)}
+.pii-price-val{color:var(--amber);font-weight:700}
+.pii-trend{font-size:8px;margin-top:4px;font-weight:600}
+
+/* ═══ SEVERITY CONTEXT BAR ═══ */
+.severity-context{
+  background:rgba(255,69,98,0.04);border:1px solid rgba(255,69,98,0.1);
+  border-radius:10px;padding:14px 18px;margin-bottom:18px;
+  display:flex;align-items:center;gap:16px;
+}
+.sev-icon{font-size:22px;flex-shrink:0}
+.sev-text{flex:1;font-size:10px;line-height:1.5}
+.sev-text strong{color:var(--red)}
+.sev-text .source{font-size:8px;color:var(--dim);margin-top:2px;display:block}
+
+/* ═══ DETAIL SECTIONS ═══ */
+.detail-grid{display:flex;gap:12px;margin-bottom:18px}
+.detail-col{flex:1;min-width:0}
+
+/* SSN / National ID Detail */
+.ssn-panel{
+  background:var(--card);border:1px solid rgba(255,69,98,0.2);
+  border-radius:10px;padding:16px;margin-bottom:12px;position:relative;
+}
+.ssn-panel::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red);border-radius:10px 0 0 10px}
+.ssn-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.ssn-title{font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px}
+.ssn-badge{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(255,69,98,0.15);color:var(--red)}
+.ssn-subtitle{font-size:8px;color:var(--dim);margin-top:2px}
+.ssn-stat-row{display:flex;gap:8px;margin-bottom:10px}
+.ssn-stat{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:6px;padding:8px 12px;flex:1;text-align:center}
+.ssn-stat-val{font-size:18px;font-weight:800}
+.ssn-stat-label{font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;margin-top:1px}
+.ssn-list{font-size:9px}
+.ssn-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(51,65,85,0.1)}
+.ssn-row:last-child{border-bottom:none}
+.ssn-type-badge{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600;min-width:50px;text-align:center;flex-shrink:0}
+.ssn-masked{font-family:'JetBrains Mono',monospace;font-size:9px;flex:1}
+.ssn-source{font-size:7px;color:var(--dim);flex-shrink:0}
+.ssn-date{font-size:7px;color:var(--dim);flex-shrink:0;width:60px;text-align:right}
+
+/* Generic detail panel */
+.detail-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.dp-badge{font-size:7px;font-weight:700;padding:2px 8px;border-radius:4px}
+.dp-count{font-size:9px;color:var(--muted)}
+.dp-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.dp-row:last-child{border-bottom:none}
+.dp-val{font-family:'JetBrains Mono',monospace;font-size:9px;flex:1}
+.dp-status{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.dp-meta{font-size:7px;color:var(--dim)}
+
+/* Timeline */
+.chart-ph{
+  height:90px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);
+  border-radius:6px;text-align:center;
+}
+
+/* Most Exposed */
+.exposed-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(51,65,85,0.1)}
+.exposed-row:last-child{border-bottom:none}
+.exposed-rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.exposed-info{flex:1}
+.exposed-email{font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.exposed-meta{font-size:7px;color:var(--dim);margin-top:1px}
+.exposed-types{display:flex;gap:3px;margin-top:3px}
+.exposed-type{font-size:6px;padding:2px 5px;border-radius:3px;font-weight:600}
+.exposed-strength{font-size:7px;padding:2px 8px;border-radius:4px;font-weight:700;flex-shrink:0}
+.exposed-alarms{font-size:10px;font-weight:700;flex-shrink:0;width:40px;text-align:right;display:flex;align-items:center;gap:3px;justify-content:flex-end}
+
+/* Record Statuses */
+.donut-wrap{display:flex;align-items:center;gap:14px}
+.donut-ph{width:100px;height:100px;border-radius:50%;border:8px solid rgba(255,69,98,0.15);border-top-color:var(--red);border-right-color:var(--red);border-bottom-color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.donut-center{font-size:16px;font-weight:800}
+.donut-legend{font-size:9px}
+.donut-legend-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.donut-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* Password Strength */
+.pw-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:8px;margin-bottom:6px}
+.pw-bar span{height:100%}
+.pw-legend{display:flex;gap:12px;font-size:8px}
+.pw-legend-item{display:flex;align-items:center;gap:4px}
+.pw-dot{width:6px;height:6px;border-radius:50%}
+
+/* Table area */
+.table-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.table-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.table-count{font-size:9px;color:var(--muted)}
+.table-tabs{display:flex;gap:4px;margin-bottom:8px}
+.ttab{font-size:8px;font-weight:600;padding:4px 12px;border-radius:6px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.ttab.active{background:rgba(255,69,98,0.12);border-color:rgba(255,69,98,0.3);color:var(--red)}
+.table-filters{display:flex;gap:4px;margin-bottom:8px;align-items:center}
+.tpill{font-size:7px;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.tpill.active{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.2);color:var(--indigo)}
+.time-pills{display:flex;gap:3px;margin-left:auto}
+.time-pills .tpill.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+.data-table{width:100%;font-size:9px;border-collapse:collapse}
+.data-table th{text-align:left;font-size:7px;color:var(--dim);letter-spacing:1px;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(51,65,85,0.3)}
+.data-table td{padding:6px 8px;border-bottom:1px solid rgba(51,65,85,0.08);vertical-align:middle}
+.data-table tr:hover{background:rgba(99,102,241,0.03)}
+.td-email{font-family:'JetBrains Mono',monospace;font-size:8px}
+.td-type{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.td-status{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+.td-alarm{color:var(--red);font-size:8px;font-weight:500}
+.table-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:8px;color:var(--dim)}
+.page-dots{display:flex;gap:3px}
+.page-dot{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;border:1px solid rgba(51,65,85,0.3);cursor:pointer}
+.page-dot.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PII EXPOSURE PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+PAGE PURPOSE:
+Full PII exposure dashboard — NOT just credentials. Shows all categories
+of personally identifiable information found on the dark web with severity-
+appropriate treatment. SSN/National ID is treated as CRITICAL. Credentials
+are one category among several, not the entire page.
+
+SEVERITY HIERARCHY (most to least dangerous):
+1. CRITICAL: National ID / SSN / Passport — identity theft, fraud, irreversible
+2. HIGH: Financial Data — credit cards, bank accounts, direct monetary loss
+3. HIGH: Physical Addresses — physical safety, stalking, doxxing
+4. MEDIUM: Phone Numbers — SIM swap attacks, phishing, 2FA bypass
+5. MEDIUM: Login Credentials — account takeover, lateral movement
+6. LOW: Email Addresses — spam, phishing campaigns
+
+DARK WEB PRICING (sourced from 2025 Dark Web Pricing Index):
+- SSN + Name + DOB: $20-$80
+- Full identity package (SSN + passport + DL): $5,200
+- Credit card with PIN: $20-$40
+- Bank login (>$2K balance): $65
+- Phone number: $5-$15
+- Email + password combo: $0.05-$0.10
+
+DATA MODELS:
+
+PIICategory: {
+  type: 'national_id' | 'financial' | 'address' | 'phone' | 'credential' | 'email',
+  severity: 'critical' | 'high' | 'medium' | 'low',
+  total_records: number,
+  open_records: number,
+  closed_records: number,
+  trend_30d: string,  // '+12%' etc
+  avg_dark_web_price: string,
+  subtypes: [{       // e.g., for national_id: SSN, passport, driver's license
+    name: string,
+    count: number
+  }]
+}
+
+PIIRecord: {
+  id: string,
+  email: string,       // associated identity
+  pii_type: string,
+  masked_value: string,  // 'SSN: ***-**-4532'
+  source: string,
+  source_type: 'stealer_log' | 'breach_db' | 'combo_list' | 'paste_site',
+  discovery_date: string,
+  breach_date: string,
+  status: 'open' | 'closed',
+  password_strength: 'weak' | 'medium' | 'strong' | null,
+  alarm_id: string | null
+}
+
+COMPONENT HIERARCHY:
+PIIExposurePage
+├── TopBanner (total stats)
+├── PIICategoryCards (6 cards, severity-coded)
+├── SeverityContextBar (explainer callout)
+├── DetailGrid (two columns)
+│   ├── LeftColumn
+│   │   ├── NationalIDPanel (CRITICAL, expanded by default)
+│   │   ├── FinancialDataPanel (HIGH)
+│   │   └── PhysicalAddressPanel (HIGH)
+│   └── RightColumn
+│       ├── ExposureTimeline (chart)
+│       ├── RecordStatuses (donut)
+│       ├── PasswordStrength (bar)
+│       └── MostExposedIdentities
+├── DataTable (all PII records, filterable by type)
+└── Legend
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">PII EXPOSURE &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#128100;</div>
+  <div class="banner-info">
+    <div class="banner-title">PII — PERSONALLY IDENTIFIABLE INFORMATION <span class="crit">23 critical (National ID)</span></div>
+    <div class="banner-desc">Tracking PII exposure across stealer logs, combo lists, breach databases, and dark web marketplaces</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bs"><div class="bs-label">TOTAL RECORDS</div><div class="bs-val">2,847</div></div>
+    <div class="bs"><div class="bs-label">OPEN</div><div class="bs-val" style="color:var(--red)">2,801</div></div>
+    <div class="bs"><div class="bs-label">CLOSED</div><div class="bs-val" style="color:var(--green)">46</div></div>
+    <div class="bs"><div class="bs-label">PII TYPES</div><div class="bs-val" style="color:var(--amber)">6</div></div>
+    <div class="bs"><div class="bs-label">WEAK PASSWORDS</div><div class="bs-val" style="color:var(--red)">487</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ PII CATEGORY CARDS ═══════════ -->
+<!-- CLAUDE CODE: Cards are clickable, selecting one filters the table below.
+     Default: "All" selected. Severity color-coding is mandatory. -->
+<div class="pii-grid">
+  <div class="pii-card tier-critical active">
+    <div class="pii-tier"><span class="dot" style="background:var(--red)"></span> CRITICAL</div>
+    <div class="pii-icon">&#127380;</div>
+    <div class="pii-val">23</div>
+    <div class="pii-name">National ID / SSN</div>
+    <div class="pii-desc">SSNs, passport numbers, driver's licenses. Irreversible identity theft risk.</div>
+    <div class="pii-price"><span class="pii-price-label">DW price</span><span class="pii-price-val">$20 &ndash; $80</span></div>
+    <div class="pii-trend" style="color:var(--red)">&#9650; +34% this month</div>
+  </div>
+  <div class="pii-card tier-high">
+    <div class="pii-tier"><span class="dot" style="background:var(--amber)"></span> HIGH</div>
+    <div class="pii-icon">&#128179;</div>
+    <div class="pii-val">156</div>
+    <div class="pii-name">Financial Data</div>
+    <div class="pii-desc">Credit cards, bank accounts, transaction data. Direct monetary loss.</div>
+    <div class="pii-price"><span class="pii-price-label">DW price</span><span class="pii-price-val">$12 &ndash; $65</span></div>
+    <div class="pii-trend" style="color:var(--amber)">&#9650; +8% this month</div>
+  </div>
+  <div class="pii-card tier-high">
+    <div class="pii-tier"><span class="dot" style="background:var(--amber)"></span> HIGH</div>
+    <div class="pii-icon">&#127968;</div>
+    <div class="pii-val">342</div>
+    <div class="pii-name">Physical Addresses</div>
+    <div class="pii-desc">Home/billing addresses. Physical safety risk, doxxing, stalking.</div>
+    <div class="pii-price"><span class="pii-price-label">DW price</span><span class="pii-price-val">$5 &ndash; $15</span></div>
+    <div class="pii-trend" style="color:var(--green)">&#9660; -2% this month</div>
+  </div>
+  <div class="pii-card tier-medium">
+    <div class="pii-tier"><span class="dot" style="background:var(--indigo)"></span> MEDIUM</div>
+    <div class="pii-icon">&#128222;</div>
+    <div class="pii-val">891</div>
+    <div class="pii-name">Phone Numbers</div>
+    <div class="pii-desc">Mobile numbers enabling SIM swap attacks and 2FA bypass.</div>
+    <div class="pii-price"><span class="pii-price-label">DW price</span><span class="pii-price-val">$5 &ndash; $15</span></div>
+    <div class="pii-trend" style="color:var(--amber)">&#9650; +12% this month</div>
+  </div>
+  <div class="pii-card tier-medium">
+    <div class="pii-tier"><span class="dot" style="background:var(--indigo)"></span> MEDIUM</div>
+    <div class="pii-icon">&#128274;</div>
+    <div class="pii-val">712</div>
+    <div class="pii-name">Login Credentials</div>
+    <div class="pii-desc">Email + password combos. Account takeover and lateral movement.</div>
+    <div class="pii-price"><span class="pii-price-label">DW price</span><span class="pii-price-val">$0.05 &ndash; $0.10</span></div>
+    <div class="pii-trend" style="color:var(--amber)">&#9650; +6% this month</div>
+  </div>
+  <div class="pii-card tier-low">
+    <div class="pii-tier"><span class="dot" style="background:var(--faint)"></span> LOW</div>
+    <div class="pii-icon">&#128231;</div>
+    <div class="pii-val">1,204</div>
+    <div class="pii-name">Email Addresses</div>
+    <div class="pii-desc">Exposed emails. Spam and phishing campaign targeting.</div>
+    <div class="pii-price"><span class="pii-price-label">DW price</span><span class="pii-price-val">&lt; $0.01</span></div>
+    <div class="pii-trend" style="color:var(--dim)">&#9660; -1% this month</div>
+  </div>
+</div>
+
+<!-- ═══════════ SEVERITY CONTEXT ═══════════ -->
+<div class="severity-context">
+  <span class="sev-icon">&#9888;</span>
+  <div class="sev-text">
+    <strong>23 National ID records</strong> are your highest-priority exposure. A leaked SSN paired with a name and DOB sells for $20&ndash;$80 on the dark web and enables irreversible identity theft — fraudulent accounts, tax fraud, and medical identity theft. <strong>69% of all data breaches</strong> in 2024 included SSN exposure.
+    <span class="source">Sources: 2025 Dark Web Pricing Index &middot; AT&amp;T breach exposed 70M SSNs (Apr 2024) &middot; National Public Data breach exposed 272M SSNs</span>
+  </div>
+</div>
+
+<!-- ═══════════ DETAIL GRID ═══════════ -->
+<div class="detail-grid">
+
+  <!-- LEFT: HIGH-SEVERITY PII DETAILS -->
+  <div class="detail-col">
+
+    <!-- National ID / SSN (CRITICAL) -->
+    <div class="ssn-panel">
+      <div class="ssn-header">
+        <div>
+          <div class="ssn-title">&#127380; National ID / SSN Exposure <span class="ssn-badge">CRITICAL</span></div>
+          <div class="ssn-subtitle">Government-issued identification numbers found on the dark web</div>
+        </div>
+        <span class="link">View All &rarr;</span>
+      </div>
+      <div class="ssn-stat-row">
+        <div class="ssn-stat"><div class="ssn-stat-val" style="color:var(--red)">14</div><div class="ssn-stat-label">SSN / TC KIMLIK</div></div>
+        <div class="ssn-stat"><div class="ssn-stat-val" style="color:var(--red)">5</div><div class="ssn-stat-label">PASSPORT NO.</div></div>
+        <div class="ssn-stat"><div class="ssn-stat-val" style="color:var(--amber)">4</div><div class="ssn-stat-label">DRIVER'S LICENSE</div></div>
+      </div>
+      <div class="ssn-list">
+        <div class="ssn-row">
+          <span class="ssn-type-badge" style="background:rgba(255,69,98,0.12);color:var(--red)">SSN</span>
+          <span class="ssn-masked">***-**-4532</span>
+          <span class="ssn-source" style="background:rgba(51,65,85,0.2);padding:1px 6px;border-radius:3px">Stealer Log</span>
+          <span class="ssn-date">Oct 19, 2025</span>
+        </div>
+        <div class="ssn-row">
+          <span class="ssn-type-badge" style="background:rgba(255,69,98,0.12);color:var(--red)">TC KIM</span>
+          <span class="ssn-masked">234*****89</span>
+          <span class="ssn-source" style="background:rgba(51,65,85,0.2);padding:1px 6px;border-radius:3px">Breach DB</span>
+          <span class="ssn-date">Sep 15, 2025</span>
+        </div>
+        <div class="ssn-row">
+          <span class="ssn-type-badge" style="background:rgba(255,69,98,0.12);color:var(--red)">PASS</span>
+          <span class="ssn-masked">U****7821</span>
+          <span class="ssn-source" style="background:rgba(51,65,85,0.2);padding:1px 6px;border-radius:3px">Dark Web Market</span>
+          <span class="ssn-date">Aug 22, 2025</span>
+        </div>
+        <div class="ssn-row">
+          <span class="ssn-type-badge" style="background:rgba(245,158,11,0.12);color:var(--amber)">DL</span>
+          <span class="ssn-masked">B4****01</span>
+          <span class="ssn-source" style="background:rgba(51,65,85,0.2);padding:1px 6px;border-radius:3px">Combo List</span>
+          <span class="ssn-date">Oct 03, 2025</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Data (HIGH) -->
+    <div class="detail-panel" style="border-color:rgba(245,158,11,0.15)">
+      <div class="dp-header">
+        <div class="dp-title">&#128179; Financial Data <span class="dp-badge" style="background:rgba(245,158,11,0.12);color:var(--amber)">HIGH</span></div>
+        <span class="dp-count">156 records</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="color:var(--amber);font-weight:700">89</span>
+        <span style="flex:2">Credit/Debit Cards</span>
+        <span class="dp-meta">23 verified active (tested &lt;48h)</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="color:var(--amber);font-weight:700">42</span>
+        <span style="flex:2">Bank Account Numbers</span>
+        <span class="dp-meta">IBAN / routing numbers</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="font-weight:700">25</span>
+        <span style="flex:2">Transaction History</span>
+        <span class="dp-meta">Spending patterns &amp; merchant data</span>
+      </div>
+    </div>
+
+    <!-- Physical Addresses (HIGH) -->
+    <div class="detail-panel" style="border-color:rgba(245,158,11,0.15)">
+      <div class="dp-header">
+        <div class="dp-title">&#127968; Physical Addresses <span class="dp-badge" style="background:rgba(245,158,11,0.12);color:var(--amber)">HIGH</span></div>
+        <span class="dp-count">342 records</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="color:var(--amber);font-weight:700">218</span>
+        <span style="flex:2">Home Addresses</span>
+        <span class="dp-meta">Full street address + postal code</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="font-weight:700">124</span>
+        <span style="flex:2">Billing Addresses</span>
+        <span class="dp-meta">Linked to payment methods</span>
+      </div>
+      <div style="margin-top:8px;font-size:8px;color:var(--dim)">&#9888; Physical addresses paired with names create doxxing and stalking risk. 67 records include both name + address + phone.</div>
+    </div>
+
+    <!-- Phone Numbers (MEDIUM) -->
+    <div class="detail-panel">
+      <div class="dp-header">
+        <div class="dp-title">&#128222; Phone Numbers <span class="dp-badge" style="background:rgba(99,102,241,0.12);color:var(--indigo)">MEDIUM</span></div>
+        <span class="dp-count">891 records</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="color:var(--indigo);font-weight:700">612</span>
+        <span style="flex:2">Mobile Numbers</span>
+        <span class="dp-meta">SIM swap &amp; 2FA bypass risk</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-val" style="font-weight:700">279</span>
+        <span style="flex:2">Landline / Work</span>
+        <span class="dp-meta">Vishing &amp; social engineering</span>
+      </div>
+      <div style="margin-top:8px;font-size:8px;color:var(--dim)">&#9888; 312 phone numbers are paired with credentials — enabling targeted 2FA bypass via SIM swap + password combo.</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CHARTS + MOST EXPOSED -->
+  <div class="detail-col">
+
+    <!-- Exposure Timeline -->
+    <div class="pn">
+      <div class="section-label">PII EXPOSURE TIMELINE</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">New records over time <span style="font-size:9px;color:var(--muted);font-weight:400">&middot; by PII type</span></div>
+      <div class="chart-ph">[Stacked Area Chart]<br>National ID &middot; Financial &middot; Address &middot; Phone &middot; Credentials &middot; Email<br>Last 6 months &middot; Monthly granularity</div>
+    </div>
+
+    <!-- Record Statuses + Password Strength -->
+    <div class="pn">
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <div class="section-label">RECORD STATUSES</div>
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">2,847 total records</div>
+          <div class="donut-wrap">
+            <div class="donut-ph"><span class="donut-center">2,847</span></div>
+            <div class="donut-legend">
+              <div class="donut-legend-row"><span class="donut-dot" style="background:var(--red)"></span>Open <strong>2,801</strong> <span style="color:var(--dim)">98.4%</span></div>
+              <div class="donut-legend-row"><span class="donut-dot" style="background:var(--indigo)"></span>Closed <strong>46</strong> <span style="color:var(--dim)">1.6%</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="section-label">PASSWORD STRENGTH</div>
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">712 credentials analyzed</div>
+          <div class="pw-bar">
+            <span style="width:68%;background:var(--red)"></span>
+            <span style="width:26%;background:var(--amber)"></span>
+            <span style="width:6%;background:var(--green)"></span>
+          </div>
+          <div class="pw-legend">
+            <span class="pw-legend-item"><span class="pw-dot" style="background:var(--red)"></span>Weak <strong>487</strong></span>
+            <span class="pw-legend-item"><span class="pw-dot" style="background:var(--amber)"></span>Medium <strong>183</strong></span>
+            <span class="pw-legend-item"><span class="pw-dot" style="background:var(--green)"></span>Strong <strong>42</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Most Exposed Identities -->
+    <div class="pn">
+      <div class="section-label">MOST EXPOSED IDENTITIES</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Highest-risk individuals</div>
+      <div class="exposed-row">
+        <div class="exposed-rank" style="background:rgba(255,69,98,0.12);color:var(--red)">1</div>
+        <div class="exposed-info">
+          <div class="exposed-email">gabriel@gmail.com</div>
+          <div class="exposed-meta">Stealer Log &middot; 2025-10-19</div>
+          <div class="exposed-types">
+            <span class="exposed-type" style="background:rgba(255,69,98,0.12);color:var(--red)">SSN</span>
+            <span class="exposed-type" style="background:rgba(245,158,11,0.1);color:var(--amber)">Card</span>
+            <span class="exposed-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Phone</span>
+            <span class="exposed-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Cred</span>
+          </div>
+        </div>
+        <span class="exposed-strength" style="background:rgba(255,69,98,0.1);color:var(--red)">WEAK</span>
+        <span class="exposed-alarms">&#128276; 277</span>
+      </div>
+      <div class="exposed-row">
+        <div class="exposed-rank" style="background:rgba(245,158,11,0.12);color:var(--amber)">2</div>
+        <div class="exposed-info">
+          <div class="exposed-email">kevin.koestoro@jtrust...</div>
+          <div class="exposed-meta">Combo List &middot; 2025-09-15</div>
+          <div class="exposed-types">
+            <span class="exposed-type" style="background:rgba(245,158,11,0.1);color:var(--amber)">Card</span>
+            <span class="exposed-type" style="background:rgba(245,158,11,0.1);color:var(--amber)">Address</span>
+            <span class="exposed-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Cred</span>
+          </div>
+        </div>
+        <span class="exposed-strength" style="background:rgba(255,69,98,0.1);color:var(--red)">WEAK</span>
+        <span class="exposed-alarms">&#128276; 18</span>
+      </div>
+      <div class="exposed-row">
+        <div class="exposed-rank" style="background:rgba(99,102,241,0.12);color:var(--indigo)">3</div>
+        <div class="exposed-info">
+          <div class="exposed-email">edy@jtrustbank.co.id</div>
+          <div class="exposed-meta">Breach DB &middot; 2025-09-09</div>
+          <div class="exposed-types">
+            <span class="exposed-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Phone</span>
+            <span class="exposed-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Cred</span>
+          </div>
+        </div>
+        <span class="exposed-strength" style="background:rgba(245,158,11,0.1);color:var(--amber)">MED</span>
+        <span class="exposed-alarms">&#128276; 9</span>
+      </div>
+      <div class="exposed-row">
+        <div class="exposed-rank" style="background:rgba(51,65,85,0.2);color:var(--muted)">4</div>
+        <div class="exposed-info">
+          <div class="exposed-email">recruit@bm.co.id</div>
+          <div class="exposed-meta">Stealer Log &middot; 2025-08-28</div>
+          <div class="exposed-types">
+            <span class="exposed-type" style="background:rgba(99,102,241,0.1);color:var(--indigo)">Cred</span>
+            <span class="exposed-type" style="background:rgba(51,65,85,0.15);color:var(--muted)">Email</span>
+          </div>
+        </div>
+        <span class="exposed-strength" style="background:rgba(245,158,11,0.1);color:var(--amber)">MED</span>
+        <span class="exposed-alarms">&#128276; 8</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ FULL DATA TABLE ═══════════ -->
+<div class="pn">
+  <div class="table-header">
+    <div class="table-title">All PII Records <span class="table-count">2,847 total</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="table-tabs">
+      <span class="ttab active">All PII Types</span>
+      <span class="ttab">National ID</span>
+      <span class="ttab">Financial</span>
+      <span class="ttab">Addresses</span>
+      <span class="ttab">Phone</span>
+      <span class="ttab">Credentials</span>
+      <span class="ttab">Email</span>
+    </div>
+    <div class="time-pills">
+      <span class="tpill">24h</span>
+      <span class="tpill">7d</span>
+      <span class="tpill">30d</span>
+      <span class="tpill">90d</span>
+      <span class="tpill active">ALL</span>
+      <span style="margin-left:4px;color:var(--dim);font-size:12px;cursor:pointer">&#8615;</span>
+    </div>
+  </div>
+  <div class="table-filters">
+    <span class="tpill active">All Severity</span>
+    <span class="tpill"><span style="color:var(--red)">&#9679;</span> Critical</span>
+    <span class="tpill"><span style="color:var(--amber)">&#9679;</span> High</span>
+    <span class="tpill"><span style="color:var(--indigo)">&#9679;</span> Medium</span>
+    <span class="tpill"><span style="color:var(--faint)">&#9679;</span> Low</span>
+    <span style="margin-left:8px"></span>
+    <span class="tpill active">All Status</span>
+    <span class="tpill">Open</span>
+    <span class="tpill">Closed</span>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:24px"></th>
+        <th>IDENTITY</th>
+        <th>PII TYPE</th>
+        <th>VALUE</th>
+        <th>SOURCE</th>
+        <th>STATUS</th>
+        <th>DISCOVERED</th>
+        <th>BREACH</th>
+        <th>ALARM</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="checkbox" style="opacity:0.3"></td>
+        <td class="td-email">gabriel@gmail.com</td>
+        <td><span class="td-type" style="background:rgba(255,69,98,0.12);color:var(--red)">SSN</span></td>
+        <td class="mono" style="font-size:8px">***-**-4532</td>
+        <td><span style="font-size:8px;background:rgba(51,65,85,0.2);padding:1px 5px;border-radius:3px">Stealer</span></td>
+        <td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td>
+        <td style="font-size:8px;color:var(--dim)">6mo ago</td>
+        <td style="font-size:8px;color:var(--dim)">1y ago</td>
+        <td><span class="td-alarm">Open &#8599;</span></td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" style="opacity:0.3"></td>
+        <td class="td-email">kevin.k@jtrust.co.id</td>
+        <td><span class="td-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">Card</span></td>
+        <td class="mono" style="font-size:8px">4***-****-7821</td>
+        <td><span style="font-size:8px;background:rgba(51,65,85,0.2);padding:1px 5px;border-radius:3px">Breach</span></td>
+        <td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td>
+        <td style="font-size:8px;color:var(--dim)">7mo ago</td>
+        <td style="font-size:8px;color:var(--dim)">2y ago</td>
+        <td><span class="td-alarm">Open &#8599;</span></td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" style="opacity:0.3"></td>
+        <td class="td-email">edy@jtrustbank.co.id</td>
+        <td><span class="td-type" style="background:rgba(99,102,241,0.12);color:var(--indigo)">Phone</span></td>
+        <td class="mono" style="font-size:8px">+62-812-***-4201</td>
+        <td><span style="font-size:8px;background:rgba(51,65,85,0.2);padding:1px 5px;border-radius:3px">Combo</span></td>
+        <td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td>
+        <td style="font-size:8px;color:var(--dim)">7mo ago</td>
+        <td style="font-size:8px;color:var(--dim)">2y ago</td>
+        <td><span class="td-alarm">Open &#8599;</span></td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" style="opacity:0.3"></td>
+        <td class="td-email">recruit@bm.co.id</td>
+        <td><span class="td-type" style="background:rgba(245,158,11,0.12);color:var(--amber)">Address</span></td>
+        <td class="mono" style="font-size:8px">Jl. Sudirman ***</td>
+        <td><span style="font-size:8px;background:rgba(51,65,85,0.2);padding:1px 5px;border-radius:3px">Stealer</span></td>
+        <td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td>
+        <td style="font-size:8px;color:var(--dim)">8mo ago</td>
+        <td style="font-size:8px;color:var(--dim)">1y ago</td>
+        <td><span class="td-alarm">Open &#8599;</span></td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" style="opacity:0.3"></td>
+        <td class="td-email">s.admin@jtrustbank.co.id</td>
+        <td><span class="td-type" style="background:rgba(99,102,241,0.12);color:var(--indigo)">Cred</span></td>
+        <td class="mono" style="font-size:8px">V****1</td>
+        <td><span style="font-size:8px;background:rgba(51,65,85,0.2);padding:1px 5px;border-radius:3px">Combo</span></td>
+        <td><span class="td-status" style="background:rgba(34,197,94,0.1);color:var(--green)">Open</span></td>
+        <td style="font-size:8px;color:var(--dim)">8mo ago</td>
+        <td style="font-size:8px;color:var(--dim)">1y ago</td>
+        <td><span class="td-alarm">Open &#8599;</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="table-footer">
+    <span>Showing 1&ndash;5 of 2,847 &middot; 10/page</span>
+    <div class="page-dots">
+      <span class="page-dot">&lsaquo;</span>
+      <span class="page-dot active">1</span>
+      <span class="page-dot">2</span>
+      <span class="page-dot">3</span>
+      <span class="page-dot">&hellip;</span>
+      <span class="page-dot">285</span>
+      <span class="page-dot">&rsaquo;</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:var(--red)"></span>Critical: National ID / SSN</span>
+    <span><span class="lsw" style="background:var(--amber)"></span>High: Financial + Address</span>
+    <span><span class="lsw" style="background:var(--indigo)"></span>Medium: Phone + Credentials</span>
+    <span><span class="lsw" style="background:var(--faint)"></span>Low: Email</span>
+  </div>
+</div>
+
+</body>
+</html>

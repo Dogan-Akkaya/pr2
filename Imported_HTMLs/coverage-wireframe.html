@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coverage — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+COVERAGE PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+Static page. All 61 sources hardcoded. No API calls.
+The blurred/redacted pills are CSS-only with placeholder text — NEVER put
+real source names behind the blur. Use "undisclosed_XX" as placeholder text.
+
+SIGNATURE ELEMENT: The redacted pills. They should look like a declassified
+intel document with redaction bars. filter:blur(4px) on styled divs with
+random widths. aria-hidden="true" for accessibility.
+
+COMPONENT: <CoveragePage /> — single component, static data.
+═══════════════════════════════════════════════════════════════════════════════
+*/
+
+/* ═══ HEADER ═══ */
+.header{text-align:center;margin-bottom:24px}
+.header-label{font-size:8px;color:var(--dim);letter-spacing:3px;font-weight:700;margin-bottom:6px}
+.header h1{font-size:22px;font-weight:800;letter-spacing:-0.3px;margin-bottom:6px}
+.header-sub{font-size:11px;color:var(--muted);margin-bottom:16px}
+.header-stats{display:flex;justify-content:center;gap:24px}
+.hs{text-align:center}
+.hs-val{font-size:20px;font-weight:800}
+.hs-extra{font-size:9px;color:var(--dim);font-weight:500}
+.hs-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-top:1px}
+
+/* ═══ CATEGORY SECTIONS ═══ */
+.category{margin-bottom:20px}
+.cat-header{
+  display:flex;align-items:center;gap:8px;padding:8px 0;
+  border-bottom:1px solid rgba(51,65,85,0.2);margin-bottom:10px;cursor:pointer;
+}
+.cat-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.cat-name{font-size:13px;font-weight:700;flex:1}
+.cat-count{font-size:9px;color:var(--muted);background:rgba(51,65,85,0.2);padding:2px 8px;border-radius:4px;font-weight:600}
+.cat-undisclosed{font-size:8px;color:var(--dim);font-style:italic}
+
+/* Source grid */
+.source-grid{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Source pill */
+.source-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--card);border:1px solid var(--border);border-radius:6px;
+  padding:7px 12px;font-size:9px;font-weight:500;
+}
+.pill-check{color:var(--green);font-size:10px;flex-shrink:0}
+.pill-name{white-space:nowrap}
+.pill-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dot-active{background:var(--green)}
+.dot-high{background:var(--red)}
+.dot-moderate{background:var(--amber)}
+
+/* ═══ REDACTED / BLURRED PILLS ═══ */
+.source-pill-redacted{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(51,65,85,0.15);border:1px solid rgba(51,65,85,0.2);border-radius:6px;
+  padding:7px 12px;font-size:9px;user-select:none;pointer-events:none;
+  position:relative;overflow:hidden;
+}
+.redacted-text{
+  filter:blur(5px);color:rgba(148,163,184,0.4);font-weight:500;white-space:nowrap;
+}
+.redacted-lock{
+  font-size:7px;color:rgba(51,65,85,0.5);flex-shrink:0;
+}
+
+/* ═══ UNDISCLOSED FOOTER ═══ */
+.undisclosed-footer{
+  background:rgba(15,23,42,0.6);border:1px solid rgba(51,65,85,0.25);
+  border-radius:12px;padding:28px 24px;margin-top:28px;position:relative;overflow:hidden;
+  text-align:center;
+}
+.undisclosed-bg{
+  display:flex;flex-wrap:wrap;gap:6px;justify-content:center;
+  margin-bottom:16px;opacity:0.5;
+}
+.undisclosed-pill{
+  display:inline-block;height:28px;border-radius:6px;
+  background:rgba(51,65,85,0.2);border:1px solid rgba(51,65,85,0.15);
+  filter:blur(5px);
+}
+.undisclosed-overlay{position:relative;z-index:1}
+.undisclosed-overlay h3{font-size:14px;font-weight:700;margin-bottom:6px}
+.undisclosed-overlay p{font-size:10px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.6}
+.undisclosed-count{
+  display:inline-block;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);
+  padding:4px 14px;border-radius:6px;font-size:10px;font-weight:700;color:var(--indigo);
+  margin-top:10px;
+}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<div style="max-width:900px;margin:0 auto">
+
+<!-- ═══════════ HEADER ═══════════ -->
+<div class="header">
+  <div class="header-label">ADVANCED DARK WEB MONITORING</div>
+  <h1>Coverage</h1>
+  <div class="header-sub">Sources actively monitored by SOCRadar's intelligence platform</div>
+  <div class="header-stats">
+    <div class="hs"><div class="hs-val">61</div><div class="hs-extra" style="color:var(--dim)">+ undisclosed</div><div class="hs-label">DISCLOSED SOURCES</div></div>
+    <div class="hs"><div class="hs-val">250</div><div class="hs-label">COUNTRIES</div></div>
+    <div class="hs"><div class="hs-val">41</div><div class="hs-label">SECTORS</div></div>
+    <div class="hs"><div class="hs-val" style="color:var(--green)">24/7</div><div class="hs-label">CONTINUOUS SCANNING</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ MESSAGING PLATFORMS ═══════════ -->
+<div class="category">
+  <div class="cat-header">
+    <div class="cat-icon" style="background:rgba(0,136,204,0.08);color:var(--cyan)">&#128172;</div>
+    <span class="cat-name">Messaging Platforms</span>
+    <span class="cat-count">4 disclosed</span>
+    <span class="cat-undisclosed">+ undisclosed</span>
+  </div>
+  <div class="source-grid">
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Discord</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">IRC</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">ICQ</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Telegram</span><span class="pill-dot dot-high"></span></div>
+    <!-- Redacted -->
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_msg_01</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_platform</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_src</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ SOCIAL MEDIA ═══════════ -->
+<div class="category">
+  <div class="cat-header">
+    <div class="cat-icon" style="background:rgba(99,102,241,0.08);color:var(--indigo)">&#127760;</div>
+    <span class="cat-name">Social Media Platforms</span>
+    <span class="cat-count">3 disclosed</span>
+    <span class="cat-undisclosed">+ undisclosed</span>
+  </div>
+  <div class="source-grid">
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Twitter / X</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Bluesky</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Reddit</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_social</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_platform_02</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ DARK WEB MARKETS ═══════════ -->
+<div class="category">
+  <div class="cat-header">
+    <div class="cat-icon" style="background:rgba(255,69,98,0.08);color:var(--red)">&#128375;</div>
+    <span class="cat-name">Dark Web Markets</span>
+    <span class="cat-count">18 disclosed</span>
+    <span class="cat-undisclosed">+ undisclosed</span>
+  </div>
+  <div class="source-grid">
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Amigos BOT</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Amigos CC</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Breached Forum</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Easy Shop</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Epicmarket</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">GenesisMarket</span><span class="pill-dot dot-moderate"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Illegal Forums</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Onion Ransomware</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Ransomware Leak Files</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Russian Market Bot</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Russian Market CC</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">XSS Forum</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Exploit.in Forum</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Deep Diver Finding</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Exodus Market Bot</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Brian's Club</span><span class="pill-dot dot-moderate"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Rescator Market</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Botnet Info Stealer</span><span class="pill-dot dot-active"></span></div>
+    <!-- Redacted -->
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_market_01</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_onion_src</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_mkt</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">partner_honeypot_feed</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_market_03</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_forum</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ THREAT FEEDS ═══════════ -->
+<div class="category">
+  <div class="cat-header">
+    <div class="cat-icon" style="background:rgba(245,158,11,0.08);color:var(--amber)">&#128225;</div>
+    <span class="cat-name">Threat Feed &amp; Share Resources</span>
+    <span class="cat-count">27 disclosed</span>
+    <span class="cat-undisclosed">+ undisclosed</span>
+  </div>
+  <div class="source-grid">
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">AlienVault</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">AnyRun</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">APD AlterVista</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">AbuseCH SSLBL</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">AbuseCH Threatfox</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">TG Check Host DDoS</span><span class="pill-dot dot-moderate"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">DDOS Watch</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">DeHashed</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Enforcement Tracker</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Malware Bazaar</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Malpedia</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">MalShare</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">MalDatabase</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">News</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">PhishTank</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Secure Reload</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">SOCRadar DarkWebTeam</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">URLHaus</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">URLScan</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">VirusShare</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">VMRay</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Ransomware Victims</span><span class="pill-dot dot-high"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Cyber Attack</span><span class="pill-dot dot-moderate"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Abuse IPDB</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">CISA</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">APK Markets</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">DDoSia (NoName057)</span><span class="pill-dot dot-high"></span></div>
+    <!-- Redacted -->
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_feed_01</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_threat_intel</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">partner_feed_02</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_ioc</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_humint</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_feed_03</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">partner_sigint</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_04</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_src</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">partner_feed_05</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ API PLATFORMS ═══════════ -->
+<div class="category">
+  <div class="cat-header">
+    <div class="cat-icon" style="background:rgba(168,85,247,0.08);color:var(--purple)">&#128187;</div>
+    <span class="cat-name">API Collection Platforms</span>
+    <span class="cat-count">2 disclosed</span>
+    <span class="cat-undisclosed">+ undisclosed</span>
+  </div>
+  <div class="source-grid">
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Postman</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Swagger</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_api</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_api_src</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ CODE REPOS & PASTE ═══════════ -->
+<div class="category">
+  <div class="cat-header">
+    <div class="cat-icon" style="background:rgba(34,197,94,0.08);color:var(--green)">&#128196;</div>
+    <span class="cat-name">Code Repository &amp; Paste Sites</span>
+    <span class="cat-count">7 disclosed</span>
+    <span class="cat-undisclosed">+ undisclosed</span>
+  </div>
+  <div class="source-grid">
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">BitBin</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Github</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Github Gist</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Pastebin</span><span class="pill-dot dot-moderate"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Repo Activity</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Huggingface</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill"><span class="pill-check">&#10003;</span><span class="pill-name">Scribd</span><span class="pill-dot dot-active"></span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_repo</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">classified_paste</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">partner_repo_src</span></div>
+    <div class="source-pill-redacted" aria-hidden="true"><span class="redacted-lock">&#128274;</span><span class="redacted-text">undisclosed_02</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ UNDISCLOSED FOOTER ═══════════ -->
+<div class="undisclosed-footer">
+  <div class="undisclosed-bg" aria-hidden="true">
+    <span class="undisclosed-pill" style="width:110px"></span>
+    <span class="undisclosed-pill" style="width:85px"></span>
+    <span class="undisclosed-pill" style="width:130px"></span>
+    <span class="undisclosed-pill" style="width:95px"></span>
+    <span class="undisclosed-pill" style="width:145px"></span>
+    <span class="undisclosed-pill" style="width:80px"></span>
+    <span class="undisclosed-pill" style="width:120px"></span>
+    <span class="undisclosed-pill" style="width:100px"></span>
+    <span class="undisclosed-pill" style="width:140px"></span>
+    <span class="undisclosed-pill" style="width:90px"></span>
+    <span class="undisclosed-pill" style="width:115px"></span>
+    <span class="undisclosed-pill" style="width:135px"></span>
+    <span class="undisclosed-pill" style="width:88px"></span>
+    <span class="undisclosed-pill" style="width:125px"></span>
+    <span class="undisclosed-pill" style="width:105px"></span>
+    <span class="undisclosed-pill" style="width:95px"></span>
+    <span class="undisclosed-pill" style="width:142px"></span>
+    <span class="undisclosed-pill" style="width:78px"></span>
+    <span class="undisclosed-pill" style="width:118px"></span>
+    <span class="undisclosed-pill" style="width:132px"></span>
+    <span class="undisclosed-pill" style="width:92px"></span>
+    <span class="undisclosed-pill" style="width:148px"></span>
+    <span class="undisclosed-pill" style="width:86px"></span>
+    <span class="undisclosed-pill" style="width:122px"></span>
+  </div>
+  <div class="undisclosed-overlay">
+    <h3>The full picture extends beyond what's shown here</h3>
+    <p>SOCRadar monitors additional sources through automated crawlers, analyst networks, proprietary honeypots, and classified partnerships that cannot be publicly disclosed.</p>
+    <div class="undisclosed-count">+ approximately 40 additional undisclosed sources</div>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend" style="max-width:900px;margin:18px auto 0">
+  <div class="legend-t">STATUS INDICATORS</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:var(--green)"></span>Active</span>
+    <span><span class="lsw" style="background:var(--amber)"></span>Moderate activity</span>
+    <span><span class="lsw" style="background:var(--red)"></span>High activity</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.3);filter:blur(2px)"></span>Undisclosed / Classified</span>
+  </div>
+</div>
+
+</body>
+</html>

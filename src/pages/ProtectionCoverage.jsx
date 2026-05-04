@@ -3,10 +3,10 @@ import { useTheme } from "../context/ThemeContext";
 
 // ── Asset Types with their limits, icons, and descriptions ──
 const ASSET_TYPES = [
-  { key: "domain", label: "Domain", used: 1, total: 3, color: "#E8463A", icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z", desc: "Your company domains to monitor for dark web exposure", format: "companydomain.com" },
+  { key: "domain", label: "Domain", used: 1, total: 3, color: "#FF4562", icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z", desc: "Your company domains to monitor for dark web exposure", format: "companydomain.com" },
   { key: "ip_range", label: "IP Range", used: 1, total: 3, color: "#EA580C", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", desc: "IP address ranges to track for unauthorized access listings", format: "10.0.0.0/24" },
   { key: "company_name", label: "Company Name", used: 0, total: 1, color: "#F59E0B", icon: "M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M9 21V9m6 12V9", desc: "Brand and company names to detect dark web mentions", format: "Company Name" },
-  { key: "brand_keyword", label: "Brand Keyword", used: 2, total: 5, color: "#E8463A", icon: "M7 20l4-16m2 16l4-16M6 9h14M4 15h14", desc: "Keywords related to your brand to scan across dark web sources", format: "keyword" },
+  { key: "brand_keyword", label: "Brand Keyword", used: 2, total: 5, color: "#FF4562", icon: "M7 20l4-16m2 16l4-16M6 9h14M4 15h14", desc: "Keywords related to your brand to scan across dark web sources", format: "keyword" },
   { key: "vip_account", label: "VIP Account", used: 3, total: 5, color: "#A855F7", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zm-6 8a6 6 0 0112 0H6z", desc: "Executive and high-value accounts to monitor for credential leaks", format: "executive@company.com" },
   { key: "third_party", label: "Third Party Employee", used: 0, total: 3, color: "#3B82F6", icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75", desc: "Vendor and contractor accounts to track for supply chain risks", format: "vendor@partner.com" },
   { key: "bin_number", label: "BIN Number", used: 2, total: 5, color: "#10B981", icon: "M3 10h18V6a2 2 0 00-2-2H5a2 2 0 00-2 2v4zm0 2v4a2 2 0 002 2h14a2 2 0 002-2v-4H3z", desc: "Bank Identification Numbers to detect compromised payment cards", format: "123456" },
@@ -28,7 +28,7 @@ const ASSETS = [
 
 // ── Top Alarms dummy ──
 const TOP_ALARMS = [
-  { label: "VIP Credential", count: 802, color: "#E8463A" },
+  { label: "VIP Credential", count: 802, color: "#FF4562" },
   { label: "Dark Web Suspicious", count: 460, color: "#A855F7" },
   { label: "Black Market Botnet", count: 348, color: "#3B82F6" },
   { label: "PII Exposure", count: 306, color: "#F59E0B" },
@@ -46,6 +46,37 @@ const TOP_SOURCES = [
 // ── Alarm counts per asset (dummy) ──
 const ASSET_ALARMS = { 1: 312, 2: 45, 3: 89, 4: 204, 5: 178, 6: 56, 7: 83 };
 
+// ── Findings by Asset Type (with source asset attribution) ──
+const FINDINGS_BY_TYPE = [
+  { name: "VIP Credential Leaks", source: "simon.johnsson@greenanimals.com + 2 VIPs",   count: 882, trend: "+14%", trendDir: "up",   color: "#FF4562" },
+  { name: "Dark Web Suspicious",  source: "socradar.com, greenanimalsbank keywords",     count: 468, trend: "+8%",  trendDir: "up",   color: "#F59E0B" },
+  { name: "Black Market / Botnet",source: "BIN 222222, BIN 111111",                      count: 348, trend: "-3%",  trendDir: "down", color: "#3B82F6" },
+  { name: "PII Exposure",         source: "socradar.com domain monitoring",              count: 306, trend: "+22%", trendDir: "up",   color: "#A855F7" },
+  { name: "Stolen Credentials",   source: "IP range 10.253.3.13",                        count: 127, trend: "+5%",  trendDir: "up",   color: "#06B6D4" },
+];
+
+// ── Top Alarm-Generating Assets (which specific assets fire most) ──
+const TOP_ALARM_ASSETS = [
+  { rank: 1, name: "socradar.com",                    type: "Domain",  count: 312, color: "#FF4562" },
+  { rank: 2, name: "BIN: 222222",                     type: "BIN",     count: 204, color: "#10B981" },
+  { rank: 3, name: "BIN: 111111",                     type: "BIN",     count: 178, color: "#10B981" },
+  { rank: 4, name: "simon.johnsson@greenanimals.com", type: "VIP",     count: 89,  color: "#A855F7" },
+  { rank: 5, name: "socradar",                        type: "Keyword", count: 83,  color: "#FF4562" },
+  { rank: 6, name: "greenanimalsbank",                type: "Keyword", count: 56,  color: "#FF4562" },
+  { rank: 7, name: "10.253.3.13",                     type: "IP",      count: 45,  color: "#EA580C" },
+];
+
+// ── Recent Scan Activity ──
+const RECENT_SCANS = [
+  { asset: "socradar.com",                    newFindings: 3, status: "new",   time: "2m ago" },
+  { asset: "BIN: 222222",                     newFindings: 1, status: "new",   time: "3m ago" },
+  { asset: "greenanimalsbank",                newFindings: 0, status: "clean", time: "4m ago" },
+  { asset: "simon.johnsson@greenanimals.com", newFindings: 0, status: "clean", time: "4m ago" },
+  { asset: "socradar",                        newFindings: 2, status: "new",   time: "5m ago" },
+  { asset: "10.253.3.13",                     newFindings: 0, status: "clean", time: "5m ago" },
+  { asset: "BIN: 111111",                     newFindings: 0, status: "clean", time: "5m ago" },
+];
+
 // ── Radar chart labels ──
 const RADAR_LABELS = [
   "Stealer Logs", "Dark Forums", "Telegram", "Marketplaces",
@@ -54,7 +85,7 @@ const RADAR_LABELS = [
 const RADAR_VALUES = [0.92, 0.78, 0.85, 0.65, 0.48, 0.72, 0.55, 0.80];
 
 // ── Mini Donut Chart ──
-function MiniDonut({ segments, size = 100 }) {
+function MiniDonut({ segments, size = 100, t }) {
   const total = segments.reduce((s, seg) => s + seg.count, 0);
   let cumulative = 0;
   const radius = 36;
@@ -62,7 +93,7 @@ function MiniDonut({ segments, size = 100 }) {
 
   return (
     <svg width={size} height={size} viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="12" />
+      <circle cx="50" cy="50" r={radius} fill="none" stroke={t?.borderSection || "rgba(255,255,255,0.04)"} strokeWidth="12" />
       {segments.map((seg, i) => {
         const pct = total > 0 ? seg.count / total : 0;
         const offset = cumulative;
@@ -70,7 +101,7 @@ function MiniDonut({ segments, size = 100 }) {
         return (
           <circle
             key={i} cx="50" cy="50" r={radius} fill="none"
-            stroke={seg.color || "#E8463A"} strokeWidth="12"
+            stroke={seg.color || "#FF4562"} strokeWidth="12"
             strokeDasharray={`${pct * circumference} ${circumference}`}
             strokeDashoffset={-offset * circumference}
             transform="rotate(-90 50 50)"
@@ -78,7 +109,7 @@ function MiniDonut({ segments, size = 100 }) {
           />
         );
       })}
-      <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fill="#E8ECF1" fontSize="16" fontWeight="800" fontFamily="'Plus Jakarta Sans',sans-serif">
+      <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fill={t?.text || "#E8ECF1"} fontSize="16" fontWeight="800" fontFamily="'Red Hat Display', sans-serif">
         {total}
       </text>
     </svg>
@@ -113,10 +144,10 @@ function RadarChart({ t }) {
         return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} stroke={t.border} strokeWidth="1" />;
       })}
       {/* Data polygon */}
-      <polygon points={polygon} fill="rgba(232,70,58,0.08)" stroke="#E8463A" strokeWidth="1.5" />
+      <polygon points={polygon} fill="rgba(255,69,98,0.08)" stroke="#FF4562" strokeWidth="1.5" />
       {/* Data dots */}
       {dataPoints.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="3" fill="#E8463A" />
+        <circle key={i} cx={x} cy={y} r="3" fill="#FF4562" />
       ))}
       {/* Labels */}
       {RADAR_LABELS.map((label, i) => {
@@ -194,7 +225,7 @@ export default function ProtectionCoverage() {
                 strokeLinecap="round" transform="rotate(-90 30 30)" style={{ transition: "all 0.6s" }} />
             </svg>
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span className="hfont" style={{ fontSize: 14, fontWeight: 800, letterSpacing: "-0.02em" }}>{overallPct}%</span>
+              <span className="hfont" style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.02em" }}>{overallPct}%</span>
             </div>
           </div>
 
@@ -224,16 +255,16 @@ export default function ProtectionCoverage() {
             ].map((stat, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <div className="mono" style={{ fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: t.text25, marginBottom: 4 }}>{stat.label}</div>
-                <span className="hfont" style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.02em", color: stat.color }}>{stat.value}</span>
+                <span className="hfont" style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em", color: stat.color }}>{stat.value}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ═══ SECTION 2: THREE-COLUMN GRID ═══ */}
+      {/* ═══ SECTION 2: TWO-COLUMN LAYOUT (Asset Management | Coverage Data) ═══ */}
       <div style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 340px", gap: 18, alignItems: "start",
+        display: "grid", gridTemplateColumns: "minmax(0, 420px) minmax(0, 1fr)", gap: 18, alignItems: "start",
         animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
 
@@ -250,10 +281,10 @@ export default function ProtectionCoverage() {
                 onClick={() => setAddModalOpen(true)}
                 style={{
                   padding: "6px 14px", borderRadius: 8, border: "none",
-                  background: "#E8463A", color: "#fff", fontSize: 11, fontWeight: 600,
-                  cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+                  background: "#FF4562", color: "#fff", fontSize: 11, fontWeight: 600,
+                  cursor: "pointer", fontFamily: "'Inter', sans-serif",
                   display: "flex", alignItems: "center", gap: 5,
-                  boxShadow: "0 2px 8px rgba(232,70,58,0.25)",
+                  boxShadow: "0 2px 8px rgba(255,69,98,0.25)",
                 }}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
@@ -269,11 +300,11 @@ export default function ProtectionCoverage() {
                 placeholder="Search assets..."
                 style={{
                   width: "100%", padding: "8px 12px 8px 32px", fontSize: 11,
-                  fontFamily: "'Satoshi',sans-serif", background: t.bgInput,
+                  fontFamily: "'Inter', sans-serif", background: t.bgInput,
                   border: `1px solid ${t.borderLight}`, borderRadius: 8,
                   color: t.text, outline: "none", transition: "border-color 0.2s",
                 }}
-                onFocus={e => e.target.style.borderColor = "rgba(232,70,58,0.3)"}
+                onFocus={e => e.target.style.borderColor = "rgba(255,69,98,0.3)"}
                 onBlur={e => e.target.style.borderColor = t.borderLight}
               />
             </div>
@@ -340,7 +371,7 @@ export default function ProtectionCoverage() {
                         width: "100%", padding: "8px 12px", borderRadius: 6, cursor: "pointer",
                         border: `1px dashed ${assetType.color}30`, background: "transparent",
                         color: assetType.color, fontSize: 10, fontWeight: 500,
-                        fontFamily: "'Satoshi',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                        fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                       }}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         Add {assetType.label}
@@ -354,76 +385,234 @@ export default function ProtectionCoverage() {
           </div>
         </div>
 
-        {/* ─── CENTER COLUMN: Source Coverage + Top Alarms stacked ─── */}
+        {/* ─── RIGHT COLUMN: Coverage Data Stack ─── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Source Coverage — taller */}
-          <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Source Coverage</div>
-              <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>Detection depth by channel</span>
+
+          {/* 1. SLOT UTILIZATION */}
+          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Slot Utilization</div>
+              <span className="mono" style={{ fontSize: 11, color: "#F59E0B", fontWeight: 700 }}>{totalUsed}/{totalAvailable} slots used</span>
             </div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px 12px 16px" }}>
-              <RadarChart t={t} />
-              <div style={{ marginTop: 14, textAlign: "center" }}>
-                <span className="mono" style={{ fontSize: 10, color: t.text30, letterSpacing: "0.04em" }}>AVG COVERAGE: </span>
-                <span className="hfont" style={{ fontSize: 16, fontWeight: 800, color: "#E8463A" }}>72%</span>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>Are you using your coverage?</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              {ASSET_TYPES.map((a) => {
+                const pct = a.total > 0 ? (a.used / a.total) * 100 : 0;
+                const remaining = a.total - a.used;
+                const fillColor = a.used === 0 ? "#DC2626" : pct < 50 ? "#F59E0B" : pct < 100 ? "#16A34A" : "#10B981";
+                const status = a.used === 0 ? { label: "EMPTY", color: "#DC2626" }
+                  : remaining === 0 ? { label: "FULL", color: "#16A34A" }
+                  : { label: `+${remaining} AVAIL`, color: "#F59E0B" };
+                return (
+                  <div key={a.key} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 11 }}>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                      background: `${a.color}12`, border: `1px solid ${a.color}25`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={a.color} strokeWidth="2"><path d={a.icon} /></svg>
+                    </div>
+                    <span style={{ width: 124, fontWeight: 600, color: t.text60, flexShrink: 0 }}>{a.label}</span>
+                    <div style={{ flex: 1, height: 7, borderRadius: 4, background: t.bgElevated, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${pct}%`, background: fillColor, opacity: 0.85, transition: "width 0.4s" }} />
+                    </div>
+                    <span className="mono" style={{ width: 36, textAlign: "right", fontWeight: 700, fontSize: 11, color: t.text }}>{a.used}/{a.total}</span>
+                    <span className="mono" style={{ width: 70, textAlign: "right", fontSize: 9, fontWeight: 700, color: status.color, letterSpacing: "0.04em" }}>{status.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. SOURCE COVERAGE RADAR — radar + legend side by side */}
+          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+              <div>
+                <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Source Coverage</div>
+                <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>Detection depth by channel</span>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div className="mono" style={{ fontSize: 9, color: t.text30, letterSpacing: "0.06em", textTransform: "uppercase" }}>AVG</div>
+                <span className="hfont" style={{ fontSize: 18, fontWeight: 700, color: "#16A34A" }}>72%</span>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 16, alignItems: "center" }}>
+              <div style={{ display: "flex", justifyContent: "center" }}><RadarChart t={t} /></div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {RADAR_LABELS.map((label, i) => {
+                  const pct = Math.round(RADAR_VALUES[i] * 100);
+                  const color = pct >= 75 ? "#16A34A" : pct >= 55 ? "#F59E0B" : "#DC2626";
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: i < RADAR_LABELS.length - 1 ? `1px solid ${t.borderRow}` : "none" }}>
+                      <span style={{ width: 6, height: 6, borderRadius: 1.5, background: color, flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 11, color: t.text60 }}>{label}</span>
+                      <span className="mono" style={{ fontSize: 11, fontWeight: 700, color }}>{pct}%</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Top Generated Alarms — below radar */}
+          {/* 3. FINDINGS BY ASSET TYPE */}
           <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Top Generated Alarms</div>
-              <span className="hfont" style={{ fontSize: 16, fontWeight: 800 }}>{TOP_ALARMS.reduce((s, a) => s + a.count, 0).toLocaleString()}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Findings by Asset Type</div>
+              <span className="mono" style={{ fontSize: 11, color: "#FF4562", fontWeight: 700 }}>{FINDINGS_BY_TYPE.reduce((s, f) => s + f.count, 0).toLocaleString()} total</span>
             </div>
-            {TOP_ALARMS.map((alarm, i) => {
-              const barPct = (alarm.count / TOP_ALARMS[0].count) * 100;
-              return (
-                <div key={i} style={{ marginBottom: 10 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, color: t.text50 }}>{alarm.label}</span>
-                    <span className="mono" style={{ fontSize: 10, color: t.text35 }}>{alarm.count}</span>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>What your assets are catching</span>
+            <div>
+              {FINDINGS_BY_TYPE.map((f, i) => {
+                const trendColor = f.trendDir === "up" ? "#FF4562" : "#16A34A";
+                const ArrowIcon = f.trendDir === "up"
+                  ? <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 14l6-6 6 6" /></svg>
+                  : <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 10l6 6 6-6" /></svg>;
+                return (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "center", gap: 12, padding: "10px 0",
+                    borderBottom: i < FINDINGS_BY_TYPE.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                  }}>
+                    <div style={{ width: 4, height: 32, borderRadius: 2, background: f.color, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: t.text70 }}>{f.name}</div>
+                      <div className="mono" style={{ fontSize: 10, color: t.text35, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>From: {f.source}</div>
+                    </div>
+                    <span className="hfont" style={{ fontSize: 16, fontWeight: 700, color: f.color, minWidth: 50, textAlign: "right" }}>{f.count}</span>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 3, color: trendColor, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, minWidth: 48, justifyContent: "flex-end" }}>
+                      {ArrowIcon}{f.trend}
+                    </div>
                   </div>
-                  <div style={{ height: 4, borderRadius: 2, background: t.bgElevated, overflow: "hidden" }}>
-                    <div style={{ height: "100%", borderRadius: 2, background: alarm.color, width: `${barPct}%`, opacity: 0.7 }} />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* ─── RIGHT COLUMN: Recommendations ─── */}
-        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Recommendations</div>
-            <span className="hfont" style={{ fontSize: 15, fontWeight: 700 }}>Improve your coverage</span>
+          {/* 4. TOP ALARM-GENERATING ASSETS */}
+          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Top Alarm-Generating Assets</div>
+              <span className="mono" style={{ fontSize: 11, color: t.text50, fontWeight: 600 }}>{TOP_ALARM_ASSETS.reduce((s, a) => s + a.count, 0).toLocaleString()} total</span>
+            </div>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>Which assets trigger the most alarms</span>
+            <div>
+              {TOP_ALARM_ASSETS.map((a, i) => {
+                const max = TOP_ALARM_ASSETS[0].count;
+                const barPct = (a.count / max) * 100;
+                return (
+                  <div key={i} style={{
+                    display: "grid", gridTemplateColumns: "16px minmax(0,1fr) 70px 60px 36px",
+                    alignItems: "center", gap: 10, padding: "8px 0",
+                    borderBottom: i < TOP_ALARM_ASSETS.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                  }}>
+                    <span className="mono" style={{ fontSize: 9, color: t.text25, fontWeight: 700 }}>{a.rank}</span>
+                    <span className="mono" style={{ fontSize: 11, color: t.text70, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
+                    <span className="tag" style={{ background: `${a.color}14`, color: a.color, fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 4, justifySelf: "start", letterSpacing: "0.04em" }}>{a.type}</span>
+                    <div style={{ height: 5, borderRadius: 3, background: t.bgElevated, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${barPct}%`, background: a.color, opacity: 0.75 }} />
+                    </div>
+                    <span className="hfont" style={{ fontSize: 13, fontWeight: 700, color: a.color, textAlign: "right" }}>{a.count}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div style={{ flex: 1, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-            {recommendations.map((rec, i) => (
-              <div key={rec.key} style={{
-                padding: "12px 14px", borderRadius: 10,
-                background: t.bgCard, border: `1px solid ${t.border}`,
-                borderLeft: `3px solid ${rec.color}`,
-                cursor: "pointer", transition: "all 0.15s",
-              }}
-                onClick={() => { setAddModalType(rec.key); setAddModalOpen(true); }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = `${rec.color}40`}
-                onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+
+          {/* 5. RECENT SCAN ACTIVITY */}
+          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Recent Scan Activity</div>
+              <span className="mono" style={{ fontSize: 11, color: "#16A34A", fontWeight: 700 }}>All scanned &lt;5m ago</span>
+            </div>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>Latest scans across your assets</span>
+            <div>
+              {RECENT_SCANS.map((s, i) => {
+                const isNew = s.status === "new";
+                return (
+                  <div key={i} style={{
+                    display: "grid", gridTemplateColumns: "minmax(0,1fr) auto 80px 70px",
+                    alignItems: "center", gap: 12, padding: "7px 0", fontSize: 11,
+                    borderBottom: i < RECENT_SCANS.length - 1 ? `1px solid ${t.borderRow}` : "none",
+                  }}>
+                    <span className="mono" style={{ fontSize: 11, color: t.text60, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.asset}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: isNew ? "#F59E0B" : "transparent" }}>{isNew ? `+${s.newFindings} new finding${s.newFindings > 1 ? "s" : ""}` : "—"}</span>
+                    <span className="tag" style={{
+                      background: isNew ? "rgba(255,69,98,0.10)" : "rgba(22,163,74,0.10)",
+                      color: isNew ? "#FF4562" : "#16A34A",
+                      fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
+                      letterSpacing: "0.04em", justifySelf: "end",
+                    }}>{isNew ? "NEW HITS" : "CLEAN"}</span>
+                    <span className="mono" style={{ fontSize: 9, color: t.text30, textAlign: "right" }}>{s.time}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 6. COVERAGE GAPS */}
+          {unconfigured.length > 0 && (
+            <div>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4, paddingLeft: 2 }}>Coverage Gaps</div>
+              <div className="hfont" style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, paddingLeft: 2 }}>Unconfigured asset types leaving blind spots</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {unconfigured.map((g) => (
+                  <div key={g.key}
+                    onClick={() => { setAddModalType(g.key); setAddModalOpen(true); }}
+                    style={{
+                      padding: "11px 14px", borderRadius: 10, cursor: "pointer",
+                      background: "rgba(255,69,98,0.05)", border: "1px solid rgba(255,69,98,0.18)",
+                      display: "flex", alignItems: "center", gap: 12, transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,69,98,0.08)"; e.currentTarget.style.borderColor = "rgba(255,69,98,0.3)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,69,98,0.05)"; e.currentTarget.style.borderColor = "rgba(255,69,98,0.18)"; }}
+                  >
+                    <div style={{
+                      width: 30, height: 30, borderRadius: 7, flexShrink: 0,
+                      background: "rgba(255,69,98,0.10)", border: "1px solid rgba(255,69,98,0.20)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><path d={g.icon} /></svg>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: t.text }}>{g.label} — 0/{g.total} configured</div>
+                      <div style={{ fontSize: 10.5, color: t.text40, marginTop: 2, lineHeight: 1.4 }}>{g.desc}. Dark web mentions targeting this category will be missed.</div>
+                    </div>
+                    <span className="mono" style={{ fontSize: 10, color: "#FF4562", fontWeight: 700, flexShrink: 0, letterSpacing: "0.04em" }}>+ Add Now</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 7. RECOMMENDATIONS */}
+          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Recommendations</div>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>Improve your coverage</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {recommendations.map((rec) => (
+                <div key={rec.key} style={{
+                  padding: "10px 12px", borderRadius: 9,
+                  background: t.bgCard, border: `1px solid ${t.border}`,
+                  borderLeft: `3px solid ${rec.color}`,
+                  cursor: "pointer", transition: "all 0.15s",
+                  display: "flex", alignItems: "center", gap: 10,
+                }}
+                  onClick={() => { setAddModalType(rec.key); setAddModalOpen(true); }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${rec.color}40`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
+                >
                   <div style={{
-                    width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                    width: 24, height: 24, borderRadius: 6, flexShrink: 0,
                     background: `${rec.color}12`, display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={rec.color} strokeWidth="2"><path d={rec.icon} /></svg>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={rec.color} strokeWidth="2"><path d={rec.icon} /></svg>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: t.text70 }}>{rec.title}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: t.text70 }}>{rec.title}</div>
+                    <div style={{ fontSize: 10.5, color: t.text35, lineHeight: 1.4, marginTop: 1 }}>{rec.description}</div>
+                  </div>
                 </div>
-                <div style={{ fontSize: 11, color: t.text35, lineHeight: 1.45, paddingLeft: 30 }}>{rec.description}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -436,11 +625,11 @@ export default function ProtectionCoverage() {
         <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Top 5 Most Used Sources</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
           {TOP_SOURCES.map((source, i) => {
-            const colors = ["#E8463A", "#A855F7", "#3B82F6", "#F59E0B", "#10B981"];
+            const colors = ["#FF4562", "#A855F7", "#3B82F6", "#F59E0B", "#10B981"];
             return (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: t.bgCard, border: `1px solid ${t.border}` }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, background: `${colors[i]}15`, border: `1px solid ${colors[i]}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span className="hfont" style={{ fontSize: 12, fontWeight: 800, color: colors[i] }}>{i + 1}</span>
+                  <span className="hfont" style={{ fontSize: 12, fontWeight: 700, color: colors[i] }}>{i + 1}</span>
                 </div>
                 <div style={{ flex: 1 }}>
                   <span style={{ fontSize: 12, fontWeight: 500, color: t.text60 }}>{source.label}</span>
@@ -466,8 +655,8 @@ export default function ProtectionCoverage() {
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(232,70,58,0.1)", border: "1px solid rgba(232,70,58,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,69,98,0.1)", border: "1px solid rgba(255,69,98,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 </div>
                 <span className="hfont" style={{ fontSize: 18, fontWeight: 700 }}>Add New Asset</span>
               </div>
@@ -477,9 +666,9 @@ export default function ProtectionCoverage() {
             {/* Steps indicator */}
             <div style={{ display: "flex", gap: 0, marginBottom: 24 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#E8463A", marginBottom: 4 }}>Asset Type</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#FF4562", marginBottom: 4 }}>Asset Type</div>
                 <div className="mono" style={{ fontSize: 9, color: t.text30 }}>STEP 1</div>
-                <div style={{ height: 2, background: "#E8463A", borderRadius: 1, marginTop: 8 }} />
+                <div style={{ height: 2, background: "#FF4562", borderRadius: 1, marginTop: 8 }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 500, color: t.text30, marginBottom: 4 }}>Asset Details</div>
@@ -542,7 +731,7 @@ export default function ProtectionCoverage() {
                     style={{
                       width: "100%", height: 100, padding: "12px 14px", borderRadius: 10,
                       background: t.bgInput, border: `1px solid ${t.borderMed}`,
-                      color: t.text, fontSize: 13, fontFamily: "'Satoshi',sans-serif",
+                      color: t.text, fontSize: 13, fontFamily: "'Inter', sans-serif",
                       outline: "none", resize: "none",
                     }}
                   />
@@ -558,15 +747,15 @@ export default function ProtectionCoverage() {
               <button onClick={() => setAddModalOpen(false)} style={{
                 flex: 1, padding: "12px", borderRadius: 10, border: `1px solid ${t.borderMed}`,
                 background: "transparent", color: t.text60, fontSize: 13, fontWeight: 500,
-                cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+                cursor: "pointer", fontFamily: "'Inter', sans-serif",
               }}>
                 Cancel
               </button>
               <button style={{
                 flex: 2, padding: "12px", borderRadius: 10, border: "none",
-                background: "#E8463A", color: "#fff", fontSize: 13, fontWeight: 700,
-                cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif",
-                boxShadow: "0 4px 16px rgba(232,70,58,0.3)",
+                background: "#FF4562", color: "#fff", fontSize: 13, fontWeight: 700,
+                cursor: "pointer", fontFamily: "'Red Hat Display', sans-serif",
+                boxShadow: "0 4px 16px rgba(255,69,98,0.3)",
               }}>
                 Continue
               </button>

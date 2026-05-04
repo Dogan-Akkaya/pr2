@@ -243,7 +243,7 @@ export default function DarkWebNews() {
   // ── Tag colors by type ──
   function tagColor(tag) {
     const countries = ["US", "CA", "CN", "TH", "ID", "DE", "FR", "NL", "SG", "MY", "PH", "North America", "Asia", "Europe", "Southeast Asia"];
-    if (countries.includes(tag)) return { bg: "rgba(232,70,58,0.08)", color: "#E8463A" };
+    if (countries.includes(tag)) return { bg: "rgba(255,69,98,0.08)", color: "#FF4562" };
     const categories = ["Database Leak", "Access Sale", "RDP", "IP Theft"];
     if (categories.includes(tag)) return { bg: "rgba(59,130,246,0.08)", color: "#3B82F6" };
     const sectors = ["Legal", "Manufacturing", "Construction", "Healthcare", "Government", "Law Enforcement", "Semiconductor", "Finance", "E-Commerce"];
@@ -304,22 +304,22 @@ export default function DarkWebNews() {
               <AreaChart data={CHART_DATA}>
                 <defs>
                   <linearGradient id="dwn-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#E8463A" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="#E8463A" stopOpacity={0.01} />
+                    <stop offset="0%" stopColor="#FF4562" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="#FF4562" stopOpacity={0.01} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text30 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text30 }} width={30} />
                 <Tooltip {...ttS} />
-                <Area type="monotone" dataKey="v" stroke="#E8463A" strokeWidth={2} fill="url(#dwn-fill)" dot={false} name="Posts" />
+                <Area type="monotone" dataKey="v" stroke="#FF4562" strokeWidth={2} fill="url(#dwn-fill)" dot={false} name="Posts" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
           <div style={{ padding: "0 20px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8463A", boxShadow: "0 0 6px rgba(232,70,58,0.5)" }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF4562", boxShadow: "0 0 6px rgba(255,69,98,0.5)" }} />
             <span style={{ fontSize: 12, color: t.text50 }}>Dark Web Posts This Month:</span>
-            <span className="hfont" style={{ fontSize: 16, fontWeight: 800, color: t.text }}>847</span>
+            <span className="hfont" style={{ fontSize: 16, fontWeight: 700, color: t.text }}>847</span>
           </div>
         </div>
 
@@ -368,7 +368,7 @@ export default function DarkWebNews() {
               <span style={{ fontSize: 11, color: t.text40 }}>{s.label}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span className="hfont" style={{ fontSize: 24, fontWeight: 800, color: t.text, letterSpacing: "-0.02em" }}>{s.value}</span>
+              <span className="hfont" style={{ fontSize: 24, fontWeight: 700, color: t.text, letterSpacing: "-0.02em" }}>{s.value}</span>
               <span className="mono" style={{ fontSize: 10, color: s.color }}>{s.trend} this week</span>
             </div>
           </div>
@@ -389,29 +389,29 @@ export default function DarkWebNews() {
           {/* Type dropdown */}
           <div style={{
             padding: "7px 12px", borderRadius: 8,
-            background: "rgba(232,70,58,0.08)", border: "1px solid rgba(232,70,58,0.2)",
+            background: "rgba(255,69,98,0.08)", border: "1px solid rgba(255,69,98,0.2)",
             display: "flex", alignItems: "center", gap: 6, cursor: "pointer",
           }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#E8463A" }}>Dark Web News</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#FF4562" }}>Dark Web News</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
           </div>
 
           {/* Show All toggle */}
           <button onClick={() => setShowAll(!showAll)} style={{
             padding: "7px 14px", borderRadius: 8, fontSize: 11, fontWeight: 500,
-            background: showAll ? "rgba(232,70,58,0.08)" : t.bgHover,
-            border: showAll ? "1px solid rgba(232,70,58,0.2)" : `1px solid ${t.borderLight}`,
-            color: showAll ? "#E8463A" : t.text50, cursor: "pointer", fontFamily: "'Satoshi',sans-serif",
+            background: showAll ? "rgba(255,69,98,0.08)" : t.bgHover,
+            border: showAll ? "1px solid rgba(255,69,98,0.2)" : `1px solid ${t.borderLight}`,
+            color: showAll ? "#FF4562" : t.text50, cursor: "pointer", fontFamily: "'Inter', sans-serif",
           }}>{showAll ? "Show All" : "Show Top 4"}</button>
 
           {/* Separator */}
           <div style={{ width: 1, height: 24, background: t.bgElevated }} />
 
           {/* FilterDropdown: Category */}
-          <FilterDropdown label="Category" options={ALL_CATEGORIES} selected={selCategories} onSelectionChange={setSelCategories} accentColor="#E8463A" />
+          <FilterDropdown label="Category" options={ALL_CATEGORIES} selected={selCategories} onSelectionChange={setSelCategories} accentColor="#FF4562" />
 
           {/* FilterDropdown: Countries */}
-          <FilterDropdown label="Countries" options={ALL_COUNTRIES} selected={selCountries} onSelectionChange={setSelCountries} accentColor="#E8463A" />
+          <FilterDropdown label="Countries" options={ALL_COUNTRIES} selected={selCountries} onSelectionChange={setSelCountries} accentColor="#FF4562" />
 
           {/* FilterDropdown: Tags */}
           <FilterDropdown label="Tags" options={ALL_TAGS} selected={selTags} onSelectionChange={setSelTags} accentColor="#3B82F6" />
@@ -438,11 +438,11 @@ export default function DarkWebNews() {
             </svg>
             <input placeholder="Search news..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{
               width: "100%", padding: "8px 12px 8px 36px", fontSize: 12,
-              fontFamily: "'Satoshi',sans-serif", background: t.bgInput,
+              fontFamily: "'Inter', sans-serif", background: t.bgInput,
               border: `1px solid ${t.borderLight}`, borderRadius: 8,
               color: t.text, outline: "none",
             }}
-            onFocus={e => e.target.style.borderColor = "rgba(232,70,58,0.3)"}
+            onFocus={e => e.target.style.borderColor = "rgba(255,69,98,0.3)"}
             onBlur={e => e.target.style.borderColor = t.borderLight}
             />
           </div>
@@ -471,8 +471,8 @@ export default function DarkWebNews() {
                 <div key={a.id} onClick={() => setSelectedId(a.id)} style={{
                   padding: "16px 20px", cursor: "pointer",
                   borderBottom: `1px solid ${t.borderSection}`,
-                  background: isActive ? "rgba(232,70,58,0.04)" : "transparent",
-                  borderLeft: isActive ? "2px solid #E8463A" : "2px solid transparent",
+                  background: isActive ? "rgba(255,69,98,0.04)" : "transparent",
+                  borderLeft: isActive ? "2px solid #FF4562" : "2px solid transparent",
                   transition: "all 0.2s",
                 }}>
                   {/* Thumbnail placeholder */}
@@ -519,7 +519,7 @@ export default function DarkWebNews() {
           <div style={{ flex: 1, overflowY: "auto", maxHeight: 700, padding: "24px 28px" }}>
             {/* Title + Close button */}
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
-              <h2 className="hfont" style={{ fontSize: 18, fontWeight: 800, color: t.text, lineHeight: 1.4, margin: 0, letterSpacing: "-0.02em" }}>
+              <h2 className="hfont" style={{ fontSize: 18, fontWeight: 700, color: t.text, lineHeight: 1.4, margin: 0, letterSpacing: "-0.02em" }}>
                 {selected.title}
               </h2>
               <button onClick={() => setSelectedId(null)} style={{ width: 28, height: 28, borderRadius: 8, border: "none", background: t.bgElevated, color: t.text50, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✕</button>
@@ -573,23 +573,23 @@ export default function DarkWebNews() {
             {/* AI Insights Card */}
             <div style={{
               borderRadius: 12, padding: "18px 20px", marginBottom: 20,
-              background: "linear-gradient(135deg, rgba(232,70,58,0.06) 0%, rgba(168,85,247,0.04) 100%)",
-              border: "1px solid rgba(232,70,58,0.12)",
+              background: "linear-gradient(135deg, rgba(255,69,98,0.06) 0%, rgba(168,85,247,0.04) 100%)",
+              border: "1px solid rgba(255,69,98,0.12)",
             }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{
                     width: 28, height: 28, borderRadius: 8,
-                    background: "rgba(232,70,58,0.1)", border: "1px solid rgba(232,70,58,0.2)",
+                    background: "rgba(255,69,98,0.1)", border: "1px solid rgba(255,69,98,0.2)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8463A" strokeWidth="1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="1.5">
                       <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
                     </svg>
                   </div>
                   <span className="hfont" style={{ fontSize: 13, fontWeight: 700, color: t.text }}>SOCRadar AI Insights</span>
                 </div>
-                <span onClick={() => setAiExpanded(!aiExpanded)} style={{ fontSize: 11, color: "#E8463A", cursor: "pointer", fontWeight: 600 }}>{aiExpanded ? "Show Less" : "Read More"}</span>
+                <span onClick={() => setAiExpanded(!aiExpanded)} style={{ fontSize: 11, color: "#FF4562", cursor: "pointer", fontWeight: 600 }}>{aiExpanded ? "Show Less" : "Read More"}</span>
               </div>
               <p style={{
                 fontSize: 12, lineHeight: 1.65, color: t.text55, marginBottom: 14,
@@ -606,7 +606,7 @@ export default function DarkWebNews() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {selected.insights.map((ins, i) => (
                       <div key={i} style={{ display: "flex", gap: 8, fontSize: 11, lineHeight: 1.5 }}>
-                        <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#E8463A", marginTop: 6, flexShrink: 0, boxShadow: "0 0 4px rgba(232,70,58,0.4)" }} />
+                        <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#FF4562", marginTop: 6, flexShrink: 0, boxShadow: "0 0 4px rgba(255,69,98,0.4)" }} />
                         <span style={{ color: t.text50 }}>
                           <strong style={{ color: t.text70, fontWeight: 600 }}>{ins.lead}</strong> {ins.text}
                         </span>

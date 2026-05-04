@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fraud Intelligence — Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080C15;--card:#111827;--border:rgba(51,65,85,0.5);
+  --red:#FF4562;--amber:#F59E0B;--green:#22C55E;--indigo:#818CF8;--purple:#A855F7;--cyan:#22D3EE;
+  --text:#E2E8F0;--muted:#64748B;--dim:#475569;--faint:#334155;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:20px;line-height:1.4}
+.mono{font-family:'JetBrains Mono',monospace}
+.pagetitle{text-align:center;color:var(--dim);font-size:10px;letter-spacing:3px;margin-bottom:16px;font-weight:600}
+.section-label{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.link{color:var(--indigo);font-size:9px;font-weight:500;cursor:pointer}
+
+/* ═══ BANNER ═══ */
+.banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px}
+.banner-icon{width:40px;height:40px;border-radius:10px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.banner-info{flex:1}
+.banner-title{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:8px}
+.banner-title .badge{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700}
+.banner-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.banner-stats{display:flex;gap:20px;flex-shrink:0}
+.bs{text-align:center;min-width:55px}
+.bs-label{font-size:7px;color:var(--dim);letter-spacing:1.5px;font-weight:700}
+.bs-val{font-size:18px;font-weight:800;margin-top:1px}
+.export-btn{width:36px;height:36px;border-radius:8px;background:rgba(51,65,85,0.3);border:1px solid rgba(51,65,85,0.4);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:14px}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid rgba(51,65,85,0.3);padding-bottom:0}
+.tab{
+  font-size:10px;font-weight:600;padding:8px 16px;cursor:pointer;
+  color:var(--dim);border-bottom:2px solid transparent;transition:all 0.15s;
+  display:flex;align-items:center;gap:5px;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--amber);border-bottom-color:var(--amber)}
+.tab .tab-count{font-size:8px;background:rgba(51,65,85,0.3);padding:1px 6px;border-radius:4px;font-weight:700}
+.tab.active .tab-count{background:rgba(245,158,11,0.15);color:var(--amber)}
+
+/* ═══ MASTER-DETAIL LAYOUT ═══ */
+.content{display:flex;gap:12px}
+.feed{flex:1;min-width:0}
+.sidebar{width:300px;flex-shrink:0}
+
+/* ═══ FILTER BAR ═══ */
+.filter-bar{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.fpill{font-size:8px;font-weight:600;padding:4px 10px;border-radius:5px;border:1px solid rgba(51,65,85,0.3);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:4px}
+.fpill.active{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:var(--amber)}
+.fpill .fdot{width:5px;height:5px;border-radius:50%}
+.fpill-status.active{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.25);color:var(--green)}
+.filter-sep{width:1px;height:20px;background:rgba(51,65,85,0.3);margin:0 4px}
+.filter-search{
+  flex:1;min-width:200px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.3);
+  border-radius:6px;padding:6px 10px;font-size:9px;color:var(--text);font-family:inherit;outline:none;
+}
+.filter-search::placeholder{color:var(--dim)}
+.time-pills{display:flex;gap:3px;margin-left:auto}
+.tpill{font-size:7px;padding:3px 8px;border-radius:4px;border:1px solid rgba(51,65,85,0.3);color:var(--dim);cursor:pointer}
+.tpill.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* ═══ LISTING CARD ═══ */
+.listing{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;margin-bottom:6px;cursor:pointer;transition:border-color 0.15s;
+  position:relative;
+}
+.listing:hover{border-color:rgba(99,102,241,0.25)}
+.listing.selected{border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.03)}
+.listing-top{display:flex;align-items:flex-start;gap:10px}
+.sev-bar{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.sev-crit{background:var(--red)}
+.sev-high{background:var(--amber)}
+.sev-med{background:#FB923C}
+.sev-low{background:var(--indigo)}
+.listing-thumb{
+  width:44px;height:44px;border-radius:6px;background:rgba(15,23,42,0.6);
+  border:1px solid rgba(51,65,85,0.3);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;font-size:7px;color:var(--dim);text-align:center;
+}
+.listing-body{flex:1;min-width:0}
+.listing-asset{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.sev-tag{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag-crit{background:rgba(255,69,98,0.15);color:var(--red)}
+.tag-high{background:rgba(245,158,11,0.15);color:var(--amber)}
+.tag-med{background:rgba(251,146,60,0.15);color:#FB923C}
+.tag-low{background:rgba(99,102,241,0.12);color:var(--indigo)}
+.product-type{font-size:7px;padding:1px 6px;border-radius:3px;background:rgba(168,85,247,0.1);color:var(--purple);font-weight:600}
+.listing-meta{font-size:8px;color:var(--dim);margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.source-badge{background:rgba(51,65,85,0.3);padding:1px 6px;border-radius:3px;font-weight:600;color:#94A3B8;font-size:7px}
+.listing-status{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px;margin-top:3px;display:inline-block}
+.status-open{background:rgba(34,197,94,0.1);color:var(--green)}
+.status-closed{background:rgba(99,102,241,0.1);color:var(--indigo)}
+.listing-price{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;flex-shrink:0;margin-left:8px}
+.price-val{font-size:14px;font-weight:800;color:var(--amber)}
+.price-date{font-size:7px;color:var(--dim);margin-top:2px}
+
+/* Lead Flow Breadcrumb */
+.lead-flow{
+  display:flex;align-items:center;gap:4px;margin-top:6px;padding-top:6px;
+  border-top:1px solid rgba(51,65,85,0.15);font-size:7px;color:var(--dim);
+}
+.flow-step{display:flex;align-items:center;gap:3px;background:rgba(15,23,42,0.5);padding:2px 6px;border-radius:3px}
+.flow-step.match{background:rgba(255,69,98,0.08);color:var(--red);font-weight:600}
+.flow-step.source{color:var(--cyan)}
+.flow-step.market{color:var(--purple)}
+.flow-arrow{color:var(--faint);font-size:9px}
+
+/* Seller badge */
+.seller-badge{display:inline-flex;align-items:center;gap:3px;font-size:7px;color:#94A3B8}
+.seller-rating{color:var(--amber);font-weight:700}
+
+/* ═══ SIDEBAR WIDGETS ═══ */
+.widget{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.widget-label{font-size:8px;color:var(--dim);letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.widget-title{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.widget-val{font-size:9px;color:var(--muted);margin-left:auto}
+
+/* Card Checker */
+.checker-alert{
+  background:rgba(255,69,98,0.04);border:1px solid rgba(255,69,98,0.12);
+  border-radius:6px;padding:8px 10px;margin-bottom:4px;font-size:9px;
+}
+.checker-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.checker-bin{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px}
+.checker-result{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:700}
+.checker-meta{font-size:7px;color:var(--dim);display:flex;gap:8px}
+.sparkline{display:flex;align-items:flex-end;gap:1px;height:20px}
+.sparkline span{width:3px;border-radius:1px}
+
+/* Top Sellers */
+.seller-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.seller-row:last-child{border-bottom:none}
+.seller-rank{width:16px;font-size:8px;color:var(--dim);font-weight:700}
+.seller-handle{flex:1;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:9px}
+.seller-market{font-size:7px;color:var(--dim)}
+.seller-count{font-weight:700;width:24px;text-align:right}
+.seller-stars{font-size:8px;color:var(--amber)}
+
+/* Marketplace breakdown */
+.market-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:8px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.market-row:last-child{border-bottom:none}
+.market-name{flex:1;font-weight:600;font-size:9px}
+.market-bar{width:80px;height:5px;background:rgba(51,65,85,0.2);border-radius:3px;overflow:hidden}
+.market-bar-fill{height:100%;border-radius:3px}
+.market-count{width:28px;text-align:right;font-weight:700;font-size:9px}
+
+/* Data type breakdown */
+.dtype-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:8px;border-bottom:1px solid rgba(51,65,85,0.08)}
+.dtype-row:last-child{border-bottom:none}
+.dtype-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.dtype-name{flex:1;font-size:9px}
+.dtype-count{font-weight:700;font-size:9px;width:28px;text-align:right}
+
+/* BEC Section */
+.bec-signal{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:7px;padding:10px 12px;margin-bottom:5px}
+.bec-signal-header{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:10px;font-weight:700}
+.bec-signal-icon{font-size:14px}
+.bec-signal-count{font-size:8px;color:var(--muted);margin-left:auto}
+.bec-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.bec-row:last-child{border-bottom:none}
+.bec-email{font-family:'JetBrains Mono',monospace;font-size:8px;flex:1}
+.bec-access{font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(99,102,241,0.1);color:var(--indigo);font-weight:600}
+
+/* Crypto Section */
+.crypto-card{background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.25);border-radius:7px;padding:10px 12px;margin-bottom:5px}
+.crypto-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.crypto-icon{font-size:14px}
+.crypto-title{font-size:10px;font-weight:700}
+.crypto-count{font-size:8px;color:var(--muted);margin-left:auto}
+.crypto-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:9px;border-bottom:1px solid rgba(51,65,85,0.1)}
+.crypto-row:last-child{border-bottom:none}
+.crypto-exchange{font-size:7px;padding:2px 6px;border-radius:3px;font-weight:600}
+
+/* Pagination */
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:8px;color:var(--dim);margin-top:8px}
+.page-dots{display:flex;gap:3px}
+.page-dot{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;border:1px solid rgba(51,65,85,0.3);cursor:pointer}
+.page-dot.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:var(--indigo)}
+
+/* Legend */
+.legend{background:rgba(15,23,42,0.4);border-radius:8px;padding:14px 20px;margin-top:18px;text-align:center}
+.legend-t{color:var(--dim);font-size:8px;letter-spacing:2px;font-weight:600;margin-bottom:6px}
+.legend-items{display:flex;justify-content:center;gap:20px;font-size:8px;color:var(--muted);flex-wrap:wrap}
+.lsw{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+FRAUD INTELLIGENCE PAGE — IMPLEMENTATION BRIEF FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+STRUCTURAL REFERENCE: Black Market page (Direction C: Threat Dossier)
+LAYOUT: Tabbed top-level nav + master feed (left ~65%) + sidebar widgets (~35%)
+
+TAB STRUCTURE:
+- "All" (default) — mixed feed of all fraud signals, sorted by severity/recency
+- "Card Data" — CVVs, Dumps, Fullz, BINs, bank logs (existing covered types)
+- "BEC Exposure" — email credentials, BEC toolkits, money mule indicators
+- "Crypto" — exchange credentials, phishing kits, wallet drainer detections
+- "Fraud Markets" — STYX/FreshTools/Abacus marketplace query results
+
+INTERACTION:
+- Tabs filter the feed; sidebar widgets update to reflect the active tab
+- Each listing card is expandable (slide-in detail panel, same as Black Market)
+- Lead flow breadcrumb renders inline on each card: [crawl] → [marketplace] → [match] → [asset]
+- Card Checker widget is sidebar-only, always visible (it's a monitoring signal, not a listing)
+
+DATA MODELS — see the design brief document for complete shapes:
+- CardCheckerAlert: bin, masked_card, checker_service, detected_at, status
+- FraudMarketLead: marketplace, seller{}, product_type, matched_asset, match_type, price, lead_flow
+- BECSignal: signal_type (email_credential | bec_toolkit | mule_recruitment), + type-specific fields
+- CryptoExposure: signal_type (exchange_credential | phishing_kit | wallet_mention)
+- All existing types: CVV, Dump, Fullz, BIN listing, SWIFT/IBAN, bank_log, SSN
+
+COMPONENT HIERARCHY:
+FraudIntelligencePage
+├── TopBanner (KPIs)
+├── TabBar (All | Card Data | BEC Exposure | Crypto | Fraud Markets)
+├── ContentLayout
+│   ├── FeedPanel (left ~65%)
+│   │   ├── FilterBar (severity, status, time, search)
+│   │   ├── ListingFeed (scrollable, card-based)
+│   │   │   └── FraudListingCard
+│   │   │       ├── SeverityBar + Thumbnail + Body + Price
+│   │   │       └── LeadFlowBreadcrumb (inline, bottom of card)
+│   │   └── Pagination
+│   └── SidebarPanel (right ~35%)
+│       ├── CardCheckerActivity (sparkline + alert list)
+│       ├── TopSellers (repeat offenders)
+│       ├── ByMarketplace (bar breakdown)
+│       └── ByDataType (category breakdown)
+
+SEVERITY MAPPING:
+- Card checker alerts → always HIGH (pre-fraud signal)
+- BEC email credentials → CRITICAL (direct attack enablement)
+- BEC toolkits → HIGH
+- Money mule indicators → MEDIUM
+- Crypto exchange credentials → HIGH
+- Crypto phishing kits → HIGH
+- Fullz / bank logs → CRITICAL
+- CVVs / Dumps → HIGH
+- BINs in listings → MEDIUM
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="pagetitle">FRAUD INTELLIGENCE &middot; WIREFRAME LAYOUT</div>
+
+<!-- ═══════════ BANNER ═══════════ -->
+<div class="banner">
+  <div class="banner-icon">&#128176;</div>
+  <div class="banner-info">
+    <div class="banner-title">FRAUD INTELLIGENCE MONITOR <span class="badge" style="background:rgba(255,69,98,0.15);color:var(--red)">4 critical signals</span></div>
+    <div class="banner-desc">Tracking financial fraud signals across dark web marketplaces and underground forums</div>
+  </div>
+  <div class="banner-stats">
+    <div class="bs"><div class="bs-label">ACTIVE ALERTS</div><div class="bs-val" style="color:var(--red)">23</div></div>
+    <div class="bs"><div class="bs-label">CRITICAL</div><div class="bs-val" style="color:var(--red)">4</div></div>
+    <div class="bs"><div class="bs-label">SOURCES</div><div class="bs-val">8</div></div>
+    <div class="bs"><div class="bs-label">BINs TRACKED</div><div class="bs-val" style="color:var(--amber)">3</div></div>
+    <div class="bs"><div class="bs-label">TOTAL VALUE</div><div class="bs-val" style="color:var(--amber)">$1,240</div></div>
+  </div>
+  <div class="export-btn">&#8615;</div>
+</div>
+
+<!-- ═══════════ TABS ═══════════ -->
+<!-- CLAUDE CODE: Active tab filters the entire feed + sidebar widgets.
+     "All" is default. Tab counts update dynamically based on time filter. -->
+<div class="tabs">
+  <span class="tab active">All <span class="tab-count">23</span></span>
+  <span class="tab">Card Data <span class="tab-count">9</span></span>
+  <span class="tab">BEC Exposure <span class="tab-count">6</span></span>
+  <span class="tab">Crypto <span class="tab-count">4</span></span>
+  <span class="tab">Fraud Markets <span class="tab-count">4</span></span>
+</div>
+
+<!-- ═══════════ CONTENT: FEED + SIDEBAR ═══════════ -->
+<div class="content">
+
+  <!-- ═══ LEFT: FEED ═══ -->
+  <div class="feed">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="fpill active"><span class="fdot" style="background:var(--text)"></span>All Severity</span>
+      <span class="fpill"><span class="fdot" style="background:var(--red)"></span>Critical</span>
+      <span class="fpill"><span class="fdot" style="background:var(--amber)"></span>High</span>
+      <span class="fpill"><span class="fdot" style="background:#FB923C"></span>Medium</span>
+      <span class="fpill"><span class="fdot" style="background:var(--indigo)"></span>Low</span>
+      <span class="filter-sep"></span>
+      <span class="fpill fpill-status active">All Status</span>
+      <span class="fpill">Open</span>
+      <span class="fpill">Closed</span>
+      <input class="filter-search" type="text" placeholder="Search by BIN, domain, email, seller, keyword...">
+      <div class="time-pills">
+        <span class="tpill">24h</span><span class="tpill">7d</span><span class="tpill">30d</span><span class="tpill">90d</span><span class="tpill active">ALL</span>
+      </div>
+    </div>
+
+    <!-- LISTING 1: BEC Email Credential (CRITICAL) -->
+    <div class="listing selected">
+      <div class="listing-top">
+        <div class="sev-bar sev-crit"></div>
+        <div class="listing-thumb"><div>BEC<br>Signal</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            j.sm***@greenanimals.com
+            <span class="sev-tag tag-crit">CRITICAL</span>
+            <span class="product-type">EMAIL CRED</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">FreshTools</span>
+            <span>&middot;</span>
+            <span>OWA / Exchange access</span>
+            <span>&middot;</span>
+            <span class="seller-badge">&#9733; <span class="seller-rating">4.8</span> emailpwnz</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$25</span>
+          <span class="price-date">2025-10-12</span>
+        </div>
+      </div>
+      <div class="lead-flow">
+        <span class="flow-step source">&#9881; SOCRadar Crawl</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step market">FreshTools</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">seller "emailpwnz" posted OWA login</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step match">matched email pattern *@greenanimals.com</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step" style="background:rgba(255,69,98,0.1);color:var(--red);font-weight:700">ALERT</span>
+      </div>
+    </div>
+
+    <!-- LISTING 2: Fullz (CRITICAL) -->
+    <div class="listing">
+      <div class="listing-top">
+        <div class="sev-bar sev-crit"></div>
+        <div class="listing-thumb"><div>Fullz<br>Preview</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            BIN 4532 65** matched — US Fullz bundle
+            <span class="sev-tag tag-crit">CRITICAL</span>
+            <span class="product-type">FULLZ</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">STYX</span>
+            <span>&middot;</span>
+            <span class="seller-badge">&#9733; <span class="seller-rating">4.7</span> Bearss (340 listings)</span>
+            <span>&middot;</span>
+            <span>SSN+DOB+CC verified</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$45</span>
+          <span class="price-date">2025-10-03</span>
+        </div>
+      </div>
+      <div class="lead-flow">
+        <span class="flow-step source">&#9881; SOCRadar Crawl</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step market">STYX Marketplace</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">seller "Bearss" posted fullz bundle</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step match">matched BIN 4532 65** (Chase Visa)</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step" style="background:rgba(255,69,98,0.1);color:var(--red);font-weight:700">ALERT</span>
+      </div>
+    </div>
+
+    <!-- LISTING 3: Crypto Exchange Credential (HIGH) -->
+    <div class="listing">
+      <div class="listing-top">
+        <div class="sev-bar sev-high"></div>
+        <div class="listing-thumb"><div>Crypto<br>Cred</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            d.jo***@greenanimals.com — Coinbase
+            <span class="sev-tag tag-high">HIGH</span>
+            <span class="product-type">EXCHANGE CRED</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Russian Market</span>
+            <span>&middot;</span>
+            <span>Stealer log (Raccoon v2)</span>
+            <span>&middot;</span>
+            <span>Includes 2FA backup codes</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$35</span>
+          <span class="price-date">2025-10-14</span>
+        </div>
+      </div>
+      <div class="lead-flow">
+        <span class="flow-step source">&#9881; Stealer Log Scan</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step market">Russian Market</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">Raccoon v2 exfiltrated Coinbase session</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step match">matched email *@greenanimals.com</span>
+      </div>
+    </div>
+
+    <!-- LISTING 4: BEC Toolkit (HIGH) -->
+    <div class="listing">
+      <div class="listing-top">
+        <div class="sev-bar sev-high"></div>
+        <div class="listing-thumb"><div>BEC<br>Kit</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            "GreenAnimals Bank Invoice Template Pack v2"
+            <span class="sev-tag tag-high">HIGH</span>
+            <span class="product-type">BEC TOOLKIT</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">STYX</span>
+            <span>&middot;</span>
+            <span class="seller-badge">&#9733; <span class="seller-rating">4.2</span> invoiceghost</span>
+            <span>&middot;</span>
+            <span>PDF invoice + email templates + domain spoof guide</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$120</span>
+          <span class="price-date">2025-10-10</span>
+        </div>
+      </div>
+      <div class="lead-flow">
+        <span class="flow-step source">&#9881; SOCRadar Crawl</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step market">STYX Marketplace</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step match">matched brand keyword "GreenAnimals"</span>
+      </div>
+    </div>
+
+    <!-- LISTING 5: Crypto Phishing Kit (HIGH) -->
+    <div class="listing">
+      <div class="listing-top">
+        <div class="sev-bar sev-high"></div>
+        <div class="listing-thumb"><div>Phish<br>Kit</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            Ledger Wallet 2025 Smart Scampage Inferno Multichain
+            <span class="sev-tag tag-high">HIGH</span>
+            <span class="product-type">PHISHING KIT</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Dark Forum</span>
+            <span>&middot;</span>
+            <span class="seller-badge">&#9733; <span class="seller-rating">4.5</span> cryptodrainer_pro</span>
+            <span>&middot;</span>
+            <span>Seed capture &middot; Anti-bot &middot; Multi-chain</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$200</span>
+          <span class="price-date">2025-09-01</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTING 6: CVV (HIGH) -->
+    <div class="listing">
+      <div class="listing-top">
+        <div class="sev-bar sev-high"></div>
+        <div class="listing-thumb"><div>CVV<br>Data</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            BIN 4532 65** — 12 cards, US issuer
+            <span class="sev-tag tag-high">HIGH</span>
+            <span class="product-type">CVV</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Russian Market</span>
+            <span>&middot;</span>
+            <span>d0####ey [platinum]</span>
+            <span>&middot;</span>
+            <span>Verified active</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span class="price-val">$15<span style="font-size:8px;color:var(--dim)">/ea</span></span>
+          <span class="price-date">2025-10-24</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTING 7: Money Mule (MEDIUM) -->
+    <div class="listing">
+      <div class="listing-top">
+        <div class="sev-bar sev-med"></div>
+        <div class="listing-thumb"><div>Mule<br>Recruit</div></div>
+        <div class="listing-body">
+          <div class="listing-asset">
+            Money mule recruitment — US banking sector
+            <span class="sev-tag tag-med">MEDIUM</span>
+            <span class="product-type">MULE RECRUIT</span>
+          </div>
+          <div class="listing-meta">
+            <span class="source-badge">Telegram</span>
+            <span>&middot;</span>
+            <span>"Looking for US-based mules, finance/banking preferred..."</span>
+          </div>
+          <span class="listing-status status-open">&#9679; OPEN</span>
+        </div>
+        <div class="listing-price">
+          <span style="font-size:9px;color:var(--dim)">N/A</span>
+          <span class="price-date">2025-10-08</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination">
+      <span>Showing 1&ndash;7 of 23</span>
+      <div class="page-dots">
+        <span class="page-dot">&lsaquo;</span>
+        <span class="page-dot active">1</span>
+        <span class="page-dot">2</span>
+        <span class="page-dot">3</span>
+        <span class="page-dot">4</span>
+        <span class="page-dot">&rsaquo;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT: SIDEBAR ═══ -->
+  <div class="sidebar">
+
+    <!-- CARD CHECKER ACTIVITY (NEW — most time-sensitive) -->
+    <!-- CLAUDE CODE: This widget is always visible regardless of active tab.
+         It's a MONITORING signal, not a listing to triage. A spike here means
+         cards were just stolen and are about to be used. Show sparkline of
+         check volume over last 7 days. Alert list shows individual detections. -->
+    <div class="widget" style="border-color:rgba(255,69,98,0.2)">
+      <div class="widget-label">CARD CHECKER ACTIVITY</div>
+      <div class="widget-title">BIN validation alerts <span class="widget-val" style="color:var(--red)">&#9650; 340% spike</span></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div>
+          <div style="font-size:24px;font-weight:800;color:var(--red)">47</div>
+          <div style="font-size:7px;color:var(--dim)">checks detected (7d)</div>
+        </div>
+        <div class="sparkline" style="flex:1">
+          <span style="height:3px;background:rgba(255,69,98,0.3)"></span>
+          <span style="height:4px;background:rgba(255,69,98,0.3)"></span>
+          <span style="height:3px;background:rgba(255,69,98,0.3)"></span>
+          <span style="height:5px;background:rgba(255,69,98,0.4)"></span>
+          <span style="height:4px;background:rgba(255,69,98,0.4)"></span>
+          <span style="height:12px;background:rgba(255,69,98,0.6)"></span>
+          <span style="height:20px;background:var(--red)"></span>
+        </div>
+      </div>
+      <div class="checker-alert">
+        <div class="checker-header">
+          <span class="checker-bin">4532 65** **** ****</span>
+          <span class="checker-result" style="background:rgba(255,69,98,0.12);color:var(--red)">ACTIVE</span>
+        </div>
+        <div class="checker-meta"><span>Try2Check</span><span>14 Oct, 14:32</span></div>
+      </div>
+      <div class="checker-alert">
+        <div class="checker-header">
+          <span class="checker-bin">4532 65** **** ****</span>
+          <span class="checker-result" style="background:rgba(99,102,241,0.12);color:var(--indigo)">DEAD</span>
+        </div>
+        <div class="checker-meta"><span>STYX Checker</span><span>14 Oct, 13:18</span></div>
+      </div>
+      <div class="checker-alert">
+        <div class="checker-header">
+          <span class="checker-bin">5123 44** **** ****</span>
+          <span class="checker-result" style="background:rgba(255,69,98,0.12);color:var(--red)">ACTIVE</span>
+        </div>
+        <div class="checker-meta"><span>LuxChecker</span><span>13 Oct, 22:05</span></div>
+      </div>
+      <div style="text-align:center;margin-top:6px"><span class="link">View all 47 checks &rarr;</span></div>
+    </div>
+
+    <!-- TOP SELLERS (repeat offenders targeting this customer) -->
+    <div class="widget">
+      <div class="widget-label">TOP SELLERS</div>
+      <div class="widget-title">Repeat offenders listing your data</div>
+      <div class="seller-row">
+        <span class="seller-rank">1</span>
+        <span class="seller-handle">Bearss</span>
+        <span class="seller-stars">&#9733; 4.7</span>
+        <span class="seller-market">STYX</span>
+        <span class="seller-count" style="color:var(--red)">12</span>
+      </div>
+      <div class="seller-row">
+        <span class="seller-rank">2</span>
+        <span class="seller-handle">emailpwnz</span>
+        <span class="seller-stars">&#9733; 4.8</span>
+        <span class="seller-market">FreshTools</span>
+        <span class="seller-count" style="color:var(--amber)">7</span>
+      </div>
+      <div class="seller-row">
+        <span class="seller-rank">3</span>
+        <span class="seller-handle">d0####ey</span>
+        <span class="seller-stars">&#9733; 4.3</span>
+        <span class="seller-market">Russian Mkt</span>
+        <span class="seller-count">5</span>
+      </div>
+      <div class="seller-row">
+        <span class="seller-rank">4</span>
+        <span class="seller-handle">invoiceghost</span>
+        <span class="seller-stars">&#9733; 4.2</span>
+        <span class="seller-market">STYX</span>
+        <span class="seller-count">3</span>
+      </div>
+      <div class="seller-row">
+        <span class="seller-rank">5</span>
+        <span class="seller-handle">cryptodrainer_pro</span>
+        <span class="seller-stars">&#9733; 4.5</span>
+        <span class="seller-market">Forum</span>
+        <span class="seller-count">2</span>
+      </div>
+    </div>
+
+    <!-- BY MARKETPLACE -->
+    <div class="widget">
+      <div class="widget-label">BY MARKETPLACE</div>
+      <div class="widget-title">Listings per platform</div>
+      <div class="market-row"><span class="market-name">STYX</span><div class="market-bar"><div class="market-bar-fill" style="width:75%;background:var(--red)"></div></div><span class="market-count" style="color:var(--red)">8</span></div>
+      <div class="market-row"><span class="market-name">Russian Market</span><div class="market-bar"><div class="market-bar-fill" style="width:50%;background:var(--amber)"></div></div><span class="market-count" style="color:var(--amber)">5</span></div>
+      <div class="market-row"><span class="market-name">FreshTools</span><div class="market-bar"><div class="market-bar-fill" style="width:38%;background:var(--indigo)"></div></div><span class="market-count">4</span></div>
+      <div class="market-row"><span class="market-name">Telegram</span><div class="market-bar"><div class="market-bar-fill" style="width:30%;background:var(--cyan)"></div></div><span class="market-count">3</span></div>
+      <div class="market-row"><span class="market-name">Genesis Market</span><div class="market-bar"><div class="market-bar-fill" style="width:15%;background:var(--faint)"></div></div><span class="market-count">2</span></div>
+      <div class="market-row"><span class="market-name">Dark Forums</span><div class="market-bar"><div class="market-bar-fill" style="width:8%;background:var(--faint)"></div></div><span class="market-count">1</span></div>
+    </div>
+
+    <!-- BY DATA TYPE -->
+    <div class="widget">
+      <div class="widget-label">BY DATA TYPE</div>
+      <div class="widget-title">Signal breakdown</div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--red)"></span><span class="dtype-name">CVVs / Dumps</span><span class="dtype-count" style="color:var(--red)">6</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--red)"></span><span class="dtype-name">Fullz</span><span class="dtype-count" style="color:var(--red)">3</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--red)"></span><span class="dtype-name">BEC — Email Credentials</span><span class="dtype-count" style="color:var(--red)">4</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--amber)"></span><span class="dtype-name">BEC — Toolkits</span><span class="dtype-count" style="color:var(--amber)">2</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--amber)"></span><span class="dtype-name">Crypto Credentials</span><span class="dtype-count" style="color:var(--amber)">2</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--amber)"></span><span class="dtype-name">Crypto Phishing Kits</span><span class="dtype-count" style="color:var(--amber)">2</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--indigo)"></span><span class="dtype-name">Bank Logs</span><span class="dtype-count">2</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:#FB923C"></span><span class="dtype-name">Money Mule Indicators</span><span class="dtype-count">1</span></div>
+      <div class="dtype-row"><span class="dtype-dot" style="background:var(--faint)"></span><span class="dtype-name">SWIFT / IBAN</span><span class="dtype-count">1</span></div>
+    </div>
+
+    <!-- ACTIVE LISTINGS TIMELINE -->
+    <div class="widget">
+      <div class="widget-label">ACTIVE LISTINGS TIMELINE</div>
+      <div class="widget-title">Last 30 days</div>
+      <div style="height:80px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:9px;border:1px dashed rgba(51,65,85,0.3);border-radius:6px;text-align:center">[Line Chart]<br>New listings over time &middot; by type</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-t">PAGE ARCHITECTURE</div>
+  <div class="legend-items">
+    <span><span class="lsw" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3)"></span>Banner (KPIs)</span>
+    <span><span class="lsw" style="background:rgba(245,158,11,0.1)"></span>Tabs (All | Card | BEC | Crypto | Markets)</span>
+    <span><span class="lsw" style="background:rgba(99,102,241,0.06)"></span>Feed ~65% (filtered listings)</span>
+    <span><span class="lsw" style="background:rgba(51,65,85,0.15)"></span>Sidebar ~35% (widgets)</span>
+    <span><span class="lsw" style="background:rgba(255,69,98,0.15);border:1px solid rgba(255,69,98,0.25)"></span>Card Checker (always visible)</span>
+  </div>
+</div>
+
+</body>
+</html>

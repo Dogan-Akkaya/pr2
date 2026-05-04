@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function CoverageBar({ item }) {
+  const { t } = useTheme();
   const [hov, setHov] = useState(false);
   const pct = item.total > 0 ? (item.used / item.total) * 100 : 0;
   return (
@@ -10,19 +12,19 @@ export default function CoverageBar({ item }) {
       style={{
         padding: "8px 10px", borderRadius: 9, cursor: "pointer",
         transition: "all 0.2s",
-        background: hov ? "rgba(255,255,255,0.03)" : "transparent",
+        background: hov ? t.bgInput : "transparent",
         marginBottom: 4,
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-        <span style={{ fontSize: 11, fontWeight: 500, color: hov ? "#E8ECF1" : "rgba(232,236,241,0.5)", transition: "color 0.2s" }}>
+        <span style={{ fontSize: 11, fontWeight: 500, color: hov ? t.text : t.text50, transition: "color 0.2s" }}>
           {item.label}
         </span>
-        <span className="mono" style={{ fontSize: 10, color: hov ? item.color : "rgba(232,236,241,0.3)", transition: "color 0.2s" }}>
+        <span className="mono" style={{ fontSize: 10, color: hov ? item.color : t.text30, transition: "color 0.2s" }}>
           {item.used}/{item.total}
         </span>
       </div>
-      <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+      <div style={{ height: 4, borderRadius: 2, background: t.borderLight, overflow: "hidden" }}>
         <div
           style={{
             height: "100%", borderRadius: 2, background: item.color,
