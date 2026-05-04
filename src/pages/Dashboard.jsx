@@ -19,11 +19,33 @@ const COVERAGE_PAIRS = [
 ];
 const COVERAGE_PCT = 65;
 
-const BANNER_ALERTS = [
-  { severity: "critical", text: "23 employee credentials found in stealer logs", source: "Russian Market", time: "2h ago" },
-  { severity: "warn",     text: "Company database listed for sale on Breach Forums", source: "Breach Forums", time: "5h ago" },
-  { severity: "warn",     text: "3 VIP accounts detected in combo lists", source: "Telegram", time: "3h ago" },
-];
+// Banner copy + accent per threat level (driven by AdminPanel → DataContext.threatLevel)
+const BANNER_BY_LEVEL = {
+  critical: {
+    badge: "CRITICAL EXPOSURE",
+    headline: "Immediate attention required",
+    subline: "3 critical findings in the last 24h · Exposure increased 12% this week",
+    accent: "#FF4562", // coral — also used for gradient + badge tint
+  },
+  high: {
+    badge: "HIGH EXPOSURE",
+    headline: "Elevated risk — review your exposure",
+    subline: "Multiple high-severity findings detected · Exposure trending up",
+    accent: "#EA580C",
+  },
+  medium: {
+    badge: "MEDIUM EXPOSURE",
+    headline: "Moderate exposure detected",
+    subline: "Review monitored alerts and triage at convenience",
+    accent: "#CA8A04",
+  },
+  low: {
+    badge: "LOW EXPOSURE",
+    headline: "Your environment looks secure",
+    subline: "No critical exposures detected · Continue monitoring",
+    accent: "#16A34A",
+  },
+};
 
 // B1 — KPIs
 const KPI_TILES = [
@@ -181,8 +203,13 @@ function FraudIcon({ name, color }) {
 
 // ═══════════════════════════════════════
 export default function Dashboard() {
-  const { state } = useData();
-  const { threatLevel, blackMarket, exposedEmp } = state;
+  const { state, dispatch } = useData();
+  const { threatLevel, heroAlerts, blackMarket, exposedEmp } = state;
+  // Banner copy + colour comes from threatLevel (set by AdminPanel)
+  const banner = BANNER_BY_LEVEL[threatLevel] || BANNER_BY_LEVEL.critical;
+  const accent = banner.accent;
+  // Hero alerts are dispatched by the AdminPanel — show all but in "low" mode collapse to a single all-clear row
+  const dismissHeroAlert = (id) => dispatch({ type: "DISMISS_HERO_ALERT", payload: id });
   const navigate = useNavigate();
   const { t } = useTheme();
   const [loaded, setLoaded] = useState(false);
@@ -201,32 +228,35 @@ export default function Dashboard() {
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
       {/* ═══════════════════════════════════════
-          SEVERITY BANNER (full-width, top)
+          SEVERITY BANNER (full-width, top) — driven by AdminPanel
           ═══════════════════════════════════════ */}
       <div style={{
-        background: "linear-gradient(135deg, rgba(255,69,98,0.13) 0%, rgba(255,69,98,0.03) 100%)",
-        border: "1px solid rgba(255,69,98,0.22)",
+        background: `linear-gradient(135deg, ${accent}22 0%, ${accent}06 100%)`,
+        border: `1px solid ${accent}38`,
         borderRadius: 14, padding: "20px 24px 16px",
         position: "relative", overflow: "hidden",
         animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
+        transition: "background 0.4s ease, border-color 0.4s ease",
       }}>
         <div style={{
           position: "absolute", top: 0, left: 0, width: 4, height: "100%",
-          background: "linear-gradient(180deg, #FF4562, rgba(255,69,98,0.2))",
+          background: `linear-gradient(180deg, ${accent}, ${accent}33)`,
           borderRadius: "14px 0 0 14px",
+          transition: "background 0.4s ease",
         }} />
         <span style={{
           display: "inline-flex", alignItems: "center", gap: 6,
           padding: "4px 14px", borderRadius: 10,
-          background: "rgba(255,69,98,0.18)", color: "#FF4562",
+          background: `${accent}2E`, color: accent,
           fontSize: 10, fontWeight: 700, letterSpacing: "0.14em",
           fontFamily: "'JetBrains Mono', monospace",
+          transition: "background 0.4s ease, color 0.4s ease",
         }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF4562" }} />
-          CRITICAL EXPOSURE
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: accent, boxShadow: `0 0 6px ${accent}80` }} />
+          {banner.badge}
         </span>
-        <h2 className="hfont" style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 4px", color: t.text, letterSpacing: "-0.02em" }}>Immediate attention required</h2>
-        <div style={{ color: t.text45, fontSize: 11 }}>3 critical findings in the last 24h · Exposure increased 12% this week</div>
+        <h2 className="hfont" style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 4px", color: t.text, letterSpacing: "-0.02em" }}>{banner.headline}</h2>
+        <div style={{ color: t.text45, fontSize: 11 }}>{banner.subline}</div>
 
         {/* Coverage strip */}
         <div style={{ display: "flex", gap: 18, marginTop: 8, fontSize: 10, color: t.text45, alignItems: "center", flexWrap: "wrap" }}>
@@ -242,23 +272,47 @@ export default function Dashboard() {
           </span>
         </div>
 
-        {/* 3 inline alerts */}
+        {/* Inline alerts (dispatched from AdminPanel; dismissable) */}
         <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 4 }}>
-          {BANNER_ALERTS.map((a, i) => {
-            const isCrit = a.severity === "critical";
+          {threatLevel === "low" || heroAlerts.length === 0 ? (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "10px 14px", borderRadius: 6,
+              background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.16)",
+              fontSize: 11, color: "#16A34A",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              All clear — no critical exposures detected. Continue monitoring.
+            </div>
+          ) : heroAlerts.map((a) => {
+            const sevColor = SEV[a.sev] || accent;
+            const sevBg = `${sevColor}10`;
             return (
-              <div key={i} style={{
+              <div key={a.id} style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
                 padding: "9px 14px", borderRadius: 6,
-                background: isCrit ? "rgba(255,69,98,0.06)" : "rgba(245,158,11,0.05)",
-                border: `1px solid ${isCrit ? "rgba(255,69,98,0.16)" : "rgba(245,158,11,0.12)"}`,
+                background: sevBg, border: `1px solid ${sevColor}28`,
                 fontSize: 10,
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, color: t.text }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: isCrit ? "#FF4562" : "#F59E0B" }} />
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: sevColor, boxShadow: `0 0 4px ${sevColor}80` }} />
                   {a.text}
                 </div>
-                <div className="mono" style={{ color: t.text30, fontSize: 9 }}>{a.source} · {a.time}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="mono" style={{ color: t.text30, fontSize: 9 }}>{a.source} · {a.time}</span>
+                  <button
+                    onClick={() => dismissHeroAlert(a.id)}
+                    title="Dismiss"
+                    style={{
+                      width: 18, height: 18, borderRadius: 4, border: "none",
+                      background: "transparent", color: t.text30,
+                      cursor: "pointer", fontSize: 12, lineHeight: 1,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.color = t.text50; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = t.text30; }}
+                  >×</button>
+                </div>
               </div>
             );
           })}
