@@ -495,7 +495,7 @@ export default function Dashboard() {
             </div>
             <div className="glass" style={{ padding: "12px 14px" }}>
               <div style={{ display: "flex", alignItems: "center", marginBottom: 7 }}>
-                <span className="hfont" style={{ fontSize: 12, fontWeight: 700 }}>Black Market Activity</span>
+                <span className="hfont" style={{ fontSize: 12, fontWeight: 700 }}>Data on Sale Activity</span>
                 <span className="mono" style={{ fontSize: 9, color: "#FF4562", fontWeight: 700, marginLeft: 8 }}>4 listings</span>
               </div>
               {BLACK_MARKET_LISTINGS.map((b, i) => (

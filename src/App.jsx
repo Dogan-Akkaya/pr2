@@ -38,7 +38,8 @@ export default function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="global-threats" element={<GlobalThreats />} />
             <Route path="protection-coverage" element={<ProtectionCoverage />} />
-            <Route path="black-market" element={<BlackMarket />} />
+            <Route path="data-on-sale" element={<BlackMarket />} />
+            <Route path="black-market" element={<BlackMarket />} />{/* legacy alias */}
             <Route path="domain-exposure" element={<DomainExposure />} />
             <Route path="pii" element={<PII />} />
             <Route path="executive-protection" element={<ExecutiveProtection />} />

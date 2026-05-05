@@ -189,7 +189,7 @@ export default function BlackMarket() {
             </div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Black Market Monitor</span>
+                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase" }}>Data on Sale Monitor</span>
                 <span style={{ padding: "2px 8px", borderRadius: 10, background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.2)", fontSize: 10, fontWeight: 600, color: "#DC2626" }}>
                   {criticalCount} critical listing{criticalCount !== 1 ? "s" : ""}
                 </span>
@@ -466,7 +466,7 @@ export default function BlackMarket() {
                     <span className="mono" style={{ fontSize: 10, color: SEV_COLOR[selected.severity], textTransform: "uppercase", fontWeight: 600 }}>{selected.severity}</span>
                   </div>
                   <span className="hfont" style={{ fontSize: 20, fontWeight: 700 }}>#{selected.id}</span>
-                  <div className="mono" style={{ fontSize: 10, color: t.text30, marginTop: 2 }}>Black Market Listing</div>
+                  <div className="mono" style={{ fontSize: 10, color: t.text30, marginTop: 2 }}>Data on Sale Listing</div>
                 </div>
                 <button onClick={() => setSelectedId(null)} style={{ width: 28, height: 28, borderRadius: 8, border: "none", background: t.borderLight, color: t.text50, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
