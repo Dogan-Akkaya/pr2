@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import AdminPanel from "../components/AdminPanel";
+import CommentsPanel from "../components/CommentsPanel";
 import { useData } from "../context/DataContext";
 import { useTheme } from "../context/ThemeContext";
 
@@ -22,6 +23,7 @@ export default function AppLayout() {
         <Outlet />
       </main>
       {state.adminOpen && <AdminPanel />}
+      {state.commentsOpen && <CommentsPanel />}
     </div>
   );
 }

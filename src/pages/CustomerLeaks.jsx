@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useTheme } from "../context/ThemeContext";
 import { tooltipStyles } from "../components/chartTheme";
+import HoverComment from "../components/HoverComment";
 
 // ═══════════════════════════════════════
 // DATA FIXTURES
@@ -301,6 +302,7 @@ export default function CustomerLeaks() {
           position: "absolute", top: 0, left: 0, width: 4, height: "100%",
           background: "linear-gradient(180deg, #FF4562, #A855F7)", borderRadius: "14px 0 0 14px",
         }} />
+        <HoverComment anchorKey="customer-leaks.infocard" top={14} right={16} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 24, flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 320 }}>
             <span style={{

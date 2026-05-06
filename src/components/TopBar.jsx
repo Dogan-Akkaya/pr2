@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useData } from "../context/DataContext";
 import { useTheme } from "../context/ThemeContext";
+import { PAGE_COMMENTS } from "../data/comments";
 
 function formatRelative(ts) {
   const diffMs = Math.max(0, Date.now() - ts);
@@ -25,6 +27,8 @@ export default function TopBar({ title = "Dark Web Dashboard", subtitle = "Advan
 
   const alertCount = state.heroAlerts?.length || 0;
   const lastScanLabel = formatRelative(state.lastScanAt);
+  const location = useLocation();
+  const hasPageComment = !!PAGE_COMMENTS[location.pathname];
 
   return (
     <div style={{
@@ -115,6 +119,34 @@ export default function TopBar({ title = "Dark Web Dashboard", subtitle = "Advan
             }}>{alertCount > 99 ? "99+" : alertCount}</span>
           )}
         </div>
+        {/* Comments — between bell and admin gear */}
+        <div
+          onClick={() => dispatch({ type: "TOGGLE_COMMENTS" })}
+          title="Demo annotations · per-page commentary"
+          style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: state.commentsOpen ? "rgba(99,102,241,0.18)" : t.bgHover,
+            border: `1px solid ${state.commentsOpen ? "rgba(99,102,241,0.45)" : t.borderMed}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", transition: "all 0.2s",
+            position: "relative",
+          }}
+          onMouseEnter={(e) => { if (!state.commentsOpen) e.currentTarget.style.background = t.bgElevated; }}
+          onMouseLeave={(e) => { if (!state.commentsOpen) e.currentTarget.style.background = t.bgHover; }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={state.commentsOpen ? "#6366F1" : t.text50} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          {hasPageComment && !state.commentsOpen && (
+            <span style={{
+              position: "absolute", top: 5, right: 5,
+              width: 6, height: 6, borderRadius: "50%",
+              background: "#6366F1",
+              boxShadow: "0 0 4px rgba(99,102,241,0.7)",
+            }} />
+          )}
+        </div>
+
         {/* Admin gear */}
         <div
           onClick={() => dispatch({ type: "TOGGLE_ADMIN" })}

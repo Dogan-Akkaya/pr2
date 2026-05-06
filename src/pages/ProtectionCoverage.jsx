@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import HoverComment from "../components/HoverComment";
 
 // ── Asset Types with their limits, icons, and descriptions ──
 const ASSET_TYPES = [
@@ -212,9 +213,10 @@ export default function ProtectionCoverage() {
 
       {/* ═══ SECTION 1: HERO BANNER ═══ */}
       <div className="glass" style={{
-        padding: "16px 20px", overflow: "hidden",
+        padding: "16px 20px", overflow: "visible", position: "relative",
         animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
+        <HoverComment anchorKey="protection-coverage.attention" top={10} right={12} />
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           {/* Coverage ring — 60px */}
           <div style={{ position: "relative", flexShrink: 0, width: 60, height: 60 }}>

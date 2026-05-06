@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
+import HoverComment from "../components/HoverComment";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { WORLD_PATHS } from "../data/worldMapPaths";
@@ -613,6 +614,7 @@ export default function GlobalThreats() {
         position: "sticky", top: 60, zIndex: 20,
         animation: loaded ? "fadeUp 0.6s 0.02s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
+        <HoverComment anchorKey="global-threats.context" top={-10} right={-10} />
         <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
           <span className="mono" style={{ fontSize: 8, color: t.text25, letterSpacing: "0.14em", fontWeight: 700, marginRight: 6 }}>CONTEXT</span>
           {[
@@ -674,7 +676,8 @@ export default function GlobalThreats() {
       </div>
 
       {/* ═══ v2 §3 — HEATMAP HERO + LIVE PULSE ═══ */}
-      <div style={{ animation: loaded ? "fadeUp 0.6s 0.08s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+      <div style={{ animation: loaded ? "fadeUp 0.6s 0.08s cubic-bezier(0.16,1,0.3,1) both" : "none", position: "relative" }}>
+        <HoverComment anchorKey="global-threats.heatmap" top={-2} right={4} />
         <div className="mono" style={{ fontSize: 8, color: t.text25, letterSpacing: "0.20em", fontWeight: 700, marginBottom: 8 }}>GLOBAL THREAT TEMPERATURE</div>
         <div className="glass" style={{ padding: "16px 18px", marginBottom: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -925,7 +928,9 @@ export default function GlobalThreats() {
       <div className="glass" style={{
         overflow: "hidden",
         animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none",
+        position: "relative",
       }}>
+        <HoverComment anchorKey="global-threats.telegram" top={12} right={130} />
         <div style={{ padding: "14px 20px 10px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div className="mono" style={{ fontSize: 9, color: "#22D3EE", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, marginBottom: 2 }}>Telegram Intelligence</div>
@@ -1173,7 +1178,8 @@ export default function GlobalThreats() {
       </div>
 
       {/* ═══ v2 §7 — LATEST ACTIVITY (moved up, was at end) ═══ */}
-      <div style={{ animation: loaded ? "fadeUp 0.6s 0.18s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+      <div style={{ animation: loaded ? "fadeUp 0.6s 0.18s cubic-bezier(0.16,1,0.3,1) both" : "none", position: "relative" }}>
+        <HoverComment anchorKey="global-threats.news" top={-2} right={4} />
         <div className="mono" style={{ fontSize: 8, color: t.text25, letterSpacing: "0.20em", fontWeight: 700, marginBottom: 8 }}>LATEST ACTIVITY</div>
         <div className="glass" style={{ overflow: "hidden" }}>
           <div style={{ padding: "14px 18px 10px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>

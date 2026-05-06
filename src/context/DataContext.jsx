@@ -23,6 +23,7 @@ const initialState = {
   expData: DEFAULT_EXP_DATA,
   stats: DEFAULT_STATS,
   adminOpen: false,
+  commentsOpen: false,
   // Last successful crawler ingest. Seeded at module-load time so the
   // TopBar freshness reads "n minutes ago" relative to when the user opened
   // the app, instead of a literal "12 min ago" baked into JSX.
@@ -54,7 +55,10 @@ function dataReducer(state, action) {
     case "SET_STATS":
       return { ...state, stats: action.payload };
     case "TOGGLE_ADMIN":
-      return { ...state, adminOpen: !state.adminOpen };
+      // Opening admin closes comments (only one panel at a time)
+      return { ...state, adminOpen: !state.adminOpen, commentsOpen: false };
+    case "TOGGLE_COMMENTS":
+      return { ...state, commentsOpen: !state.commentsOpen, adminOpen: false };
     case "RESET_ALL":
       return { ...initialState, adminOpen: state.adminOpen };
     default:

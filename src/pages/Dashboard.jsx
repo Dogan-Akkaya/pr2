@@ -5,6 +5,7 @@ import { useData } from "../context/DataContext";
 import { useTheme } from "../context/ThemeContext";
 import { TL, SEV, STR_COL } from "../data/threat-levels";
 import { TimeRangeFilter } from "../components/TableUtils";
+import HoverComment from "../components/HoverComment";
 
 // ═══════════════════════════════════════
 // Page-local fixtures (kept simple — wireframe-faithful)
@@ -244,6 +245,7 @@ export default function Dashboard() {
           borderRadius: "14px 0 0 14px",
           transition: "background 0.4s ease",
         }} />
+        <HoverComment anchorKey="dashboard.info-card" top={12} right={14} />
         <span style={{
           display: "inline-flex", alignItems: "center", gap: 6,
           padding: "4px 14px", borderRadius: 10,
@@ -605,6 +607,7 @@ export default function Dashboard() {
             position: "absolute", left: 0, top: 0, bottom: 0, width: 1,
             background: "linear-gradient(180deg, rgba(99,102,241,0.32), rgba(99,102,241,0.06), transparent)",
           }} />
+          <HoverComment anchorKey="dashboard.global-intel" top={0} right={4} />
           {/* Column header */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{
