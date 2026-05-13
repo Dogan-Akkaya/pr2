@@ -27,7 +27,8 @@ export const PAGE_COMMENTS = {
     "we seek to catch their attention through showing interesting information here. " +
     "The hard part is they have to be updated stuff so instead of prebuilt things we want to focus on live widgets where we can manage to change " +
     "(for example a Dark Web News widget where we choose the 3 news, or a Threat Actor similarly we choose). " +
-    "The choosement can be done via an admin settings page."
+    "The choosement can be done via an admin settings page. /n " +
+    "3. Everything here considered as widgets just like how we manage our dashboards today."
   ),
 
   "/global-threats": norm(
@@ -67,14 +68,14 @@ export const PAGE_COMMENTS = {
     "This is a digested page combining our domain-related findings like botnet. The goal is to keep headlines no-brainer for the users."
   ),
 
-  "/pii": norm(
+  "/pii-stealer-exposure": norm(
     "This one is the updated version of our PII. We want to take a step further and show more than just leak account credentials — " +
     "we want to show SSN, national ID number, financial data with names, address, phone number, or just email address and leak context. /n " +
     "Our goal is to gather attention on all PII leaked online. If possible we may try to search for findings with matching names on LinkedIn, but this can be full of FPs " +
     "therefore this can be alarm- or search-based. Meanwhile you can add general data — just like on Global Threats — to the bottom of the page to show the data and catch their attention."
   ),
 
-  "/executive-protection": norm(
+  "/vip-monitoring": norm(
     "This will be an updated version of our previous VIP radar. We want to keep a look out of our excel look — we can have cards for each added VIP from Protection Coverage."
   ),
 
@@ -111,12 +112,11 @@ export const PAGE_COMMENTS = {
     "This is our Dark Web Search — threat hunting. Nothing changed."
   ),
 
-  "/dark-web-news": norm(
-    "Will be mostly the same; only difference is we stripped away ransomware intelligence and are showing it as a separate screen."
-  ),
-
-  "/ransomware-news": norm(
-    "Similar to Dark Web News we want to copy the same page and dedicate it for ransomware for more visibility on the topic."
+  "/ransom-dark-web-news": norm(
+    "Merged Dark Web News and Ransomware News into a single screen with an Apple-style toggle. " +
+    "The toggle swaps the top dashboard (trend chart + countries vs. attack-trend chart + top-groups donut), " +
+    "the four KPI cards, the filter chips, and the news feed itself. " +
+    "Goal: communicate that this page covers BOTH purposes without forcing the user into two separate pages."
   ),
 
   "/rfi": norm(
@@ -171,6 +171,9 @@ export const HOVER_COMMENTS = {
   "protection-coverage.attention": norm(
     "This is the modal where I said we'll show and push them to add more until they fill any of their rights. " +
     "Then immediately we'll change this to \"You look like you are out of this. Would you like to contact us to get more?\""
+  ),
+  "topbar.admin-gear": norm(
+    "This is for managing threat severity which will change the info card look."
   ),
   "customer-leaks.infocard": norm(
     "This will be a synthesis of the data we show them — rather than something AI-generated, I think of something with fixed data and categorization. " +

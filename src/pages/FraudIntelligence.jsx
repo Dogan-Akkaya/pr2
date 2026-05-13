@@ -2,21 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { useTheme } from "../context/ThemeContext";
+import { usePagination, Pagination } from "../components/TableUtils";
 
 // ═══════════════════════════════════════
 // LISTINGS — full feed across all tabs
 // ═══════════════════════════════════════
 const LISTINGS = [
-  {
-    id: 1, tab: "bec", severity: "critical",
-    asset: "j.sm***@greenanimals.com", productType: "EMAIL CRED",
-    thumb: "BEC\nSignal",
-    market: "FreshTools", seller: "emailpwnz", sellerRating: 4.8,
-    detail: "OWA / Exchange access",
-    status: "Open", price: "$25", date: "2025-10-12",
-    leadFlow: ["SOCRadar Crawl", "FreshTools", "seller \"emailpwnz\" posted OWA login", "matched email pattern *@greenanimals.com"],
-    matchType: "email-pattern",
-  },
   {
     id: 2, tab: "card", severity: "critical",
     asset: "BIN 4532 65** matched — US Fullz bundle", productType: "FULLZ",
@@ -36,16 +27,6 @@ const LISTINGS = [
     status: "Open", price: "$35", date: "2025-10-14",
     leadFlow: ["Stealer Log Scan", "Russian Market", "Raccoon v2 exfiltrated Coinbase session", "matched email *@greenanimals.com"],
     matchType: "email-pattern",
-  },
-  {
-    id: 4, tab: "bec", severity: "high",
-    asset: "\"GreenAnimals Bank Invoice Template Pack v2\"", productType: "BEC TOOLKIT",
-    thumb: "BEC\nKit",
-    market: "STYX", seller: "invoiceghost", sellerRating: 4.2,
-    detail: "PDF invoice + email templates + domain spoof guide",
-    status: "Open", price: "$120", date: "2025-10-10",
-    leadFlow: ["SOCRadar Crawl", "STYX Marketplace", "matched brand keyword \"GreenAnimals\""],
-    matchType: "brand",
   },
   {
     id: 5, tab: "crypto", severity: "high",
@@ -97,23 +78,12 @@ const LISTINGS = [
     leadFlow: ["SOCRadar Crawl", "FreshTools", "seller \"emailpwnz\" posted bank log", "matched domain greenanimals.com"],
     matchType: "domain",
   },
-  {
-    id: 10, tab: "bec", severity: "critical",
-    asset: "k.ar***@greenanimalsbank.com", productType: "EMAIL CRED",
-    thumb: "BEC\nSignal",
-    market: "FreshTools", seller: "emailpwnz", sellerRating: 4.8,
-    detail: "Microsoft 365 / Outlook access · MFA bypass session",
-    status: "Open", price: "$32", date: "2025-10-21",
-    leadFlow: ["SOCRadar Crawl", "FreshTools", "seller \"emailpwnz\" posted M365 cred", "matched email pattern *@greenanimalsbank.com"],
-    matchType: "email-pattern",
-  },
 ];
 
 // Tab counts derived from LISTINGS
 const TAB_DEFS = [
   { id: "all", label: "All" },
   { id: "card", label: "Card Data" },
-  { id: "bec", label: "BEC Exposure" },
   { id: "crypto", label: "Crypto" },
   { id: "markets", label: "Fraud Markets" },
 ];
@@ -146,8 +116,6 @@ const BY_MARKET = [
 const BY_DATA_TYPE = [
   { name: "CVVs / Dumps", count: 6, color: "#FF4562" },
   { name: "Fullz", count: 3, color: "#FF4562" },
-  { name: "BEC — Email Credentials", count: 4, color: "#FF4562" },
-  { name: "BEC — Toolkits", count: 2, color: "#F59E0B" },
   { name: "Crypto Credentials", count: 2, color: "#F59E0B" },
   { name: "Crypto Phishing Kits", count: 2, color: "#F59E0B" },
   { name: "Bank Logs", count: 2, color: "#3B82F6" },
@@ -167,6 +135,19 @@ const TIMELINE_DATA = Array.from({ length: 30 }, (_, i) => ({
   d: i,
   v: Math.max(0, 3 + Math.round(Math.sin(i / 4) * 2 + (i > 22 ? (i - 22) * 1.4 : 0) + Math.random() * 1.8)),
 }));
+
+// ═══════════════════════════════════════
+// KYC Data Sale — dark web news feed
+// Modelled on the GlobalThreats news widget but single-topic (no ransomware tab).
+// ═══════════════════════════════════════
+const KYC_NEWS = [
+  { id: 1, title: "Alleged Indian Aadhaar KYC Dataset (12M Records) Listed on Hacker Forum", desc: "A threat actor is selling an alleged Aadhaar-linked KYC dataset claiming verified ID scans, selfies and proof-of-address documents for 12M Indian citizens.", date: "30 Apr 2026", tags: ["India", "Aadhaar", "KYC", "ID Scan"], country: "IN" },
+  { id: 2, title: "Crypto Exchange KYC Leak — 400K Verified Users Allegedly on Sale", desc: "A user on a Russian-language forum is offering 400K complete KYC packets (passport scan + selfie) allegedly exfiltrated from a tier-2 crypto exchange.", date: "28 Apr 2026", tags: ["Crypto", "Exchange", "Passport", "Selfie"], country: "RU" },
+  { id: 3, title: "UK Fintech KYC Vendor Reportedly Breached — Selfie + Document Bundles Listed", desc: "Threat actor \"kycmaster\" is advertising bundles of selfie + government-ID photos sourced from a UK-based KYC verification vendor. Sample includes 1,200 records.", date: "26 Apr 2026", tags: ["United Kingdom", "Fintech", "Vendor Breach"], country: "GB" },
+  { id: 4, title: "Brazilian Bank Onboarding KYC Records Surface on Telegram Channel", desc: "A Telegram channel began drip-leaking onboarding KYC packets from a major Brazilian retail bank, including CPF, full address and signed contract PDFs.", date: "24 Apr 2026", tags: ["Brazil", "Banking", "Telegram", "CPF"], country: "BR" },
+  { id: 5, title: "Forged KYC Service Re-emerges — Custom Selfies Holding Any Document on Demand", desc: "A long-running underground service offering custom \"selfie holding ID\" creations for any provided document is back online and now accepts crypto-only payments.", date: "21 Apr 2026", tags: ["Forgery", "Service", "Selfie"], country: "" },
+  { id: 6, title: "Turkish e-Government KYC Snippets Posted as \"Sample Pack\" by New Seller", desc: "A first-time seller posted a 5,000-record sample of Turkish citizens' KYC data (TC kimlik no, address, MERNIS verification timestamp) as proof-of-access.", date: "19 Apr 2026", tags: ["Turkey", "Government", "TC Kimlik"], country: "TR" },
+];
 
 const SEV = { critical: "#DC2626", high: "#EA580C", medium: "#CA8A04", low: "#3B82F6" };
 const SEV_BG = { critical: "rgba(220,38,38,0.12)", high: "rgba(234,88,12,0.12)", medium: "rgba(202,138,4,0.12)", low: "rgba(59,130,246,0.12)" };
@@ -347,7 +328,9 @@ export default function FraudIntelligence() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("ALL");
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState(1);
+  const [selectedId, setSelectedId] = useState(2);
+  const [activeKyc, setActiveKyc] = useState(0);
+  const selectedKyc = KYC_NEWS[Math.min(activeKyc, KYC_NEWS.length - 1)] || null;
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
@@ -373,6 +356,10 @@ export default function FraudIntelligence() {
       return true;
     });
   }, [activeTab, sevFilter, statusFilter, search]);
+
+  // Pagination — defaults to 10/page; selector exposes 10 / 25 / 100.
+  const pag = usePagination(feed.length, 10);
+  const pagedFeed = pag.paginate(feed);
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
@@ -468,7 +455,7 @@ export default function FraudIntelligence() {
       }}>
 
         {/* ═══ LEFT: FEED ═══ */}
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, display: "flex", flexDirection: "column" }}>
           {/* Filter bar */}
           <div style={{ display: "flex", gap: 4, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
             {[
@@ -540,47 +527,41 @@ export default function FraudIntelligence() {
             </div>
           </div>
 
-          {/* Listings */}
-          {feed.length === 0 ? (
-            <div style={{
-              padding: 40, textAlign: "center",
-              background: t.bgCard, border: `1px solid ${t.borderSection}`, borderRadius: 10,
-            }}>
-              <div style={{ fontSize: 12, color: t.text40 }}>No fraud signals match the current filters.</div>
-            </div>
-          ) : (
-            feed.map(l => (
-              <ListingCard
-                key={l.id}
-                listing={l}
-                selected={selectedId === l.id}
-                onClick={() => setSelectedId(l.id)}
-                t={t}
-              />
-            ))
-          )}
-
-          {/* Pagination footer */}
-          <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "10px 4px", fontSize: 9, color: t.text35,
-          }}>
-            <span>Showing 1–{feed.length} of {LISTINGS.length}</span>
-            <div style={{ display: "flex", gap: 3 }}>
-              {["‹", "1", "2", "3", "4", "›"].map((p, i) => {
-                const active = p === "1";
-                return (
-                  <button key={i} style={{
-                    width: 24, height: 24, borderRadius: 5,
-                    border: `1px solid ${active ? "rgba(59,130,246,0.30)" : t.borderLight}`,
-                    background: active ? NAV_BLUE_BG : "transparent",
-                    color: active ? NAV_BLUE : t.text40,
-                    fontSize: 9, fontWeight: 700, cursor: "pointer",
-                  }}>{p}</button>
-                );
-              })}
-            </div>
+          {/* Listings — flex:1 so the column stretches down to the sidebar's bottom */}
+          <div style={{ flex: 1, minHeight: 0 }}>
+            {feed.length === 0 ? (
+              <div style={{
+                padding: 40, textAlign: "center",
+                background: t.bgCard, border: `1px solid ${t.borderSection}`, borderRadius: 10,
+              }}>
+                <div style={{ fontSize: 12, color: t.text40 }}>No fraud signals match the current filters.</div>
+              </div>
+            ) : (
+              pagedFeed.map(l => (
+                <ListingCard
+                  key={l.id}
+                  listing={l}
+                  selected={selectedId === l.id}
+                  onClick={() => setSelectedId(l.id)}
+                  t={t}
+                />
+              ))
+            )}
           </div>
+
+          {/* Pagination — pinned to the bottom of the feed column */}
+          <Pagination
+            page={pag.page}
+            totalPages={pag.totalPages}
+            startIdx={pag.startIdx}
+            endIdx={pag.endIdx}
+            totalItems={feed.length}
+            onPrev={pag.prev}
+            onNext={pag.next}
+            onGoTo={pag.goTo}
+            perPage={pag.perPage}
+            onPerPageChange={pag.setPerPage}
+          />
         </div>
 
         {/* ═══ RIGHT: SIDEBAR ═══ */}
@@ -764,6 +745,83 @@ export default function FraudIntelligence() {
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* ═══ KYC DATA SALE — news widget at the bottom (single-topic, no ransomware tab) ═══ */}
+      <div style={{ animation: loaded ? "fadeUp 0.6s 0.18s cubic-bezier(0.16,1,0.3,1) both" : "none", position: "relative" }}>
+        <div className="mono" style={{ fontSize: 8, color: t.text25, letterSpacing: "0.20em", fontWeight: 700, marginBottom: 8 }}>KYC DATA SALE</div>
+        <div className="glass" style={{ overflow: "hidden" }}>
+          <div style={{ padding: "14px 18px 10px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span className="hfont" style={{ fontSize: 14, fontWeight: 700, color: t.text }}>KYC data on sale</span>
+              <span className="mono" style={{ fontSize: 9, color: "#F59E0B", fontWeight: 700, padding: "2px 7px", background: "rgba(245,158,11,0.12)", borderRadius: 3 }}>{KYC_NEWS.length} listings tracked</span>
+            </div>
+            <span className="mono" style={{ fontSize: 11, color: "#FF4562", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/ransom-dark-web-news")}>View All →</span>
+          </div>
+          <div style={{ display: "flex", minHeight: 320 }}>
+            <div style={{ width: 380, flexShrink: 0, borderRight: `1px solid ${t.borderSection}`, overflow: "auto", maxHeight: 380 }}>
+              {KYC_NEWS.map((item, i) => {
+                const isActive = activeKyc === i;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => setActiveKyc(i)}
+                    style={{
+                      padding: "14px 16px", cursor: "pointer", transition: "all 0.2s",
+                      borderLeft: isActive ? "3px solid #F59E0B" : "3px solid transparent",
+                      background: isActive ? t.bgInput : "transparent",
+                      borderBottom: `1px solid ${t.borderSection}`,
+                    }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = t.bgCard; }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <div style={{ display: "flex", gap: 12 }}>
+                      <div style={{
+                        width: 80, height: 56, borderRadius: 6, flexShrink: 0,
+                        background: t.bgHover, border: `1px solid ${t.borderLight}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={t.text15} strokeWidth="1.5">
+                          <rect x="3" y="4" width="18" height="16" rx="2" />
+                          <circle cx="9" cy="11" r="2.5" />
+                          <path d="M14 10h4M14 13h4M5 18h14" />
+                        </svg>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "inline-flex", padding: "2px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600, background: "rgba(245,158,11,0.18)", color: "#F59E0B", marginBottom: 5, fontFamily: "'Inter', sans-serif" }}>KYC Data Sale</div>
+                        <div style={{ fontSize: 12, fontWeight: 500, lineHeight: 1.4, color: t.text70, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.title}</div>
+                        <div className="mono" style={{ fontSize: 9, color: t.text25 }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4, verticalAlign: "middle" }}><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                          {item.date}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {selectedKyc && (
+              <div style={{ flex: 1, padding: "18px 22px" }}>
+                <h3 className="hfont" style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.3, marginBottom: 6 }}>{selectedKyc.title}</h3>
+                <div className="mono" style={{ fontSize: 9, color: t.text30, marginBottom: 10 }}>📅 {selectedKyc.date}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
+                  {selectedKyc.tags.map((tag, k) => (
+                    <span key={k} style={{ padding: "3px 9px", borderRadius: 5, fontSize: 9, fontWeight: 500, background: "rgba(245,158,11,0.10)", color: "#F59E0B" }}>{tag}</span>
+                  ))}
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", borderRadius: 7, background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.14)" }}>
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(168,85,247,0.14)", color: "#A855F7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="#A855F7"><polygon points="12,2 14.5,9 22,9 16,14 18.5,22 12,17 5.5,22 8,14 2,9 9.5,9" /></svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: "#A855F7", marginBottom: 3 }}>SOCRadar AI Insights</div>
+                    <div style={{ fontSize: 9, color: t.text50, lineHeight: 1.55 }}>{selectedKyc.desc}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

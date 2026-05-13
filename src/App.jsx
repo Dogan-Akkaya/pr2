@@ -12,9 +12,7 @@ import ExecutiveProtection from "./pages/ExecutiveProtection";
 import FinancialIntelligence from "./pages/FinancialIntelligence";
 import DarkWebSearch from "./pages/DarkWebSearch";
 import IABMonitor from "./pages/IABMonitor";
-import TacticalIntel from "./pages/TacticalIntel";
 import DarkWebNews from "./pages/DarkWebNews";
-import RansomwareNews from "./pages/RansomwareNews";
 import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
@@ -41,14 +39,12 @@ export default function App() {
             <Route path="data-on-sale" element={<BlackMarket />} />
             <Route path="black-market" element={<BlackMarket />} />{/* legacy alias */}
             <Route path="domain-exposure" element={<DomainExposure />} />
-            <Route path="pii" element={<PII />} />
-            <Route path="executive-protection" element={<ExecutiveProtection />} />
+            <Route path="pii-stealer-exposure" element={<PII />} />
+            <Route path="vip-monitoring" element={<ExecutiveProtection />} />
             <Route path="financial-intelligence" element={<FinancialIntelligence />} />
             <Route path="dark-web-search" element={<DarkWebSearch />} />
             <Route path="iab-monitor" element={<IABMonitor />} />
-            <Route path="tactical-intel" element={<TacticalIntel />} />
-            <Route path="dark-web-news" element={<DarkWebNews />} />
-            <Route path="ransomware-news" element={<RansomwareNews />} />
+            <Route path="ransom-dark-web-news" element={<DarkWebNews />} />
             <Route path="incidents" element={<Incidents />} />
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />

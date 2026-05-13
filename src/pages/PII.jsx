@@ -293,7 +293,7 @@ export default function PII() {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-            <div className="mono" style={{ fontSize: 9, color: t.text25, letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 700 }}>PII — Personally Identifiable Information</div>
+            <div className="mono" style={{ fontSize: 9, color: t.text25, letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 700 }}>PII &amp; Stealer Exposure</div>
             <span style={{ fontSize: 8, padding: "2px 7px", borderRadius: 4, background: "rgba(220,38,38,0.14)", color: "#DC2626", fontWeight: 700, letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>
               {PII_CATEGORIES[0].count} critical (National ID)
             </span>

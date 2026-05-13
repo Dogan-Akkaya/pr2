@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
+import DemoNotice from "../components/DemoNotice";
 
 // ═══════════════════════════════════════
 // REPORTS — generated artefacts (board, compliance, tactical)
@@ -194,6 +195,7 @@ export default function Reports() {
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
+      <DemoNotice />
 
       {/* ═══ BANNER ═══ */}
       <div className="glass" style={{

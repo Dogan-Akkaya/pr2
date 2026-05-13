@@ -215,19 +215,215 @@ const CAT_COLORS = {
   "Forum Post": { bg: "rgba(59,130,246,0.08)", color: "#3B82F6" },
 };
 
+// ─── RANSOMWARE MODE ─────────────────────────────────────────────────
+// Mirrored from the now-merged RansomwareNews page so this single screen
+// can flip its dashboard, stats and feed when the user toggles mode.
+const RW_TREND_DATA = [
+  { m: "Apr", v: 180 }, { m: "May", v: 210 }, { m: "Jun", v: 245 },
+  { m: "Jul", v: 390 }, { m: "Aug", v: 420 }, { m: "Sep", v: 365 },
+  { m: "Oct", v: 310 }, { m: "Nov", v: 290 }, { m: "Dec", v: 265 },
+  { m: "Jan", v: 285 }, { m: "Feb", v: 298 }, { m: "Mar", v: 312 },
+];
+
+const RW_TOP_GROUPS = [
+  { name: "LockBit", count: 2100, color: "#DC2626" },
+  { name: "BlackCat/ALPHV", count: 1400, color: "#EA580C" },
+  { name: "Cl0p", count: 980, color: "#F59E0B" },
+  { name: "Play", count: 870, color: "#A855F7" },
+  { name: "8Base", count: 650, color: "#3B82F6" },
+  { name: "Akira", count: 520, color: "#10B981" },
+  { name: "Medusa", count: 410, color: "#06B6D4" },
+  { name: "NoEscape", count: 380, color: "#EC4899" },
+];
+
+const RW_STATS = [
+  { label: "Active Groups",       value: "47",  color: "#DC2626", trend: "+5" },
+  { label: "Victims This Month",  value: "312", color: "#A855F7", trend: "+18%" },
+  { label: "Countries Affected",  value: "68",  color: "#F59E0B", trend: "+3" },
+  { label: "Industries Targeted", value: "23",  color: "#3B82F6", trend: "+2" },
+];
+
+const RW_NEWS = [
+  { id: 1, title: "Dutch hospitals disconnect systems after patient software cyberattack",
+    desc: "Several hospitals across the Netherlands were forced to disconnect critical systems after a ransomware attack targeted their shared patient management software platform.",
+    date: "07 Apr 2026", tags: ["Netherlands", "Healthcare", "Ransomware", "Hospitals"],
+    victim: "Dutch Hospital Network Consortium", ransomwareGroup: "LockBit", industry: "Healthcare",
+    aiAnalysis: "Coordinated attack on shared patient software suggests the threat actors identified a single point of failure in the hospital network's supply chain.",
+    keyInsights: [
+      { label: "Critical Infrastructure", text: "Healthcare in EU saw a 340% rise in ransomware since 2024." },
+      { label: "Supply Chain Risk", text: "Shared platforms create single-point-of-failure across institutions." },
+    ],
+  },
+  { id: 2, title: "Cybersecurity and Data Privacy — Dykema",
+    desc: "Law firm Dykema reported a cybersecurity incident affecting client data systems with unauthorized encryption of file servers.",
+    date: "06 Apr 2026", tags: ["United States", "Legal", "Law Firm"],
+    victim: "Dykema Gossett PLLC", ransomwareGroup: "BlackCat/ALPHV", industry: "Legal",
+    aiAnalysis: "Targeting a major law firm presents unique challenges due to attorney-client privilege protections.",
+    keyInsights: [
+      { label: "Privileged Data", text: "Attorney-client communications create extreme leverage for extortion." },
+      { label: "Cascading Impact", text: "One law firm breach can affect hundreds of corporate clients." },
+    ],
+  },
+  { id: 3, title: "Minnesota National Guard Responds to Winona County Cyberattack",
+    desc: "The Minnesota National Guard's cyber defense unit was activated to respond to a ransomware attack on Winona County's government systems.",
+    date: "06 Apr 2026", tags: ["United States", "Government", "National Guard"],
+    victim: "Winona County, Minnesota", ransomwareGroup: "Play", industry: "Government",
+    aiAnalysis: "Deployment of National Guard cyber assets to a county-level incident highlights the growing severity of attacks on local government.",
+    keyInsights: [
+      { label: "Critical Infrastructure", text: "Local government manages essential services that directly impact public safety." },
+      { label: "VPN Vulnerability", text: "Remote access infrastructure remains a primary attack vector." },
+    ],
+  },
+  { id: 4, title: "Transport Engineer Firm Discloses Ransomware Incident",
+    desc: "A European transportation engineering firm disclosed a ransomware incident that disrupted design systems and project management platforms.",
+    date: "05 Apr 2026", tags: ["United Kingdom", "Transportation", "Engineering"],
+    victim: "Transport Engineering Corp.", ransomwareGroup: "8Base", industry: "Transportation",
+    aiAnalysis: "Ransomware targeting engineering firms creates risks beyond data loss — encrypted design files can delay infrastructure projects.",
+    keyInsights: [
+      { label: "Infrastructure Delay", text: "Encrypted engineering files can delay multi-year infrastructure projects." },
+      { label: "Specialized Data", text: "CAD/BIM files require specialized recovery procedures." },
+    ],
+  },
+  { id: 5, title: "Gulf Region Faces 200,000 Daily Cyber Attack Attempts",
+    desc: "SOCRadar intelligence reveals that Gulf region organizations face over 200,000 cyberattack attempts daily, with ransomware comprising a growing percentage.",
+    date: "05 Apr 2026", tags: ["Global", "Energy", "Gulf Region"],
+    victim: "Gulf Region Organizations (Multiple)", ransomwareGroup: "Multiple Groups", industry: "Energy",
+    aiAnalysis: "The Gulf region's rapid digital transformation combined with geopolitical significance makes it an increasingly attractive target.",
+    keyInsights: [
+      { label: "Attack Volume", text: "200,000+ daily attack attempts indicate industrialized targeting." },
+      { label: "Energy Sector", text: "Oil & gas infrastructure attacks carry global economic implications." },
+    ],
+  },
+  { id: 6, title: "Krybit Ransomware Attack on Gerald Zisser GmbH",
+    desc: "Austrian manufacturing company Gerald Zisser GmbH has been listed as a victim by the emerging Krybit ransomware group with 45GB allegedly exfiltrated.",
+    date: "04 Apr 2026", tags: ["Germany", "Manufacturing", "SMB"],
+    victim: "Gerald Zisser GmbH", ransomwareGroup: "Krybit", industry: "Manufacturing",
+    aiAnalysis: "Krybit is an emerging ransomware group rapidly expanding operations targeting European SMBs in manufacturing.",
+    keyInsights: [
+      { label: "Emerging Threat", text: "New ransomware operation with aggressive tactics targeting European manufacturing." },
+      { label: "Double Extortion", text: "45GB exfiltration combined with encryption maximizes pressure." },
+    ],
+  },
+  { id: 7, title: "LockBit Claims Attack on Major European Manufacturing Firm",
+    desc: "The LockBit ransomware group has claimed responsibility for an attack on a major European manufacturing conglomerate operating across 12 countries.",
+    date: "03 Apr 2026", tags: ["Europe", "Manufacturing", "Large Enterprise"],
+    victim: "European Manufacturing Conglomerate", ransomwareGroup: "LockBit", industry: "Manufacturing",
+    aiAnalysis: "Despite law enforcement disruptions, LockBit continues to target high-value manufacturing enterprises.",
+    keyInsights: [
+      { label: "Persistence", text: "LockBit remains operational despite multiple law enforcement actions." },
+      { label: "Strategic Data", text: "Strategic plans and client contracts represent high-value intelligence." },
+    ],
+  },
+  { id: 8, title: "Cl0p Exploits MOVEit Vulnerability to Target Financial Sector",
+    desc: "The Cl0p ransomware group has launched a new wave of attacks exploiting a recently disclosed vulnerability in MOVEit file transfer software.",
+    date: "02 Apr 2026", tags: ["Global", "Finance", "Zero-Day"],
+    victim: "Multiple Financial Institutions", ransomwareGroup: "Cl0p", industry: "Finance",
+    aiAnalysis: "Cl0p's continued exploitation of file transfer vulnerabilities demonstrates a refined operational model focused on supply chain compromise.",
+    keyInsights: [
+      { label: "Supply Chain Attack", text: "File transfer software compromise enables mass exploitation." },
+      { label: "Speed of Exploitation", text: "Automated tools outpace most organizations' patching capabilities." },
+    ],
+  },
+];
+
+const RW_ALL_INDUSTRIES = [...new Set(RW_NEWS.map(n => n.industry).filter(Boolean))];
+const RW_ALL_GROUPS     = [...new Set(RW_NEWS.map(n => n.ransomwareGroup).filter(Boolean))];
+
+// ─── Mini donut (ransomware groups) ──────────────────────────────────
+function MiniDonut({ groups, size = 130, t }) {
+  const cx = size / 2, cy = size / 2, r = size / 2 - 12;
+  const total = groups.reduce((s, g) => s + g.count, 0);
+  let cumAngle = -90;
+  const arcs = groups.map((g) => {
+    const angle = (g.count / total) * 360;
+    const startRad = (cumAngle * Math.PI) / 180;
+    const endRad   = ((cumAngle + angle) * Math.PI) / 180;
+    const largeArc = angle > 180 ? 1 : 0;
+    const x1 = cx + r * Math.cos(startRad);
+    const y1 = cy + r * Math.sin(startRad);
+    const x2 = cx + r * Math.cos(endRad);
+    const y2 = cy + r * Math.sin(endRad);
+    cumAngle += angle;
+    return { ...g, d: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z` };
+  });
+  const innerR = r * 0.58;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {arcs.map((a, i) => <path key={i} d={a.d} fill={a.color} opacity={0.85} />)}
+      <circle cx={cx} cy={cy} r={innerR} fill={t.bgBase} />
+      <text x={cx} y={cy - 2} textAnchor="middle" fill={t.text} fontSize="13" fontWeight="800" fontFamily="'Red Hat Display', sans-serif">{(total / 1000).toFixed(1)}K</text>
+      <text x={cx} y={cy + 12} textAnchor="middle" fill={t.text35} fontSize="8" fontFamily="'JetBrains Mono',monospace">TOTAL</text>
+    </svg>
+  );
+}
+
+// ─── Apple-style toggle ──────────────────────────────────────────────
+// Two labels flank a sliding-pill switch. Tap either label OR the pill itself.
+function AppleToggle({ mode, onChange, t }) {
+  const isRansom = mode === "ransomware";
+  const leftActive  = !isRansom;
+  const rightActive =  isRansom;
+  const trackColor  = isRansom ? "#A855F7" : "#FF4562";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <span
+        onClick={() => onChange("darkweb")}
+        style={{
+          fontSize: 11, fontWeight: 700, cursor: "pointer", userSelect: "none",
+          color: leftActive ? "#FF4562" : t.text30, transition: "color 0.2s",
+        }}
+      >Dark Web</span>
+      <div
+        onClick={() => onChange(isRansom ? "darkweb" : "ransomware")}
+        role="switch"
+        aria-checked={isRansom}
+        style={{
+          width: 42, height: 24, borderRadius: 14,
+          background: trackColor, position: "relative", cursor: "pointer",
+          transition: "background 0.25s cubic-bezier(0.16,1,0.3,1)",
+          boxShadow: `0 1px 2px rgba(0,0,0,0.18), 0 0 0 1px ${trackColor}55`,
+        }}
+      >
+        <div style={{
+          position: "absolute", top: 2,
+          left: isRansom ? 20 : 2,
+          width: 20, height: 20, borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.04)",
+          transition: "left 0.25s cubic-bezier(0.16,1,0.3,1)",
+        }} />
+      </div>
+      <span
+        onClick={() => onChange("ransomware")}
+        style={{
+          fontSize: 11, fontWeight: 700, cursor: "pointer", userSelect: "none",
+          color: rightActive ? "#A855F7" : t.text30, transition: "color 0.2s",
+        }}
+      >Ransomware</span>
+    </div>
+  );
+}
+
 // ── Tag colors by type (moved into component, see getTagColor) ──
 
 export default function DarkWebNews() {
   const { t } = useTheme();
   const [loaded, setLoaded] = useState(false);
+  // Mode: "darkweb" (default) | "ransomware" — controls dashboard, stats, filter chips and feed.
+  const [mode, setMode] = useState("darkweb");
   const [selectedId, setSelectedId] = useState(1);
+  const [rwSelectedId, setRwSelectedId] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selCategories, setSelCategories] = useState(new Set());
   const [selCountries, setSelCountries] = useState(new Set());
   const [selTags, setSelTags] = useState(new Set());
+  const [selIndustries, setSelIndustries] = useState(new Set());
+  const [selGroups, setSelGroups] = useState(new Set());
   const [showAll, setShowAll] = useState(true);
   const [aiExpanded, setAiExpanded] = useState(false);
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
+
+  const isRansom = mode === "ransomware";
 
   // ── Tooltip style ──
   const ttS = {
@@ -286,76 +482,101 @@ export default function DarkWebNews() {
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
-      {/* ── 1. TOP DASHBOARD ROW ── */}
+      {/* ── 1. TOP DASHBOARD ROW (swaps with mode) ── */}
       <div style={{
         display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18,
         animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
-        {/* Threat Pulse Chart */}
+        {/* LEFT: Trend chart */}
         <div className="glass" style={{ overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>
-              THREAT PULSE
+              {isRansom ? "12-MONTH OVERVIEW" : "THREAT PULSE"}
             </div>
-            <span className="hfont" style={{ fontSize: 15, fontWeight: 700, color: t.text }}>Dark Web Activity Trend</span>
+            <span className="hfont" style={{ fontSize: 15, fontWeight: 700, color: t.text }}>
+              {isRansom ? "Ransomware Attack Trend" : "Dark Web Activity Trend"}
+            </span>
           </div>
           <div style={{ padding: "16px 20px 8px" }}>
             <ResponsiveContainer width="100%" height={120}>
-              <AreaChart data={CHART_DATA}>
+              <AreaChart data={isRansom ? RW_TREND_DATA : CHART_DATA}>
                 <defs>
                   <linearGradient id="dwn-fill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#FF4562" stopOpacity={0.15} />
                     <stop offset="100%" stopColor="#FF4562" stopOpacity={0.01} />
+                  </linearGradient>
+                  <linearGradient id="rwn-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#A855F7" stopOpacity={0.30} />
+                    <stop offset="100%" stopColor="#A855F7" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text30 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: t.text30 }} width={30} />
                 <Tooltip {...ttS} />
-                <Area type="monotone" dataKey="v" stroke="#FF4562" strokeWidth={2} fill="url(#dwn-fill)" dot={false} name="Posts" />
+                <Area type="monotone" dataKey="v" stroke={isRansom ? "#A855F7" : "#FF4562"} strokeWidth={2} fill={`url(#${isRansom ? "rwn-fill" : "dwn-fill"})`} dot={false} name={isRansom ? "Attacks" : "Posts"} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
           <div style={{ padding: "0 20px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF4562", boxShadow: "0 0 6px rgba(255,69,98,0.5)" }} />
-            <span style={{ fontSize: 12, color: t.text50 }}>Dark Web Posts This Month:</span>
-            <span className="hfont" style={{ fontSize: 16, fontWeight: 700, color: t.text }}>847</span>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: isRansom ? "#A855F7" : "#FF4562", boxShadow: `0 0 6px ${isRansom ? "rgba(168,85,247,0.5)" : "rgba(255,69,98,0.5)"}` }} />
+            <span style={{ fontSize: 12, color: t.text50 }}>{isRansom ? "Attacks This Month:" : "Dark Web Posts This Month:"}</span>
+            <span className="hfont" style={{ fontSize: 16, fontWeight: 700, color: t.text }}>{isRansom ? "312" : "847"}</span>
           </div>
         </div>
 
-        {/* Affected Regions */}
+        {/* RIGHT: Countries (DW) or Top Groups donut (Ransom) */}
         <div className="glass" style={{ overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>
-              AFFECTED REGIONS
+              {isRansom ? "THREAT LANDSCAPE" : "AFFECTED REGIONS"}
             </div>
-            <span className="hfont" style={{ fontSize: 15, fontWeight: 700, color: t.text }}>Top 10 Countries by Posts</span>
+            <span className="hfont" style={{ fontSize: 15, fontWeight: 700, color: t.text }}>
+              {isRansom ? "Top Ransomware Groups" : "Top 10 Countries by Posts"}
+            </span>
           </div>
-          <div style={{ padding: "12px 20px 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
-            {COUNTRIES.map((c, i) => (
-              <div key={c.code} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "7px 12px 7px 0",
-                borderBottom: i < 8 ? `1px solid ${t.borderRow}` : "none",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 14 }}>{c.flag}</span>
-                  <span className="mono" style={{ fontSize: 10, color: t.text50, width: 24 }}>{c.code}</span>
-                  <span style={{ fontSize: 11, color: t.text40 }}>{c.name}</span>
-                </div>
-                <span className="mono" style={{ fontSize: 11, fontWeight: 500, color: t.text }}>{c.count}</span>
+          {isRansom ? (
+            <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 24 }}>
+              <MiniDonut groups={RW_TOP_GROUPS} size={130} t={t} />
+              <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px" }}>
+                {RW_TOP_GROUPS.map((g, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: 2, background: g.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, color: t.text60, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{g.name}</span>
+                    <span className="mono" style={{ fontSize: 10, color: t.text30, marginLeft: "auto", flexShrink: 0 }}>
+                      {g.count >= 1000 ? (g.count / 1000).toFixed(1) + "K" : g.count}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div style={{ padding: "12px 20px 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+              {COUNTRIES.map((c, i) => (
+                <div key={c.code} style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "7px 12px 7px 0",
+                  borderBottom: i < 8 ? `1px solid ${t.borderRow}` : "none",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 14 }}>{c.flag}</span>
+                    <span className="mono" style={{ fontSize: 10, color: t.text50, width: 24 }}>{c.code}</span>
+                    <span style={{ fontSize: 11, color: t.text40 }}>{c.name}</span>
+                  </div>
+                  <span className="mono" style={{ fontSize: 11, fontWeight: 500, color: t.text }}>{c.count}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ── 2. STAT CARDS ROW ── */}
+      {/* ── 2. STAT CARDS ROW (swaps with mode) ── */}
       <div style={{
         display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12,
         animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
-        {STATS.map(s => (
+        {(isRansom ? RW_STATS : STATS).map(s => (
           <div key={s.label} className="glass" style={{ padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <div style={{
@@ -363,13 +584,19 @@ export default function DarkWebNews() {
                 background: `${s.color}10`, border: `1px solid ${s.color}20`,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                <StatIcon type={s.icon} color={s.color} />
+                {isRansom ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                ) : (
+                  <StatIcon type={s.icon} color={s.color} />
+                )}
               </div>
               <span style={{ fontSize: 11, color: t.text40 }}>{s.label}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
               <span className="hfont" style={{ fontSize: 24, fontWeight: 700, color: t.text, letterSpacing: "-0.02em" }}>{s.value}</span>
-              <span className="mono" style={{ fontSize: 10, color: s.color }}>{s.trend} this week</span>
+              <span className="mono" style={{ fontSize: 10, color: s.color }}>{s.trend}{isRansom ? "" : " this week"}</span>
             </div>
           </div>
         ))}
@@ -386,47 +613,49 @@ export default function DarkWebNews() {
           borderBottom: `1px solid ${t.borderSection}`,
           display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
         }}>
-          {/* Type dropdown */}
-          <div style={{
-            padding: "7px 12px", borderRadius: 8,
-            background: "rgba(255,69,98,0.08)", border: "1px solid rgba(255,69,98,0.2)",
-            display: "flex", alignItems: "center", gap: 6, cursor: "pointer",
-          }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#FF4562" }}>Dark Web News</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4562" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
-          </div>
+          {/* Apple-style mode toggle (replaces the old Dark Web News dropdown) */}
+          <AppleToggle mode={mode} onChange={setMode} t={t} />
+
+          {/* Spacer — pushes the rest of the filters a little further right so the toggle has room */}
+          <div style={{ width: 18 }} />
+
+          {/* Vertical separator after the toggle */}
+          <div style={{ width: 1, height: 24, background: t.bgElevated }} />
 
           {/* Show All toggle */}
           <button onClick={() => setShowAll(!showAll)} style={{
             padding: "7px 14px", borderRadius: 8, fontSize: 11, fontWeight: 500,
-            background: showAll ? "rgba(255,69,98,0.08)" : t.bgHover,
-            border: showAll ? "1px solid rgba(255,69,98,0.2)" : `1px solid ${t.borderLight}`,
-            color: showAll ? "#FF4562" : t.text50, cursor: "pointer", fontFamily: "'Inter', sans-serif",
+            background: showAll ? (isRansom ? "rgba(168,85,247,0.08)" : "rgba(255,69,98,0.08)") : t.bgHover,
+            border: showAll ? `1px solid ${isRansom ? "rgba(168,85,247,0.2)" : "rgba(255,69,98,0.2)"}` : `1px solid ${t.borderLight}`,
+            color: showAll ? (isRansom ? "#A855F7" : "#FF4562") : t.text50, cursor: "pointer", fontFamily: "'Inter', sans-serif",
           }}>{showAll ? "Show All" : "Show Top 4"}</button>
 
           {/* Separator */}
           <div style={{ width: 1, height: 24, background: t.bgElevated }} />
 
-          {/* FilterDropdown: Category */}
-          <FilterDropdown label="Category" options={ALL_CATEGORIES} selected={selCategories} onSelectionChange={setSelCategories} accentColor="#FF4562" />
-
-          {/* FilterDropdown: Countries */}
-          <FilterDropdown label="Countries" options={ALL_COUNTRIES} selected={selCountries} onSelectionChange={setSelCountries} accentColor="#FF4562" />
-
-          {/* FilterDropdown: Tags */}
-          <FilterDropdown label="Tags" options={ALL_TAGS} selected={selTags} onSelectionChange={setSelTags} accentColor="#3B82F6" />
-
-          {/* Static filters (non-interactive labels) */}
-          {STATIC_FILTERS.map(f => (
-            <div key={f.label} style={{
-              padding: "7px 10px", borderRadius: 8,
-              background: t.bgInput, border: `1px solid ${t.borderLight}`,
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
-              <span style={{ fontSize: 11, color: t.text40 }}>{f.label}</span>
-              <span className="mono" style={{ fontSize: 9, color: t.text25 }}>{f.count}</span>
-            </div>
-          ))}
+          {isRansom ? (
+            <>
+              <FilterDropdown label="Industries"        options={RW_ALL_INDUSTRIES} selected={selIndustries} onSelectionChange={setSelIndustries} accentColor="#A855F7" />
+              <FilterDropdown label="Countries"         options={ALL_COUNTRIES}    selected={selCountries}  onSelectionChange={setSelCountries}  accentColor="#A855F7" />
+              <FilterDropdown label="Ransomware Groups" options={RW_ALL_GROUPS}    selected={selGroups}     onSelectionChange={setSelGroups}     accentColor="#A855F7" />
+            </>
+          ) : (
+            <>
+              <FilterDropdown label="Category"  options={ALL_CATEGORIES} selected={selCategories} onSelectionChange={setSelCategories} accentColor="#FF4562" />
+              <FilterDropdown label="Countries" options={ALL_COUNTRIES}  selected={selCountries}  onSelectionChange={setSelCountries}  accentColor="#FF4562" />
+              <FilterDropdown label="Tags"      options={ALL_TAGS}       selected={selTags}       onSelectionChange={setSelTags}       accentColor="#3B82F6" />
+              {STATIC_FILTERS.map(f => (
+                <div key={f.label} style={{
+                  padding: "7px 10px", borderRadius: 8,
+                  background: t.bgInput, border: `1px solid ${t.borderLight}`,
+                  display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  <span style={{ fontSize: 11, color: t.text40 }}>{f.label}</span>
+                  <span className="mono" style={{ fontSize: 9, color: t.text25 }}>{f.count}</span>
+                </div>
+              ))}
+            </>
+          )}
 
           {/* Spacer */}
           <div style={{ flex: 1 }} />
@@ -448,7 +677,8 @@ export default function DarkWebNews() {
           </div>
         </div>
 
-        {/* Master-Detail Layout */}
+        {/* Master-Detail Layout — Dark Web mode */}
+        {!isRansom && (
         <div style={{ display: "flex", minHeight: 600 }}>
           {/* Left: Article List */}
           <div style={{
@@ -661,6 +891,161 @@ export default function DarkWebNews() {
             </div>
           </div>
         </div>
+        )}
+
+        {/* Master-Detail Layout — Ransomware mode */}
+        {isRansom && (() => {
+          // Filter ransom news by search + chips
+          const filteredRw = RW_NEWS.filter(n => {
+            if (searchQuery) {
+              const q = searchQuery.toLowerCase();
+              if (!n.title.toLowerCase().includes(q) && !n.desc.toLowerCase().includes(q) && !n.ransomwareGroup.toLowerCase().includes(q)) return false;
+            }
+            if (selIndustries.size > 0 && !selIndustries.has(n.industry)) return false;
+            if (selGroups.size > 0     && !selGroups.has(n.ransomwareGroup)) return false;
+            return true;
+          });
+          const displayedRw = showAll ? filteredRw : filteredRw.slice(0, 4);
+          const selectedRw = displayedRw.find(n => n.id === rwSelectedId) || displayedRw[0] || RW_NEWS[0];
+          return (
+            <div style={{ display: "flex", minHeight: 600 }}>
+              {/* Left list */}
+              <div style={{ width: 380, borderRight: `1px solid ${t.borderSection}`, overflowY: "auto", maxHeight: 700 }}>
+                {displayedRw.length === 0 && (
+                  <div style={{ padding: "40px 20px", textAlign: "center", color: t.text25, fontSize: 12 }}>
+                    No ransomware news matches your filters
+                  </div>
+                )}
+                {displayedRw.map(n => {
+                  const isActive = n.id === rwSelectedId;
+                  return (
+                    <div key={n.id} onClick={() => setRwSelectedId(n.id)} style={{
+                      padding: "16px 20px", cursor: "pointer",
+                      borderBottom: `1px solid ${t.borderSection}`,
+                      background: isActive ? "rgba(168,85,247,0.04)" : "transparent",
+                      borderLeft: isActive ? "2px solid #A855F7" : "2px solid transparent",
+                      transition: "all 0.2s",
+                    }}>
+                      <div style={{
+                        width: "100%", height: 90, borderRadius: 8, marginBottom: 10,
+                        background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.12)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(168,85,247,0.4)" strokeWidth="1.5">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                      </div>
+                      <span style={{
+                        display: "inline-block", fontSize: 9, fontWeight: 600, padding: "3px 7px",
+                        borderRadius: 4, background: "rgba(168,85,247,0.12)", color: "#A855F7", marginBottom: 6,
+                      }}>Ransomware</span>
+                      <div className="hfont" style={{
+                        fontSize: 13, fontWeight: 700, color: isActive ? t.text : t.text70,
+                        lineHeight: 1.4, marginBottom: 4,
+                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                      }}>{n.title}</div>
+                      <div style={{
+                        fontSize: 11, color: t.text35, lineHeight: 1.4, marginBottom: 8,
+                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                      }}>{n.desc}</div>
+                      <div className="mono" style={{ fontSize: 10, color: t.text30, display: "flex", alignItems: "center", gap: 10 }}>
+                        <span>📅 {n.date}</span>
+                        <span style={{ color: "rgba(168,85,247,0.65)", fontWeight: 600 }}>{n.ransomwareGroup}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Right detail */}
+              <div style={{ flex: 1, overflowY: "auto", maxHeight: 700, padding: "24px 28px" }}>
+                <h2 className="hfont" style={{ fontSize: 18, fontWeight: 700, color: t.text, lineHeight: 1.35, margin: 0, letterSpacing: "-0.02em", marginBottom: 10 }}>
+                  {selectedRw.title}
+                </h2>
+                <div className="mono" style={{ fontSize: 10, color: t.text30, marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
+                  <span>📅 {selectedRw.date}</span>
+                  <span style={{ color: "#A855F7", fontWeight: 600 }}>{selectedRw.ransomwareGroup}</span>
+                  <span style={{ color: t.text40 }}>· {selectedRw.industry}</span>
+                </div>
+
+                {/* Tags */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+                  {selectedRw.tags.map((tag, i) => (
+                    <span key={i} style={{
+                      padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 500,
+                      background: "rgba(168,85,247,0.10)", color: "#A855F7", border: "1px solid rgba(168,85,247,0.20)",
+                    }}>{tag}</span>
+                  ))}
+                </div>
+
+                {/* Article image */}
+                <div style={{
+                  width: "100%", height: 200, borderRadius: 12, marginBottom: 18,
+                  background: t.bgInput, border: `1px solid ${t.borderLight}`,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
+                }}>
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={t.text15} strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                  <span style={{ fontSize: 11, color: t.text15 }}>Article image</span>
+                </div>
+
+                {/* AI Insights */}
+                <div style={{
+                  borderRadius: 12, padding: "16px 18px", marginBottom: 18,
+                  background: "linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(168,85,247,0.02) 100%)",
+                  border: "1px solid rgba(168,85,247,0.14)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 8,
+                      background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.2)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="1.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+                      </svg>
+                    </div>
+                    <span className="hfont" style={{ fontSize: 13, fontWeight: 700, color: t.text }}>SOCRadar AI Insights</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: t.text55, lineHeight: 1.65, marginBottom: 10 }}>{selectedRw.aiAnalysis}</p>
+                  <div className="mono" style={{ fontSize: 9, letterSpacing: "0.06em", color: "rgba(168,85,247,0.5)", textTransform: "uppercase", marginBottom: 8 }}>Key Insights</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {selectedRw.keyInsights.map((ins, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, fontSize: 11, lineHeight: 1.5 }}>
+                        <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#A855F7", marginTop: 6, flexShrink: 0, boxShadow: "0 0 4px rgba(168,85,247,0.5)" }} />
+                        <span style={{ color: t.text50 }}>
+                          <strong style={{ color: t.text70, fontWeight: 600 }}>{ins.label}:</strong> {ins.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <p style={{ fontSize: 12, lineHeight: 1.7, color: t.text45, marginBottom: 16 }}>{selectedRw.desc}</p>
+
+                {/* Victim summary card */}
+                <div style={{
+                  padding: "10px 14px", borderRadius: 8,
+                  background: t.bgCard, border: `1px solid ${t.borderSection}`,
+                  display: "flex", alignItems: "center", gap: 16,
+                }}>
+                  <div>
+                    <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase", letterSpacing: "0.06em" }}>Victim</span>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: t.text60 }}>{selectedRw.victim}</div>
+                  </div>
+                  <div style={{ marginLeft: "auto", textAlign: "right" }}>
+                    <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase", letterSpacing: "0.06em" }}>Group</span>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#A855F7" }}>{selectedRw.ransomwareGroup}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

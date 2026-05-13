@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { SortHeader, useSort, usePagination, Pagination, ExportButton, exportCSV, CopyCell, Checkbox, useSelection, BulkActionBar, stickyHeaderStyle } from "../components/TableUtils";
+import { SortHeader, useSort, usePagination, Pagination, ExportButton, exportCSV, CopyCell, Checkbox, useSelection, BulkActionBar, getStickyHeaderStyle } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
 import DemoNotice from "../components/DemoNotice";
 
@@ -472,7 +472,7 @@ export default function IABMonitor() {
         ) : (
           /* Table */
           <>
-            <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 1fr 90px 110px 60px 110px 110px 40px", gap: 8, borderBottom: `1px solid ${t.borderSection}`, ...stickyHeaderStyle }}>
+            <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 1fr 90px 110px 60px 110px 110px 40px", gap: 8, borderBottom: `1px solid ${t.borderSection}`, ...getStickyHeaderStyle(t) }}>
               <Checkbox checked={sel.allSelected(pageData)} indeterminate={sel.count > 0 && !sel.allSelected(pageData)} onChange={() => sel.toggleAll(pageData)} />
               <SortHeader label="URL" field="url" sortField={sortField} sortDir={sortDir} onSort={onSort} />
               <SortHeader label="User" field="user" sortField={sortField} sortDir={sortDir} onSort={onSort} />

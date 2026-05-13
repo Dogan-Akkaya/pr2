@@ -1,32 +1,14 @@
-import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useData } from "../context/DataContext";
 import { useTheme } from "../context/ThemeContext";
 import { PAGE_COMMENTS } from "../data/comments";
-
-function formatRelative(ts) {
-  const diffMs = Math.max(0, Date.now() - ts);
-  const m = Math.floor(diffMs / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m} min ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
+import HoverComment from "./HoverComment";
 
 export default function TopBar({ title = "Dark Web Dashboard", subtitle = "Advanced Dark Web Monitoring" }) {
   const { state, dispatch } = useData();
   const { mode, toggle, t } = useTheme();
-  const [, tick] = useState(0);
-
-  // Re-render every 30s so "Last scan" stays accurate without re-fetching.
-  useEffect(() => {
-    const id = setInterval(() => tick(n => n + 1), 30000);
-    return () => clearInterval(id);
-  }, []);
 
   const alertCount = state.heroAlerts?.length || 0;
-  const lastScanLabel = formatRelative(state.lastScanAt);
   const location = useLocation();
   const hasPageComment = !!PAGE_COMMENTS[location.pathname];
 
@@ -45,27 +27,6 @@ export default function TopBar({ title = "Dark Web Dashboard", subtitle = "Advan
         <span className="mono" style={{ fontSize: 10, color: t.text25, marginLeft: 12 }}>{subtitle}</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span title="This is a redesign prototype — all data is synthesised" style={{
-          display: "inline-flex", alignItems: "center", gap: 5,
-          padding: "3px 9px", borderRadius: 5,
-          background: "rgba(168,85,247,0.10)",
-          border: "1px solid rgba(168,85,247,0.22)",
-          color: "#A855F7",
-          fontSize: 8.5, fontWeight: 800, letterSpacing: "0.14em",
-          fontFamily: "'JetBrains Mono', monospace",
-        }}>
-          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#A855F7" }} />
-          PROTOTYPE · DUMMY DATA
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }} title={`Last successful crawler ingest: ${new Date(state.lastScanAt).toLocaleString()}`}>
-          <span style={{
-            width: 6, height: 6, borderRadius: "50%",
-            background: "#22C55E", boxShadow: "0 0 6px rgba(34,197,94,0.5)",
-            animation: "pulse 2s ease-in-out infinite",
-          }} />
-          <span className="mono" style={{ fontSize: 10, color: t.text40 }}>Last scan: {lastScanLabel}</span>
-        </div>
-
         {/* Theme toggle */}
         <div
           onClick={toggle}
@@ -155,10 +116,12 @@ export default function TopBar({ title = "Dark Web Dashboard", subtitle = "Advan
             background: t.bgHover, border: `1px solid ${t.borderMed}`,
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "pointer", transition: "all 0.2s",
+            position: "relative",
           }}
           onMouseEnter={(e) => { e.currentTarget.style.background = t.bgElevated; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = t.bgHover; }}
         >
+          <HoverComment anchorKey="topbar.admin-gear" top={-9} right={-9} />
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={t.text50} strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />

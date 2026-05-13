@@ -488,6 +488,76 @@ export default function GlobalThreats() {
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
 
+      {/* ═══ v2 §3 — HEATMAP HERO + LIVE PULSE (moved to top) ═══ */}
+      <div style={{ animation: loaded ? "fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both" : "none", position: "relative" }}>
+        <HoverComment anchorKey="global-threats.heatmap" top={-2} right={4} />
+        <div className="mono" style={{ fontSize: 8, color: t.text25, letterSpacing: "0.20em", fontWeight: 700, marginBottom: 8 }}>GLOBAL THREAT TEMPERATURE</div>
+        <div className="glass" style={{ padding: "16px 18px", marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>Attack Distribution by Sector & Type</span>
+            <span style={{ fontSize: 9, color: t.text30 }}>Click any cell to filter the page</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "100px repeat(6, 1fr)", gap: 3 }}>
+            <div></div>
+            {HEATMAP.industries.map(ind => (
+              <div key={ind} className="mono" style={{
+                fontSize: 7, color: t.text30, textAlign: "center", padding: 4,
+                letterSpacing: "0.10em", fontWeight: 700,
+              }}>{ind}</div>
+            ))}
+            {HEATMAP.attackTypes.map((at, ri) => (
+              <Fragment key={at}>
+                <div className="mono" style={{ fontSize: 9, color: t.text50, fontWeight: 600, display: "flex", alignItems: "center" }}>{at}</div>
+                {HEATMAP.matrix[ri].map((v, ci) => {
+                  const tier = heatmapTier(v);
+                  const tierBg = {
+                    hot:  "rgba(255,69,98,0.55)",
+                    warm: "rgba(255,69,98,0.32)",
+                    med:  "rgba(245,158,11,0.28)",
+                    cool: "rgba(99,102,241,0.18)",
+                    cold: "rgba(51,65,85,0.18)",
+                  }[tier];
+                  const tierColor = tier === "cool" || tier === "cold" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.95)";
+                  return (
+                    <div
+                      key={`${ri}-${ci}`}
+                      title={`${HEATMAP.attackTypes[ri]} · ${HEATMAP.industries[ci]} · ${v}`}
+                      onClick={() => addChip({ type: "industry", value: HEATMAP.industries[ci].toLowerCase().replace(/[^\w]/g, "-"), label: HEATMAP.industries[ci] })}
+                      style={{
+                        borderRadius: 4, height: 32,
+                        background: tierBg, color: tierColor,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 9, fontWeight: 700,
+                        cursor: "pointer", transition: "transform 0.12s ease",
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.06)"}
+                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                    >{v}</div>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+        {/* Live Pulse stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+          {[
+            { num: "312",   label: "Ransomware\nVictims",  trend: "▲ +28%", color: "#FF4562", trendColor: "#FF4562" },
+            { num: "1,092", label: "Data\nBreaches",        trend: "▲ +15%", color: "#F59E0B", trendColor: "#F59E0B" },
+            { num: "647",   label: "DDoS\nCampaigns",       trend: "▼ -8%",  color: t.text,   trendColor: "#22C55E" },
+            { num: "247",   label: "IAB\nListings",         trend: "▲ +34%", color: "#F59E0B", trendColor: "#FF4562" },
+          ].map((p, i) => (
+            <div key={i} className="glass" style={{ padding: "11px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+              <div className="hfont" style={{ fontSize: 22, fontWeight: 800, color: p.color }}>{p.num}</div>
+              <div style={{ fontSize: 9, color: t.text45, lineHeight: 1.35, whiteSpace: "pre-line" }}>
+                {p.label}
+                <div className="mono" style={{ fontSize: 8, color: p.trendColor, fontWeight: 700, marginTop: 2 }}>{p.trend}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ═══ LAYER 2: ADVANCED SEARCH (chips + freetext + autocomplete dropdown) ═══ */}
       <div ref={searchWrapRef} style={{
         position: "relative",
@@ -675,76 +745,6 @@ export default function GlobalThreats() {
         </div>
       </div>
 
-      {/* ═══ v2 §3 — HEATMAP HERO + LIVE PULSE ═══ */}
-      <div style={{ animation: loaded ? "fadeUp 0.6s 0.08s cubic-bezier(0.16,1,0.3,1) both" : "none", position: "relative" }}>
-        <HoverComment anchorKey="global-threats.heatmap" top={-2} right={4} />
-        <div className="mono" style={{ fontSize: 8, color: t.text25, letterSpacing: "0.20em", fontWeight: 700, marginBottom: 8 }}>GLOBAL THREAT TEMPERATURE</div>
-        <div className="glass" style={{ padding: "16px 18px", marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span className="hfont" style={{ fontSize: 14, fontWeight: 700 }}>Attack Distribution by Sector & Type</span>
-            <span style={{ fontSize: 9, color: t.text30 }}>Click any cell to filter the page</span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "100px repeat(6, 1fr)", gap: 3 }}>
-            <div></div>
-            {HEATMAP.industries.map(ind => (
-              <div key={ind} className="mono" style={{
-                fontSize: 7, color: t.text30, textAlign: "center", padding: 4,
-                letterSpacing: "0.10em", fontWeight: 700,
-              }}>{ind}</div>
-            ))}
-            {HEATMAP.attackTypes.map((at, ri) => (
-              <Fragment key={at}>
-                <div className="mono" style={{ fontSize: 9, color: t.text50, fontWeight: 600, display: "flex", alignItems: "center" }}>{at}</div>
-                {HEATMAP.matrix[ri].map((v, ci) => {
-                  const tier = heatmapTier(v);
-                  const tierBg = {
-                    hot:  "rgba(255,69,98,0.55)",
-                    warm: "rgba(255,69,98,0.32)",
-                    med:  "rgba(245,158,11,0.28)",
-                    cool: "rgba(99,102,241,0.18)",
-                    cold: "rgba(51,65,85,0.18)",
-                  }[tier];
-                  const tierColor = tier === "cool" || tier === "cold" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.95)";
-                  return (
-                    <div
-                      key={`${ri}-${ci}`}
-                      title={`${HEATMAP.attackTypes[ri]} · ${HEATMAP.industries[ci]} · ${v}`}
-                      onClick={() => addChip({ type: "industry", value: HEATMAP.industries[ci].toLowerCase().replace(/[^\w]/g, "-"), label: HEATMAP.industries[ci] })}
-                      style={{
-                        borderRadius: 4, height: 32,
-                        background: tierBg, color: tierColor,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 9, fontWeight: 700,
-                        cursor: "pointer", transition: "transform 0.12s ease",
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.06)"}
-                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                    >{v}</div>
-                  );
-                })}
-              </Fragment>
-            ))}
-          </div>
-        </div>
-        {/* Live Pulse stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-          {[
-            { num: "312",   label: "Ransomware\nVictims",  trend: "▲ +28%", color: "#FF4562", trendColor: "#FF4562" },
-            { num: "1,092", label: "Data\nBreaches",        trend: "▲ +15%", color: "#F59E0B", trendColor: "#F59E0B" },
-            { num: "647",   label: "DDoS\nCampaigns",       trend: "▼ -8%",  color: t.text,   trendColor: "#22C55E" },
-            { num: "247",   label: "IAB\nListings",         trend: "▲ +34%", color: "#F59E0B", trendColor: "#FF4562" },
-          ].map((p, i) => (
-            <div key={i} className="glass" style={{ padding: "11px 14px", display: "flex", alignItems: "center", gap: 10 }}>
-              <div className="hfont" style={{ fontSize: 22, fontWeight: 800, color: p.color }}>{p.num}</div>
-              <div style={{ fontSize: 9, color: t.text45, lineHeight: 1.35, whiteSpace: "pre-line" }}>
-                {p.label}
-                <div className="mono" style={{ fontSize: 8, color: p.trendColor, fontWeight: 700, marginTop: 2 }}>{p.trend}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ═══ v2 §4 — GEO TARGETING (compact) + RANSOMWARE GROUPS (compact) ═══ */}
       <div style={{
         display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
@@ -860,7 +860,7 @@ export default function GlobalThreats() {
                       background: "rgba(255,69,98,0.10)", color: "#FF4562",
                       border: "1px solid rgba(255,69,98,0.20)",
                       fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em",
-                    }}>TARGETS YOU</span>
+                    }}>TARGETS YOUR COUNTRY OR INDUSTRY</span>
                   )}
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.text40} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0)", transition: "transform 0.18s ease" }}><path d="M9 18l6-6-6-6" /></svg>
                 </div>
@@ -1187,7 +1187,7 @@ export default function GlobalThreats() {
               <button className={`tab-btn ${newsTab === "darkweb" ? "on" : ""}`} onClick={() => { setNewsTab("darkweb"); setActiveDW(0); }}>Dark Web News</button>
               <button className={`tab-btn ${newsTab === "ransomware" ? "on" : ""}`} onClick={() => { setNewsTab("ransomware"); setActiveRansom(0); }}>Ransomware News</button>
             </div>
-            <span className="mono" style={{ fontSize: 11, color: "#FF4562", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/dark-web-news")}>View All →</span>
+            <span className="mono" style={{ fontSize: 11, color: "#FF4562", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/ransom-dark-web-news")}>View All →</span>
           </div>
           {activeNews.length > 0 ? (
             <div style={{ display: "flex", minHeight: 320 }}>
@@ -1337,7 +1337,7 @@ export default function GlobalThreats() {
               <button className={`tab-btn ${newsTab === "ransomware" ? "on" : ""}`} onClick={() => { setNewsTab("ransomware"); setActiveRansom(0); }}>Ransomware News</button>
             </div>
           </div>
-          <span className="mono" style={{ fontSize: 11, color: "#FF4562", cursor: "pointer" }} onClick={() => navigate("/dark-web-news")}>View All →</span>
+          <span className="mono" style={{ fontSize: 11, color: "#FF4562", cursor: "pointer" }} onClick={() => navigate("/ransom-dark-web-news")}>View All →</span>
         </div>
         {activeNews.length > 0 ? (
           <div style={{ display: "flex", minHeight: 360 }}>
@@ -1448,7 +1448,7 @@ export default function GlobalThreats() {
                       background: "rgba(255,69,98,0.14)", color: "#FF4562",
                       fontSize: 7, fontWeight: 800, letterSpacing: "0.10em",
                       fontFamily: "'JetBrains Mono', monospace",
-                    }}>TARGETS YOU</span>
+                    }}>TARGETS YOUR COUNTRY OR INDUSTRY</span>
                   )}
                 </span>
               </div>

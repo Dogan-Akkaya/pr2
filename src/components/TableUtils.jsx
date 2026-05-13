@@ -105,7 +105,7 @@ export function Pagination({ page, totalPages, startIdx, endIdx, totalItems, onP
               fontFamily: "'JetBrains Mono',monospace", cursor: "pointer", outline: "none",
             }}
           >
-            {[10, 25, 50].map(n => <option key={n} value={n} style={{ background: t.bgSidebar }}>{n}/page</option>)}
+            {[10, 25, 100].map(n => <option key={n} value={n} style={{ background: t.bgSidebar }}>{n}/page</option>)}
           </select>
         )}
       </div>

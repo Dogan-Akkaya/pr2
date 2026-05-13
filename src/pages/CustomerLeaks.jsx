@@ -99,57 +99,30 @@ const SOURCES = [
   { name: "Paste Sites", count: 2121, pct: 5, color: "#64748B", iconKey: "edit" },
 ];
 
-const RISK_SEGMENTS = [
-  {
-    name: "Multi-Exposure Customers", color: "#FF4562",
-    desc: "Customers found in 3+ separate sources. Highest risk of targeted account takeover.",
-    count: 4218, trendPct: 18, trendColor: "#FF4562",
-    iconKey: "lock",
-  },
-  {
-    name: "Financial Data Exposed", color: "#F59E0B",
-    desc: "Customers with payment cards or bank details in dark web listings.",
-    count: 8891, trendPct: 7, trendColor: "#F59E0B",
-    iconKey: "card",
-  },
-  {
-    name: "Active Session Hijack Risk", color: "#A855F7",
-    desc: "Customers with live session tokens/cookies for sale. 2FA bypass possible.",
-    count: 4127, trendPct: 34, trendColor: "#FF4562",
-    iconKey: "user",
-  },
-  {
-    name: "High-Value Accounts", color: "#22C55E",
-    desc: "Premium/VIP customers or accounts with high transaction history exposed.",
-    count: 1203, trendPct: 5, trendColor: "#F59E0B",
-    iconKey: "star",
-  },
+// Quick-range presets for the customer-leak CSV export.
+// Dates are inline strings; today's reference is 2026-05-13.
+const EXPORT_PRESETS = [
+  { id: "last-month", label: "Last Month", start: "2026-04-01", end: "2026-04-30" },
+  { id: "this-year",  label: "This Year",  start: "2026-01-01", end: "2026-05-13" },
+  { id: "last-year",  label: "Last Year",  start: "2025-01-01", end: "2025-12-31" },
 ];
 
 const ACTIONS = [
   {
     name: "Force Password Reset", iconKey: "key",
     desc: "Export the list of 31,205 compromised credentials and trigger mandatory password resets for affected customer accounts.",
-    cta: "Run reset", running: "Pushing reset tokens…",
-    outcome: "31,205 reset emails dispatched · expires in 24h",
   },
   {
     name: "Notify Affected Customers", iconKey: "megaphone",
     desc: "Generate a compliance-ready notification template for the 47,832 exposed customers, customized to your regulatory region.",
-    cta: "Generate notice", running: "Drafting KVKK-compliant notice…",
-    outcome: "47,832 notices queued · legal review pending",
   },
   {
     name: "Generate Board Report", iconKey: "chart",
     desc: "Export a presentation-ready executive summary with exposure stats, compliance estimates, and trend analysis for board briefing.",
-    cta: "Build report", running: "Compiling PDF…",
-    outcome: "Q2 board pack ready · saved to Reports",
   },
   {
     name: "Invalidate Sessions", iconKey: "shield",
     desc: "Identify and revoke the 4,127 active session tokens currently for sale to prevent immediate account takeover attacks.",
-    cta: "Revoke tokens", running: "Killing sessions…",
-    outcome: "4,127 sessions revoked · IdP audit log updated",
   },
 ];
 
@@ -208,8 +181,6 @@ function Icon({ name, size = 16, color = "currentColor" }) {
       return <svg {...props}><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>;
     case "edit":
       return <svg {...props}><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>;
-    case "ibm":
-      return <svg {...props}><path d="M3 3v18h18" /><path d="m21 7-7 7-3-3-5 5" /></svg>;
     default:
       return null;
   }
@@ -257,26 +228,12 @@ export default function CustomerLeaks() {
   const ttS = tooltipStyles(t);
   const [loaded, setLoaded] = useState(false);
   const [activeRegion, setActiveRegion] = useState("tr");
-  // Per-action workflow state: idle | running | done
-  // Each action also tracks a deterministic outcome message shown when done.
-  const [actionStates, setActionStates] = useState(() =>
-    Object.fromEntries(ACTIONS.map(a => [a.iconKey, { phase: "idle", progress: 0 }]))
-  );
+  // Export panel state — quick-range preset + manual date overrides.
+  const [exportPreset, setExportPreset] = useState("last-month");
+  const [exportStart, setExportStart] = useState(EXPORT_PRESETS[0].start);
+  const [exportEnd, setExportEnd] = useState(EXPORT_PRESETS[0].end);
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
-
-  function runAction(key, outcome) {
-    setActionStates(s => ({ ...s, [key]: { phase: "running", progress: 0 } }));
-    let p = 0;
-    const id = setInterval(() => {
-      p = Math.min(100, p + Math.round(8 + Math.random() * 14));
-      setActionStates(s => {
-        if (s[key].phase !== "running") return s;
-        return { ...s, [key]: { phase: p >= 100 ? "done" : "running", progress: p, outcome } };
-      });
-      if (p >= 100) clearInterval(id);
-    }, 220);
-  }
 
   const reorderedRegions = useMemo(() => {
     // Active region first, others after
@@ -570,56 +527,76 @@ export default function CustomerLeaks() {
           </div>
 
           <div className="glass" style={{ padding: "16px 18px" }}>
-            <div className="mono" style={{ fontSize: 8, color: t.text30, letterSpacing: "0.14em", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Customer Risk Segments</div>
-            <div className="hfont" style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: t.text }}>Highest-risk customer groups</div>
-            {RISK_SEGMENTS.map((r, i) => (
-              <div key={i} style={{
-                background: t.bgCard, border: `1px solid ${t.borderLight}`,
-                borderRadius: 8, padding: 12, marginBottom: 6,
-                display: "flex", alignItems: "center", gap: 12,
-              }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: 9,
-                  background: `${r.color}15`, color: r.color,
-                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                }}>
-                  <Icon name={r.iconKey} size={17} color={r.color} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: r.color }}>{r.name}</div>
-                  <div style={{ fontSize: 9, color: t.text35, marginTop: 2, lineHeight: 1.4 }}>{r.desc}</div>
-                </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div className="hfont" style={{ fontSize: 18, fontWeight: 800, color: r.color, lineHeight: 1 }}>{r.count.toLocaleString()}</div>
-                  <div className="mono" style={{ fontSize: 8, color: r.trendColor, marginTop: 4, fontWeight: 700 }}>▲ +{r.trendPct}%</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ IBM CALLOUT ═══ */}
-      <div style={{
-        background: isDark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.05)",
-        border: "1px solid rgba(99,102,241,0.16)",
-        borderRadius: 9, padding: "14px 18px",
-        display: "flex", alignItems: "center", gap: 14,
-        animation: loaded ? "fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both" : "none",
-      }}>
-        <div style={{
-          width: 38, height: 38, borderRadius: 9,
-          background: "rgba(99,102,241,0.10)", color: "#6366F1",
-          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-        }}>
-          <Icon name="ibm" size={20} color="#6366F1" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, lineHeight: 1.6, color: t.text50 }}>
-            According to IBM's 2025 Cost of a Data Breach Report, customer PII was compromised in <strong style={{ color: "#FF4562" }}>53% of all breaches</strong> studied. The global average breach cost is <strong style={{ color: "#FF4562" }}>$4.44 million</strong>, with healthcare at $7.42M and the US alone averaging <strong style={{ color: "#FF4562" }}>$10.22 million</strong>. Organizations with exposed credentials took an average of <strong style={{ color: "#FF4562" }}>292 days</strong> to resolve breaches.
-          </div>
-          <div className="mono" style={{ fontSize: 8, color: t.text30, marginTop: 4 }}>
-            Source: IBM / Ponemon Institute — Cost of a Data Breach Report 2025 · 600 organizations across 16 countries
+            <div className="mono" style={{ fontSize: 8, color: t.text30, letterSpacing: "0.14em", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Data Export</div>
+            <div className="hfont" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, color: t.text }}>Export leaked customers</div>
+            <div style={{ fontSize: 10, color: t.text40, lineHeight: 1.5, marginBottom: 12 }}>
+              Pick a quick range or set custom start &amp; end dates. Export delivers a CSV of all exposed customer records in that window.
+            </div>
+            {/* Quick range chips */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+              {EXPORT_PRESETS.map(p => {
+                const active = exportPreset === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => { setExportPreset(p.id); setExportStart(p.start); setExportEnd(p.end); }}
+                    style={{
+                      padding: "5px 11px", borderRadius: 5,
+                      border: `1px solid ${active ? "rgba(255,69,98,0.32)" : t.borderLight}`,
+                      background: active ? "rgba(255,69,98,0.10)" : "transparent",
+                      color: active ? "#FF4562" : t.text50,
+                      fontSize: 10, fontWeight: 700, cursor: "pointer",
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >{p.label}</button>
+                );
+              })}
+            </div>
+            {/* Start / End date inputs */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span className="mono" style={{ fontSize: 8, color: t.text30, letterSpacing: "0.12em", fontWeight: 700, textTransform: "uppercase" }}>From</span>
+                <input
+                  type="date"
+                  value={exportStart}
+                  onChange={e => { setExportStart(e.target.value); setExportPreset("custom"); }}
+                  style={{
+                    padding: "7px 10px", fontSize: 11,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    background: t.bgInput, border: `1px solid ${t.borderLight}`,
+                    borderRadius: 7, color: t.text, outline: "none",
+                  }}
+                />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span className="mono" style={{ fontSize: 8, color: t.text30, letterSpacing: "0.12em", fontWeight: 700, textTransform: "uppercase" }}>To</span>
+                <input
+                  type="date"
+                  value={exportEnd}
+                  onChange={e => { setExportEnd(e.target.value); setExportPreset("custom"); }}
+                  style={{
+                    padding: "7px 10px", fontSize: 11,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    background: t.bgInput, border: `1px solid ${t.borderLight}`,
+                    borderRadius: 7, color: t.text, outline: "none",
+                  }}
+                />
+              </label>
+            </div>
+            <button
+              style={{
+                width: "100%",
+                padding: "9px 14px", borderRadius: 8, border: "none",
+                background: "#FF4562", color: "#fff",
+                fontSize: 11, fontWeight: 700, cursor: "pointer",
+                fontFamily: "'Inter', sans-serif",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                boxShadow: "0 4px 16px rgba(255,69,98,0.25)",
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+              Export CSV
+            </button>
           </div>
         </div>
       </div>
@@ -629,15 +606,12 @@ export default function CustomerLeaks() {
         <div className="mono" style={{ fontSize: 8, color: t.text30, letterSpacing: "0.14em", fontWeight: 700, textTransform: "uppercase", marginBottom: 9 }}>Recommended Actions</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
           {ACTIONS.map((a) => {
-            const st = actionStates[a.iconKey];
-            const phase = st.phase;
-            const accent = phase === "done" ? "#22C55E" : phase === "running" ? "#F59E0B" : "#3B82F6";
-            const accentBg = phase === "done" ? "rgba(34,197,94,0.10)" : phase === "running" ? "rgba(245,158,11,0.10)" : "rgba(59,130,246,0.10)";
+            const accent = "#3B82F6";
+            const accentBg = "rgba(59,130,246,0.10)";
             return (
               <div key={a.iconKey} style={{
-                background: t.bgCard, border: `1px solid ${phase === "idle" ? t.borderSection : `${accent}55`}`,
+                background: t.bgCard, border: `1px solid ${t.borderSection}`,
                 borderRadius: 9, padding: "14px 16px",
-                transition: "all 0.2s ease",
                 display: "flex", flexDirection: "column",
                 position: "relative", overflow: "hidden",
               }}>
@@ -646,60 +620,12 @@ export default function CustomerLeaks() {
                     width: 32, height: 32, borderRadius: 8,
                     background: accentBg, color: accent,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "all 0.2s ease",
                   }}>
-                    {phase === "running" ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
-                          <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
-                        </path>
-                      </svg>
-                    ) : phase === "done" ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                    ) : (
-                      <Icon name={a.iconKey} size={16} color={accent} />
-                    )}
+                    <Icon name={a.iconKey} size={16} color={accent} />
                   </div>
                   <div style={{ fontSize: 11, fontWeight: 700, color: t.text, flex: 1, lineHeight: 1.25 }}>{a.name}</div>
                 </div>
-                <div style={{ fontSize: 9, color: t.text40, lineHeight: 1.5, marginBottom: 10, flex: 1 }}>{a.desc}</div>
-                {phase === "running" && (
-                  <>
-                    <div className="mono" style={{ fontSize: 9, color: accent, fontWeight: 600, marginBottom: 5 }}>{a.running}</div>
-                    <div style={{ height: 4, background: t.bgInput, borderRadius: 2, overflow: "hidden", marginBottom: 8 }}>
-                      <div style={{ height: "100%", width: `${st.progress}%`, background: accent, borderRadius: 2, transition: "width 0.22s ease" }} />
-                    </div>
-                  </>
-                )}
-                {phase === "done" && (
-                  <div className="mono" style={{
-                    fontSize: 9, color: accent, fontWeight: 600,
-                    padding: "6px 8px", borderRadius: 5,
-                    background: `${accent}10`, marginBottom: 8, lineHeight: 1.4,
-                  }}>
-                    {st.outcome}
-                  </div>
-                )}
-                <button
-                  onClick={() => phase !== "running" && runAction(a.iconKey, a.outcome)}
-                  disabled={phase === "running"}
-                  style={{
-                    border: `1px solid ${accent}55`,
-                    background: phase === "idle" ? "transparent" : `${accent}10`,
-                    color: accent,
-                    padding: "6px 10px", borderRadius: 6,
-                    fontSize: 10, fontWeight: 700, cursor: phase === "running" ? "wait" : "pointer",
-                    fontFamily: "'Inter', sans-serif",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-                    transition: "all 0.15s ease",
-                  }}
-                  onMouseEnter={e => { if (phase !== "running") e.currentTarget.style.background = `${accent}18`; }}
-                  onMouseLeave={e => { if (phase === "idle") e.currentTarget.style.background = "transparent"; else if (phase !== "running") e.currentTarget.style.background = `${accent}10`; }}
-                >
-                  {phase === "idle" && <>{a.cta} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></>}
-                  {phase === "running" && <>Running… {st.progress}%</>}
-                  {phase === "done" && <>Done · run again</>}
-                </button>
+                <div style={{ fontSize: 9, color: t.text40, lineHeight: 1.5, flex: 1 }}>{a.desc}</div>
               </div>
             );
           })}

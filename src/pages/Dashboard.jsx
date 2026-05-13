@@ -444,7 +444,7 @@ export default function Dashboard() {
               ))
             )}
             <div style={{ textAlign: "right", marginTop: 6 }}>
-              <span className="mono" style={{ fontSize: 9, color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate(empVipTab === "employees" ? "/pii" : "/executive-protection")}>View All →</span>
+              <span className="mono" style={{ fontSize: 9, color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate(empVipTab === "employees" ? "/pii-stealer-exposure" : "/vip-monitoring")}>View All →</span>
             </div>
           </div>
 
@@ -453,7 +453,7 @@ export default function Dashboard() {
             <div style={{ display: "flex", alignItems: "center", marginBottom: 9 }}>
               <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>VIP Protection</span>
               <span className="mono" style={{ fontSize: 9, color: "#FF4562", fontWeight: 700, marginLeft: 8 }}>2 at risk</span>
-              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/executive-protection")}>Manage VIPs →</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/vip-monitoring")}>Manage VIPs →</span>
             </div>
             {VIP_PROTECTION.map((v, i) => (
               <div key={i} style={{
@@ -474,7 +474,7 @@ export default function Dashboard() {
             ))}
             <div style={{ fontSize: 10, color: t.text30, marginTop: 8, textAlign: "center" }}>
               Monitoring <strong style={{ color: t.text }}>3</strong> / <strong style={{ color: "#F59E0B" }}>5</strong> VIP slots ·{" "}
-              <span style={{ color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/executive-protection")}>Add VIPs →</span>
+              <span style={{ color: "#3B82F6", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/vip-monitoring")}>Add VIPs →</span>
             </div>
           </div>
 
@@ -521,7 +521,7 @@ export default function Dashboard() {
           <div>
             <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
               <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>PII Exposure</span>
-              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/pii")}>Details →</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/pii-stealer-exposure")}>Details →</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
               {PII_EXPOSURE.map((p, i) => (
@@ -642,7 +642,7 @@ export default function Dashboard() {
           <div>
             <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
               <span className="hfont" style={{ fontSize: 13, fontWeight: 700 }}>Dark Web News</span>
-              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/dark-web-news")}>Open Feed →</span>
+              <span className="mono" style={{ fontSize: 10, color: "#3B82F6", marginLeft: "auto", cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/ransom-dark-web-news")}>Open Feed →</span>
             </div>
             {DW_NEWS.map((n, i) => (
               <div key={i} className="glass" style={{ padding: "8px 12px", marginBottom: 4 }}>

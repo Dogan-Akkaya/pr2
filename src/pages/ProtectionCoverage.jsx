@@ -36,14 +36,6 @@ const TOP_ALARMS = [
   { label: "Stolen Credentials", count: 127, color: "#10B981" },
 ];
 
-const TOP_SOURCES = [
-  { label: "Hacker Forums", count: 7 },
-  { label: "Telegram", count: 6 },
-  { label: "Breach Data Check", count: 6 },
-  { label: "Discord", count: 5 },
-  { label: "IRC", count: 5 },
-];
-
 // ── Alarm counts per asset (dummy) ──
 const ASSET_ALARMS = { 1: 312, 2: 45, 3: 89, 4: 204, 5: 178, 6: 56, 7: 83 };
 
@@ -270,7 +262,8 @@ export default function ProtectionCoverage() {
         animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none",
       }}>
 
-        {/* ─── LEFT COLUMN: Monitored Assets ─── */}
+        {/* ─── LEFT COLUMN: Monitored Assets + Recommendations ─── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {/* Header */}
           <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.borderSection}` }}>
@@ -384,6 +377,39 @@ export default function ProtectionCoverage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+          {/* RECOMMENDATIONS — moved below Monitored Assets in left column */}
+          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Recommendations</div>
+            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>Improve your coverage</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {recommendations.map((rec) => (
+                <div key={rec.key} style={{
+                  padding: "10px 12px", borderRadius: 9,
+                  background: t.bgCard, border: `1px solid ${t.border}`,
+                  borderLeft: `3px solid ${rec.color}`,
+                  cursor: "pointer", transition: "all 0.15s",
+                  display: "flex", alignItems: "center", gap: 10,
+                }}
+                  onClick={() => { setAddModalType(rec.key); setAddModalOpen(true); }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${rec.color}40`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
+                >
+                  <div style={{
+                    width: 24, height: 24, borderRadius: 6, flexShrink: 0,
+                    background: `${rec.color}12`, display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={rec.color} strokeWidth="2"><path d={rec.icon} /></svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: t.text70 }}>{rec.title}</div>
+                    <div style={{ fontSize: 10.5, color: t.text35, lineHeight: 1.4, marginTop: 1 }}>{rec.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -585,61 +611,6 @@ export default function ProtectionCoverage() {
             </div>
           )}
 
-          {/* 7. RECOMMENDATIONS */}
-          <div className="glass" style={{ padding: "16px 20px", overflow: "hidden" }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Recommendations</div>
-            <span className="hfont" style={{ fontSize: 14, fontWeight: 700, display: "block", marginBottom: 12 }}>Improve your coverage</span>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {recommendations.map((rec) => (
-                <div key={rec.key} style={{
-                  padding: "10px 12px", borderRadius: 9,
-                  background: t.bgCard, border: `1px solid ${t.border}`,
-                  borderLeft: `3px solid ${rec.color}`,
-                  cursor: "pointer", transition: "all 0.15s",
-                  display: "flex", alignItems: "center", gap: 10,
-                }}
-                  onClick={() => { setAddModalType(rec.key); setAddModalOpen(true); }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = `${rec.color}40`}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
-                >
-                  <div style={{
-                    width: 24, height: 24, borderRadius: 6, flexShrink: 0,
-                    background: `${rec.color}12`, display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={rec.color} strokeWidth="2"><path d={rec.icon} /></svg>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: t.text70 }}>{rec.title}</div>
-                    <div style={{ fontSize: 10.5, color: t.text35, lineHeight: 1.4, marginTop: 1 }}>{rec.description}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ TOP 5 SOURCES — full width below grid ═══ */}
-      <div className="glass" style={{
-        padding: "18px 24px", overflow: "hidden",
-        animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none",
-      }}>
-        <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 14 }}>Top 5 Most Used Sources</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
-          {TOP_SOURCES.map((source, i) => {
-            const colors = ["#FF4562", "#A855F7", "#3B82F6", "#F59E0B", "#10B981"];
-            return (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: t.bgCard, border: `1px solid ${t.border}` }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, background: `${colors[i]}15`, border: `1px solid ${colors[i]}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span className="hfont" style={{ fontSize: 12, fontWeight: 700, color: colors[i] }}>{i + 1}</span>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: t.text60 }}>{source.label}</span>
-                  <div className="mono" style={{ fontSize: 9, color: t.text25, marginTop: 2 }}>{source.count} sources</div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
 

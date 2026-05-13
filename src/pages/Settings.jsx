@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
+import DemoNotice from "../components/DemoNotice";
 
 // ═══════════════════════════════════════
 // Settings — Notifications · Integrations · Account
@@ -119,6 +120,7 @@ export default function Settings() {
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
+      <DemoNotice />
 
       {/* ═══ BANNER ═══ */}
       <div className="glass" style={{
@@ -354,7 +356,7 @@ export default function Settings() {
                 <input value={profile.org} onChange={e => setProfile(p => ({ ...p, org: e.target.value }))} style={inputStyle(t)} />
               </Field>
 
-              <Field t={t} label="Primary sector" hint="Drives RansomwareNews 'Your sector' default + GlobalThreats actor TARGETS YOU badge">
+              <Field t={t} label="Primary sector" hint="Drives Ransom & Dark Web News default + GlobalThreats actor TARGETS YOU badge">
                 <select value={profile.primarySector} onChange={e => setProfile(p => ({ ...p, primarySector: e.target.value }))} style={inputStyle(t)}>
                   {PROFILE_SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>

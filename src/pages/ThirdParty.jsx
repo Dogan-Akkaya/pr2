@@ -742,6 +742,15 @@ export default function ThirdParty() {
         </div>
       )}
 
+      {/* ═══ H1 — introduces the search section below ═══ */}
+      <h1 className="hfont" style={{
+        fontSize: 26, fontWeight: 700, letterSpacing: "-0.02em",
+        color: t.text, margin: "4px 0 -4px", lineHeight: 1.2,
+        animation: loaded ? "fadeUp 0.6s 0.08s cubic-bezier(0.16,1,0.3,1) both" : "none",
+      }}>
+        Search among the list of hacked companies
+      </h1>
+
       {/* ═══ COMPANY SEARCH HERO (50M+ DB) ═══ */}
       <div style={{
         padding: "20px 22px", borderRadius: 14, position: "relative", overflow: "hidden",

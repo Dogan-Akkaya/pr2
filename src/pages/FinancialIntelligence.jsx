@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, stickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
+import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, getStickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
 
 // ── Leaked Card Data ──
@@ -202,7 +202,7 @@ export default function FinancialIntelligence() {
         </div>
 
         {/* Table header */}
-        <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 60px 80px 70px 100px 80px 40px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle }}>
+        <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 60px 80px 70px 100px 80px 40px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...getStickyHeaderStyle(t) }}>
           <Checkbox checked={sel.allSelected(pageData)} indeterminate={sel.count > 0 && !sel.allSelected(pageData)} onChange={() => sel.toggleAll(pageData)} />
           <SortHeader label="Card Number" field="cardNumber" sortField={sortField} sortDir={sortDir} onSort={onSort} />
           <SortHeader label="CVV" field="cvv" sortField={sortField} sortDir={sortDir} onSort={onSort} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, stickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
+import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, CopyCell, TimeCell, getStickyHeaderStyle, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
 import { tooltipStyles } from "../components/chartTheme";
 
@@ -330,7 +330,7 @@ export default function ExecutiveProtection() {
             </div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#A855F7", textTransform: "uppercase", fontWeight: 600 }}>Executive Protection</span>
+                <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: "#A855F7", textTransform: "uppercase", fontWeight: 600 }}>VIP Monitoring</span>
                 <span style={{ padding: "2px 8px", borderRadius: 5, fontSize: 9, fontWeight: 700, background: "rgba(255,69,98,0.1)", color: "#FF4562", fontFamily: "'JetBrains Mono',monospace" }}>440 open</span>
               </div>
               <div style={{ fontSize: 12, color: t.text40, marginTop: 3 }}>VIP threat monitoring and executive profile protection</div>
@@ -437,7 +437,7 @@ export default function ExecutiveProtection() {
           <ExportButton onClick={() => exportCSV(filtered, CSV_COLS, "vip-alarms.csv")} />
         </div>
 
-        <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 1fr 1fr 70px 100px 100px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...stickyHeaderStyle }}>
+        <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "28px 1fr 1fr 1fr 70px 100px 100px", gap: 8, borderBottom: `1px solid ${t.borderRow}`, ...getStickyHeaderStyle(t) }}>
           <Checkbox checked={sel.allSelected(pageData)} indeterminate={sel.count > 0 && !sel.allSelected(pageData)} onChange={() => sel.toggleAll(pageData)} />
           <SortHeader label="VIP Name" field="vipName" sortField={sortField} sortDir={sortDir} onSort={onSort} />
           <SortHeader label="Keyword" field="keyword" sortField={sortField} sortDir={sortDir} onSort={onSort} />

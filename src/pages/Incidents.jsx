@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
+import DemoNotice from "../components/DemoNotice";
 
 // ═══════════════════════════════════════
 // INCIDENT FIXTURES — synthesised from cross-page critical findings.
@@ -58,8 +59,8 @@ const INCIDENTS = [
     title: "VIP Simon Johnsson — VERY HIGH risk score (72/100)",
     severity: "critical",
     status: "open",
-    sourcePage: "Executive Protection",
-    sourceRoute: "/executive-protection",
+    sourcePage: "VIP Monitoring",
+    sourceRoute: "/vip-monitoring",
     sourceColor: "#A855F7",
     assignee: "—",
     opened: Date.now() - 6 * 3600 * 1000,
@@ -234,8 +235,8 @@ const INCIDENTS = [
     title: "PII exposure batch — 1,847 employee records",
     severity: "high",
     status: "resolved",
-    sourcePage: "PII",
-    sourceRoute: "/pii",
+    sourcePage: "PII & Stealer Exposure",
+    sourceRoute: "/pii-stealer-exposure",
     sourceColor: "#3B82F6",
     assignee: "Elena Marchetti",
     opened: Date.now() - 9 * 24 * 3600 * 1000,
@@ -338,6 +339,7 @@ export default function Incidents() {
 
   return (
     <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
+      <DemoNotice />
 
       {/* ═══ BANNER ═══ */}
       <div className="glass" style={{

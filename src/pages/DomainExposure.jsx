@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell } from "recharts";
-import { SortHeader, useSort, exportCSV, ExportButton, RowChevron, TimeCell, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
+import { SortHeader, useSort, usePagination, Pagination, exportCSV, ExportButton, RowChevron, TimeCell, useSelection, Checkbox, BulkActionBar, useTimeRange, TimeRangeFilter } from "../components/TableUtils";
 import { useTheme } from "../context/ThemeContext";
 import { tooltipStyles } from "../components/chartTheme";
 
@@ -161,6 +161,12 @@ export default function DomainExposure() {
   const filteredCreds = filterByRange(CREDENTIAL_FINDINGS.filter(r => !searchQuery || r.url.toLowerCase().includes(searchQuery.toLowerCase()) || r.user.toLowerCase().includes(searchQuery.toLowerCase())), "date");
   const filteredMentions = filterByRange(DW_MENTIONS.filter(r => !searchQuery || r.platform.toLowerCase().includes(searchQuery.toLowerCase())), "date");
   const activeData = tab === "credentials" ? filteredCreds : filteredMentions;
+
+  // Pagination — shared instance keyed to the active tab's total. usePagination
+  // already resets to page 1 when total changes, which covers tab swaps and search.
+  const pag = usePagination(activeData.length, 10);
+  const pagedCreds = pag.paginate(sortData(filteredCreds));
+  const pagedMentions = pag.paginate(filteredMentions);
   const selectedCred = CREDENTIAL_FINDINGS.find(r => r.id === selectedCredId);
   const selectedMention = DW_MENTIONS.find(r => r.id === selectedMentionId);
 
@@ -203,11 +209,11 @@ export default function DomainExposure() {
         </div>
       </div>
 
-      {/* ═══ SECTION 2: TWO-COLUMN LAYOUT ═══ */}
-      <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 18, animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+      {/* ═══ SECTION 2: TWO-COLUMN LAYOUT (findings left, domain browser right) ═══ */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 18, animation: loaded ? "fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
 
-        {/* ── LEFT: Domain Browser ── */}
-        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* ── Domain Browser (visually rendered on the right via grid order) ── */}
+        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column", order: 2 }}>
           {/* Tab row + search */}
           <div style={{ padding: "12px 16px 0", borderBottom: `1px solid ${t.borderSection}` }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -342,8 +348,8 @@ export default function DomainExposure() {
           </div>
         </div>
 
-        {/* ── RIGHT: Findings Panel ── */}
-        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* ── Findings Panel (visually rendered on the left via grid order) ── */}
+        <div className="glass" style={{ overflow: "hidden", display: "flex", flexDirection: "column", order: 1 }}>
           {/* Header */}
           <div style={{ padding: "16px 20px", borderBottom: `1px solid ${t.borderSection}`, display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ flexShrink: 0 }}>
@@ -379,7 +385,7 @@ export default function DomainExposure() {
                 <span className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>Alarm</span>
                 <span />
               </div>
-              {sortData(filteredCreds).map((r, i) => (
+              {pagedCreds.map((r, i) => (
                 <div key={r.id} onClick={() => setSelectedCredId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "24px 1fr 1fr 80px 80px 64px 60px 90px 64px 24px", gap: 6, alignItems: "center", padding: "10px 16px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(255,69,98,0.06)" : selectedCredId === r.id ? "rgba(255,69,98,0.04)" : i % 2 === 0 ? t.bgCard : "transparent", borderLeft: selectedCredId === r.id ? "3px solid #FF4562" : "3px solid transparent" }}>
                   <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
                   <span className="mono" style={{ fontSize: 10, color: "#3B82F6", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.url}</span>
@@ -407,7 +413,7 @@ export default function DomainExposure() {
                   <span key={h} className="mono" style={{ fontSize: 9, color: t.text20, textTransform: "uppercase" }}>{h}</span>
                 ))}
               </div>
-              {filteredMentions.map(r => (
+              {pagedMentions.map(r => (
                 <div key={r.id} onClick={() => setSelectedMentionId(r.id)} className="trow" style={{ display: "grid", gridTemplateColumns: "24px 1fr 1fr 70px 100px 64px", gap: 6, alignItems: "center", padding: "10px 16px", cursor: "pointer", background: activeSel.isSelected(r.id) ? "rgba(255,69,98,0.06)" : selectedMentionId === r.id ? "rgba(255,69,98,0.04)" : undefined, borderLeft: selectedMentionId === r.id ? "3px solid #FF4562" : "3px solid transparent" }}>
                   <Checkbox checked={activeSel.isSelected(r.id)} onChange={() => activeSel.toggle(r.id)} />
                   <span style={{ fontSize: 11, fontWeight: 500, color: t.text60 }}>{r.platform}</span>
@@ -420,19 +426,28 @@ export default function DomainExposure() {
             </>)}
           </div>
 
-          <div style={{ padding: "10px 16px", borderTop: `1px solid ${t.borderRow}` }}>
-            <span style={{ fontSize: 11, color: t.text30 }}>Showing {activeData.length} entries</span>
-          </div>
+          <Pagination
+            page={pag.page}
+            totalPages={pag.totalPages}
+            startIdx={pag.startIdx}
+            endIdx={pag.endIdx}
+            totalItems={activeData.length}
+            onPrev={pag.prev}
+            onNext={pag.next}
+            onGoTo={pag.goTo}
+            perPage={pag.perPage}
+            onPerPageChange={pag.setPerPage}
+          />
 
           <BulkActionBar count={activeSel.count} onClear={activeSel.clear} actions={bulkActions} />
         </div>
       </div>
 
-      {/* ═══ SECTION 3: BOTTOM CHARTS ROW ═══ */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
+      {/* ═══ SECTION 3: BOTTOM CHARTS — Stealer Exposure on top, Exposure Timeline below ═══ */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 18, animation: loaded ? "fadeUp 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both" : "none" }}>
 
-        {/* Exposure Timeline */}
-        <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
+        {/* Exposure Timeline (rendered after Stealer Exposure via flex order) */}
+        <div className="glass" style={{ padding: "20px", overflow: "hidden", order: 2 }}>
           <div style={{ marginBottom: 14 }}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Exposure Timeline</div>
             <span style={{ fontSize: 12, color: t.text35 }}>Domain threat activity over time</span>
@@ -463,8 +478,8 @@ export default function DomainExposure() {
           </ResponsiveContainer>
         </div>
 
-        {/* Stealer Exposure by Domain */}
-        <div className="glass" style={{ padding: "20px", overflow: "hidden" }}>
+        {/* Stealer Exposure by Domain (rendered first via flex order) */}
+        <div className="glass" style={{ padding: "20px", overflow: "hidden", order: 1 }}>
           <div style={{ marginBottom: 14 }}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: t.text25, textTransform: "uppercase", marginBottom: 4 }}>Stealer Exposure by Domain</div>
             <span style={{ fontSize: 12, color: t.text35 }}>Exposure breakdown per domain</span>
