@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DataProvider } from "./context/DataContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import PasswordGate from "./components/PasswordGate";
 import AppLayout from "./layouts/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import GlobalThreats from "./pages/GlobalThreats";
@@ -28,6 +29,7 @@ import BreachIndex from "./pages/BreachIndex";
 export default function App() {
   return (
     <ThemeProvider>
+    <PasswordGate>
     <DataProvider>
       <BrowserRouter>
         <Routes>
@@ -60,6 +62,7 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </DataProvider>
+    </PasswordGate>
     </ThemeProvider>
   );
 }
